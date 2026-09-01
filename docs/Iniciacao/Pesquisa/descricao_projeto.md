@@ -1,9 +1,8 @@
 ---
-id: pesquisa
-title: Pesquisa
+id: pesquisa_descricao_projeto
+title: Descrição do Projeto
 ---
 
-# Pesquisa
 ### **1. Capa**
 
 - Tema: 

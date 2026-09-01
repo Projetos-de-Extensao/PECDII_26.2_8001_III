@@ -8,7 +8,11 @@ nav:
   - Home: index.md
   - Iniciação: 
       - Index: Iniciacao/index.md
-      - Pesquisa: Iniciacao/pesquisa.md
+      - Pesquisa:
+        - Descrição do Projeto: Iniciacao/Pesquisa/descricao_projeto.md
+        - Apps Semelhantes: Iniciacao/Pesquisa/apps_semelhantes.md
+        - Funcionalidades Previstas: Iniciacao/Pesquisa/funcionalidades_previstas.md
+        - Gestão de Ativos e Espaços: Iniciacao/Pesquisa/gestao_ativos_e_espacos.md
       - 5w2h: Iniciacao/5w2h.md
       - Design Thinking: Iniciacao/design_thinking.md
       - Brainstorming: Iniciacao/Brainstorm.md
