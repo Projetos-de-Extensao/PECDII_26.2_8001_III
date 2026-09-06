@@ -8,6 +8,7 @@ nav:
   - Home: index.md
   - Iniciação: 
       - Index: Iniciacao/index.md
+      - Cenário: Iniciacao/Cenario.md
       - Pesquisa:
         - Descrição do Projeto: Iniciacao/Pesquisa/descricao_projeto.md
         - Apps Semelhantes: Iniciacao/Pesquisa/apps_semelhantes.md
