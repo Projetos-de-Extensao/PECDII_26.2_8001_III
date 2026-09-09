@@ -3,256 +3,426 @@ id: pesquisa_descricao_projeto
 title: Descrição do Projeto
 ---
 
+
 # Sistema de Agendamento e Gerenciamento para a PKZ Lab
 
-## 1. Capa
 
-**Tema:** Desenvolvimento de um Sistema de Agendamento e Gerenciamento para a PKZ Lab
+## Capa
+
+
+**Tema:** Desenvolvimento de um Sistema de Agendamento e Gerenciamento (GAAP) para a PKZ Lab
+
 
 **Período:** 2026.2
 
-**Stakeholder:** Pró-Reitoria Acadêmica
+
+**Stakeholder:** PKZ Lab
+
+
+
 
 ---
 
-# 2. Pesquisa
 
-## 2.1 Contexto do Projeto
+## 1. Contexto
 
-A transformação digital tem modificado a forma como empresas e organizações administram seus serviços, clientes e processos internos. Em centros esportivos, academias e estabelecimentos voltados à prática de atividades físicas, a organização adequada dos horários é fundamental para garantir a disponibilidade de profissionais, espaços e serviços aos clientes.
 
-A PKZ Lab está inserida nesse contexto. O gerenciamento de agendamentos pode envolver diferentes participantes e recursos, como clientes, profissionais e locais de atendimento. Quando essas informações não são centralizadas, podem ocorrer dificuldades na consulta de horários disponíveis, conflitos de agendamento, falhas na comunicação e maior esforço administrativo.
+O projeto consiste no desenvolvimento de um recorte inicial do **GAAP (Gestão de Atletas de Alta Performance)**, sistema destinado a uma escola de treinamento esportivo que atende estudantes e conta com profissionais responsáveis por atividades de **treino, fisioterapia, psicologia e nutrição**.
 
-Diante dessa oportunidade, propõe-se o desenvolvimento de um sistema de agendamento capaz de centralizar as principais informações relacionadas à disponibilidade e à reserva de horários. A solução pretende organizar a interação entre os usuários do sistema e permitir uma administração mais eficiente dos recursos disponíveis na PKZ Lab.
 
-O projeto busca aplicar conhecimentos de desenvolvimento de software e banco de dados na criação de uma solução digital voltada a um problema real de organização e gerenciamento.
+Atualmente, parte da operação depende de controles dispersos, dificultando a obtenção de informações confiáveis sobre **agenda, disponibilidade, capacidade, comparecimento e registros de treinamento**.
 
----
 
-## 2.2 Objetivo
+Diante desse cenário, o projeto propõe o desenvolvimento de uma **API REST para o backend do GAAP**, com foco inicial na organização da agenda e no apoio à operação de treinamentos. O sistema deverá centralizar as principais informações operacionais e aplicar regras de validação para evitar conflitos de horários, utilização de horários bloqueados e agendamentos acima da capacidade disponível.
 
-### Objetivo Geral
 
-Desenvolver uma aplicação capaz de centralizar e facilitar o processo de agendamento e gerenciamento de horários da PKZ Lab.
+O projeto será desenvolvido como um produto acadêmico em um período de quatro meses, utilizando modelagem orientada a objetos, banco de dados relacional, ORM, UML, testes automatizados e práticas de desenvolvimento colaborativo com Git e GitHub.
 
-### Objetivos Específicos
-
-* Permitir o cadastro e o gerenciamento de clientes;
-* Permitir o cadastro e o gerenciamento de profissionais;
-* Organizar os locais ou espaços disponíveis;
-* Disponibilizar horários para consulta e agendamento;
-* Permitir a criação e o cancelamento de agendamentos;
-* Evitar conflitos entre horários, profissionais e locais;
-* Possibilitar diferentes níveis de acesso ao sistema;
-* Centralizar as informações relacionadas às reservas;
-* Melhorar a organização das atividades administrativas.
-
-Com o desenvolvimento da aplicação, espera-se reduzir a dependência de processos manuais e fornecer uma ferramenta mais organizada para a gestão dos agendamentos.
 
 ---
 
-## 2.3 Público-Alvo
 
-A solução será direcionada principalmente aos participantes envolvidos nas atividades e no gerenciamento da PKZ Lab.
+## 2. Objetivo
 
-### Clientes
 
-Os clientes poderão utilizar o sistema para consultar horários disponíveis, realizar agendamentos e acompanhar suas reservas.
+O objetivo principal é desenvolver uma **API funcional, testada e documentada** para apoiar o gerenciamento da agenda e das atividades relacionadas aos atletas de alta performance.
 
-### Profissionais
 
-Os profissionais poderão acompanhar seus horários e compromissos, contribuindo para uma organização mais eficiente de sua disponibilidade e atendimentos.
+O sistema deverá permitir:
 
-### Administração
 
-Os administradores serão responsáveis pelo gerenciamento geral do sistema. Entre suas possíveis responsabilidades estão o gerenciamento de usuários, profissionais, espaços, horários e agendamentos.
+* autenticação e autorização dos usuários;
+* controle de acesso de acordo com o perfil do usuário;
+* cadastro e manutenção de estudantes;
+* cadastro e manutenção de profissionais;
+* cadastro e gerenciamento de serviços;
+* configuração de disponibilidade e bloqueios;
+* criação e gerenciamento de agendamentos;
+* consulta de agendas;
+* registro de presença ou ausência;
+* registro de realização das atividades;
+* criação e finalização de relatórios de treino;
+* disponibilização de informações básicas para acompanhamento da operação;
+* registro de ações relevantes para auditoria;
+* documentação dos endpoints da API.
 
-### Público Indireto
 
-Funcionários e responsáveis pela operação do centro também podem ser beneficiados pela centralização das informações, reduzindo a necessidade de consultas manuais e facilitando a organização dos serviços.
+Além da implementação das funcionalidades, o projeto deverá possuir testes automatizados, documentação técnica e modelos UML e de banco de dados compatíveis com a solução desenvolvida.
 
----
-
-## 2.4 Escopo do Projeto
-
-O projeto será desenvolvido como uma aplicação voltada ao gerenciamento de agendamentos e à organização das informações relacionadas à PKZ Lab.
-
-### Funcionalidades dentro do escopo
-
-A aplicação deverá considerar, inicialmente:
-
-* Cadastro de usuários;
-* Sistema de autenticação e login;
-* Diferentes perfis de acesso;
-* Cadastro de clientes;
-* Cadastro de profissionais;
-* Cadastro de locais ou espaços;
-* Consulta de horários disponíveis;
-* Criação de agendamentos;
-* Cancelamento de agendamentos;
-* Visualização de agendamentos;
-* Gerenciamento das agendas;
-* Prevenção de conflitos de horários.
-
-### Limites do Projeto
-
-Inicialmente, o sistema não terá como foco:
-
-* Processamento de pagamentos;
-* Integração com instituições financeiras;
-* Gestão financeira completa;
-* Controle de estoque;
-* Controle automatizado de equipamentos físicos;
-* Integração com dispositivos externos;
-* Recursos avançados de inteligência artificial;
-* Sistema completo de gestão empresarial.
-
-Essas funcionalidades poderão ser consideradas como possíveis expansões futuras do projeto.
 
 ---
 
-## 2.5 Análise de Aplicações e Mercado
 
-O mercado atual apresenta diversas aplicações voltadas ao agendamento de serviços. Existem soluções para academias, clínicas, salões de beleza, consultórios e reservas de espaços. Apesar de compartilharem o conceito de gerenciamento de horários, as necessidades de cada tipo de organização podem ser diferentes.
+## 3. Público e perfis de acesso
 
-Sistemas genéricos de agendamento normalmente oferecem funcionalidades como cadastro de usuários, agenda, reservas e notificações. Entretanto, uma solução voltada especificamente ao contexto da PKZ Lab pode organizar, em uma mesma aplicação, os principais elementos necessários para a operação do centro: **clientes, profissionais, locais e agendamentos**.
 
-A análise do mercado demonstra que as seguintes funcionalidades são comuns em aplicações semelhantes:
+O sistema terá três perfis principais de usuários.
 
-* Consulta de disponibilidade;
-* Reserva de horários;
-* Cancelamento ou alteração de reservas;
-* Cadastro de usuários;
-* Gerenciamento de agendas;
-* Notificações;
-* Diferentes níveis de acesso.
 
-Com base nessa análise, a proposta da PKZ Lab busca reunir as funcionalidades essenciais de gerenciamento em uma solução adaptada às necessidades do projeto.
+### Administrador
 
-### Comparação Conceitual
 
-| Funcionalidade                                    | Sistemas de Agendamento Genéricos | Sistema PKZ Lab |
-| ------------------------------------------------- | --------------------------------- | --------------- |
-| Cadastro de usuários                              | Sim                               | Sim             |
-| Agendamento de horários                           | Sim                               | Sim             |
-| Cancelamento de reservas                          | Sim                               | Sim             |
-| Gestão de profissionais                           | Pode variar                       | Sim             |
-| Gestão de locais                                  | Pode variar                       | Sim             |
-| Perfis de acesso                                  | Pode variar                       | Sim             |
-| Foco no contexto esportivo                        | Nem sempre                        | Sim             |
-| Centralização de clientes, profissionais e locais | Parcial                           | Sim             |
+Responsável pela configuração e manutenção da operação do sistema.
 
-O diferencial da solução proposta está na centralização dos principais participantes e recursos envolvidos na operação da PKZ Lab. O sistema deverá considerar a relação entre o cliente, o profissional, o local e o horário do agendamento, permitindo uma gestão mais organizada.
 
----
+Entre suas atividades estão:
 
-## 2.6 Oportunidade Identificada
 
-A oportunidade identificada está na utilização da tecnologia para simplificar o processo de organização de horários.
+* cadastrar e gerenciar estudantes;
+* cadastrar e gerenciar profissionais;
+* cadastrar e gerenciar serviços;
+* configurar horários de disponibilidade;
+* cadastrar bloqueios de agenda;
+* administrar os agendamentos;
+* consultar informações pendentes.
 
-Um sistema centralizado pode permitir:
 
-* Maior facilidade na consulta de horários;
-* Redução de conflitos de agendamento;
-* Melhor organização dos profissionais;
-* Melhor utilização dos espaços disponíveis;
-* Centralização das informações;
-* Redução da dependência de processos manuais;
-* Maior facilidade para o gerenciamento administrativo.
+### Treinador / Coach
 
-Dessa forma, o projeto representa uma oportunidade de desenvolver uma solução tecnológica aplicada a uma necessidade de organização operacional.
 
----
+Responsável pelo acompanhamento dos estudantes dentro das atividades sob sua responsabilidade.
 
-## 2.7 Levantamento de Legislação
 
-Como a aplicação poderá armazenar informações relacionadas aos usuários e será destinada a um contexto que envolve o público infantil, o projeto deve considerar a legislação brasileira relacionada à proteção de dados, à privacidade e à proteção de crianças e adolescentes.
+Entre suas atividades estão:
 
-### Lei Geral de Proteção de Dados - LGPD
 
-A principal legislação aplicável ao projeto é a **Lei nº 13.709/2018**, conhecida como Lei Geral de Proteção de Dados Pessoais (LGPD). A legislação estabelece regras para o tratamento de dados pessoais e tem como objetivo proteger a privacidade e os direitos dos titulares dos dados.
+* consultar sua agenda;
+* registrar presença ou ausência;
+* registrar a realização da atividade;
+* criar relatórios de treino;
+* finalizar relatórios de treino.
 
-Para o projeto da PKZ Lab, essa legislação possui importância adicional devido ao envolvimento de **crianças e adolescentes**. A LGPD possui disposições específicas para o tratamento de dados pessoais desse público, estabelecendo que esse tratamento deve ser realizado considerando o seu melhor interesse.
 
-Para a aplicação, isso significa que o sistema deve:
+### Profissional de Saúde
 
-* Coletar apenas os dados necessários para o funcionamento do sistema;
-* Informar adequadamente a finalidade da utilização dos dados;
-* Considerar as regras específicas para o tratamento de dados de crianças e adolescentes;
-* Adotar medidas de segurança para proteger as informações;
-* Restringir o acesso às informações conforme a necessidade e o perfil do usuário;
-* Evitar o armazenamento desnecessário de dados pessoais;
-* Considerar os direitos dos titulares dos dados.
 
-Caso sejam armazenadas informações relacionadas à saúde ou a outras categorias classificadas como dados pessoais sensíveis pela LGPD, deverão ser observadas medidas adicionais de proteção.
+Profissional responsável pelos serviços de **fisioterapia, psicologia ou nutrição**, conforme sua atribuição.
 
-A LGPD também estabelece princípios como finalidade, necessidade, transparência, segurança e prevenção, que devem ser considerados durante o desenvolvimento do sistema.
 
-### Estatuto da Criança e do Adolescente - ECA
+Esse usuário deverá:
 
-Devido à atuação da PKZ Lab com o público infantil, também deve ser considerado o **Estatuto da Criança e do Adolescente (ECA), Lei nº 8.069/1990**. O ECA estabelece normas destinadas à proteção integral da criança e do adolescente, garantindo seus direitos fundamentais e buscando assegurar seu desenvolvimento em condições adequadas.
 
-Para o projeto, o ECA é relevante por estabelecer a proteção da criança e do adolescente em aspectos como integridade física e moral, respeito, dignidade, imagem e convivência em ambientes seguros.
+* consultar sua agenda;
+* visualizar somente os atendimentos relacionados aos serviços aos quais está vinculado;
+* acessar os agendamentos sob sua responsabilidade.
 
-O Estatuto também reconhece o **esporte e o lazer** como direitos da criança e do adolescente, tornando sua consideração pertinente ao contexto da PKZ Lab.
 
-Dessa forma, a aplicação deve considerar a proteção do público infantil durante o desenvolvimento de suas funcionalidades, especialmente no armazenamento e acesso às informações das crianças e na definição dos responsáveis por seus cadastros e agendamentos.
+O controle de acesso deverá impedir que um usuário utilize funcionalidades ou consulte informações que não estejam relacionadas ao seu perfil.
 
-### Marco Civil da Internet
-
-Também deve ser considerado o **Marco Civil da Internet, Lei nº 12.965/2014**, que estabelece princípios, garantias, direitos e deveres relacionados ao uso da internet no Brasil.
-
-Caso a solução seja disponibilizada como uma aplicação online, aspectos relacionados à privacidade, à segurança e ao tratamento de informações dos usuários devem ser considerados durante o desenvolvimento.
-
-### Acessibilidade
-
-Embora a legislação específica aplicável possa depender da forma final de disponibilização da aplicação, a acessibilidade deve ser considerada durante o desenvolvimento. A interface deve buscar ser clara e compreensível, permitindo que diferentes usuários possam utilizar suas funcionalidades.
-
-Como princípios iniciais, recomenda-se:
-
-* Utilização de textos claros;
-* Organização adequada da interface;
-* Contraste adequado entre elementos;
-* Navegação consistente;
-* Identificação clara dos campos e funcionalidades;
-* Evitar depender exclusivamente de cores para transmitir informações.
 
 ---
 
-## 2.8 Considerações sobre Segurança da Informação
 
-Além do cumprimento das normas relacionadas aos dados pessoais e à proteção de crianças e adolescentes, a aplicação deverá considerar práticas básicas de segurança da informação.
+## 4. Escopo do projeto
 
-Entre elas:
 
-* Proteção das senhas dos usuários;
-* Controle de acesso conforme o perfil;
-* Restrição de ações administrativas;
-* Validação dos dados recebidos;
-* Proteção contra acesso não autorizado;
-* Proteção das informações relacionadas às crianças e seus responsáveis;
-* Registro adequado das informações necessárias ao funcionamento do sistema;
-* Adoção de medidas para evitar conflitos e inconsistências nos agendamentos.
+O escopo corresponde ao **backend inicial do GAAP**, desenvolvido por meio de uma API REST.
 
-A segurança é especialmente importante neste projeto devido à possibilidade de o sistema armazenar informações de **crianças, responsáveis, profissionais e atividades realizadas dentro da plataforma**. Portanto, o acesso às informações deve ser controlado de acordo com as funções de cada usuário, evitando que dados de crianças sejam acessados por pessoas não autorizadas.
+
+A solução deverá contemplar os principais recursos necessários para o funcionamento da agenda e para o acompanhamento básico das atividades.
+
+
+### 4.1 Autenticação e autorização
+
+
+O sistema deverá possuir mecanismos para autenticação dos usuários e controle de acesso conforme seus perfis.
+
+
+As informações de autenticação deverão ser armazenadas de maneira segura, não sendo permitido o armazenamento de senhas em texto puro.
+
+
+### 4.2 Cadastros básicos
+
+
+A API deverá fornecer recursos para gerenciamento das informações fundamentais da operação, incluindo:
+
+
+* estudantes;
+* profissionais;
+* serviços.
+
+
+Esses cadastros servirão como base para a configuração da agenda e para a realização dos agendamentos.
+
+
+### 4.3 Disponibilidade e bloqueios
+
+
+O administrador deverá conseguir configurar períodos de disponibilidade e registrar bloqueios de agenda.
+
+
+Essas informações deverão ser consideradas pelo sistema no momento da realização de um agendamento.
+
+
+### 4.4 Agendamento
+
+
+O sistema deverá permitir a criação de agendamentos respeitando as regras definidas para a operação.
+
+
+Um agendamento não deverá ser confirmado quando:
+
+
+* houver conflito de horário;
+* o horário estiver bloqueado;
+* a capacidade disponível for excedida.
+
+
+Essas validações deverão ocorrer no backend.
+
+
+### 4.5 Consulta de agenda
+
+
+Os usuários autorizados deverão conseguir consultar os agendamentos relacionados às suas responsabilidades.
+
+
+A agenda deverá considerar as regras de autorização, evitando que profissionais tenham acesso indevido a informações de outros usuários.
+
+
+### 4.6 Presença e ausência
+
+
+O treinador ou profissional autorizado deverá registrar o comparecimento ou a ausência do estudante em uma atividade agendada.
+
+
+### 4.7 Registro de atividade realizada
+
+
+O sistema deverá permitir o registro de que a atividade ou sessão prevista no agendamento foi efetivamente realizada.
+
+
+### 4.8 Relatório de treino
+
+
+O treinador deverá poder criar e finalizar um relatório relacionado à atividade de treinamento realizada.
+
+
+O sistema deverá controlar o processo de criação e finalização desse relatório.
+
+
+### 4.9 Auditoria
+
+
+A solução deverá manter registros de ações relevantes realizadas no sistema, permitindo acompanhar eventos importantes da operação.
+
+
+### 4.10 Documentação da API
+
+
+Os endpoints desenvolvidos deverão ser documentados, permitindo compreender os recursos disponíveis, seus parâmetros, respostas e regras de utilização.
+
 
 ---
 
-# 3. Conclusão
 
-Esse contexto inicial demonstra a oportunidade de desenvolver uma solução digital voltada à organização e ao gerenciamento dos agendamentos da PKZ Lab.
+## 5. Regras de funcionamento
 
-A proposta busca centralizar informações relacionadas a clientes, profissionais, locais e horários, permitindo uma gestão mais organizada das atividades. Entre os principais benefícios esperados estão a redução de conflitos de agenda, a melhoria da organização administrativa e a facilidade de consulta e gerenciamento dos agendamentos.
 
-A análise do mercado demonstra que aplicações de agendamento são amplamente utilizadas em diferentes setores. Entretanto, a adaptação dessas funcionalidades às necessidades específicas da PKZ Lab representa a principal proposta do projeto.
+A API deverá aplicar as regras necessárias para garantir a consistência dos agendamentos e o controle adequado de acesso.
 
-Além das funcionalidades, o desenvolvimento deverá considerar aspectos legais e de segurança, especialmente a proteção dos dados pessoais conforme a Lei Geral de Proteção de Dados.
 
-A partir desta pesquisa, será possível avançar para as próximas etapas do projeto, incluindo o levantamento de requisitos funcionais e não funcionais, modelagem do sistema, desenvolvimento do banco de dados e implementação da aplicação.
+Entre as principais regras estão:
 
-# Referências
 
-* BRASIL. **Lei nº 13.709, de 14 de agosto de 2018 — Lei Geral de Proteção de Dados Pessoais (LGPD).**
-* BRASIL. **Lei nº 8.069, de 13 de julho de 1990 — Estatuto da Criança e do Adolescente (ECA).**
-* BRASIL. **Lei nº 12.965, de 23 de abril de 2014 — Marco Civil da Internet.**
-* Governo Federal. **Legislação sobre proteção de dados pessoais.**
+* um usuário somente poderá acessar funcionalidades permitidas ao seu perfil;
+* profissionais de saúde deverão visualizar apenas os atendimentos relacionados aos serviços sob sua responsabilidade;
+* horários bloqueados não poderão receber novos agendamentos;
+* não poderão existir agendamentos conflitantes;
+* um agendamento não poderá ultrapassar a capacidade disponível;
+* operações realizadas sobre os dados deverão respeitar as permissões definidas para cada perfil;
+* informações de autenticação deverão ser armazenadas de forma segura.
+
+
+As regras específicas do negócio que ainda não estiverem definidas no cenário deverão ser validadas com o cliente antes de serem consideradas requisitos definitivos.
+
+
+---
+
+
+## 6. Análise da solução
+
+
+O principal problema identificado está relacionado à dispersão das informações utilizadas na operação da escola de treinamento.
+
+
+A ausência de uma fonte confiável e centralizada pode dificultar:
+
+
+* o controle da agenda;
+* a identificação de horários disponíveis;
+* o controle da capacidade;
+* o acompanhamento da presença dos estudantes;
+* o registro das atividades realizadas;
+* a elaboração e manutenção dos relatórios de treino.
+
+
+A proposta do GAAP busca centralizar essas operações em uma API, permitindo que diferentes funcionalidades utilizem uma mesma base de dados e as mesmas regras de negócio.
+
+
+A solução também estabelece diferentes níveis de acesso, permitindo que administradores, treinadores e profissionais de saúde utilizem o sistema de acordo com suas responsabilidades.
+
+
+---
+
+
+## 7. Tecnologias e abordagem
+
+
+O desenvolvimento do projeto deverá utilizar uma abordagem orientada a objetos e um banco de dados relacional.
+
+
+Entre os principais elementos técnicos previstos estão:
+
+
+* modelagem orientada a objetos;
+* banco de dados relacional normalizado;
+* ORM;
+* API REST;
+* autenticação e autorização;
+* validação de dados;
+* tratamento de erros;
+* testes automatizados;
+* documentação de endpoints;
+* UML;
+* Git e GitHub para versionamento e colaboração.
+
+
+O banco de dados deverá utilizar **chaves primárias, chaves estrangeiras, restrições de unicidade e índices** adequados às consultas realizadas pela agenda.
+
+
+---
+
+
+## 8. Segurança e proteção de dados
+
+
+Como o sistema poderá trabalhar com dados pessoais de estudantes e profissionais, a segurança deverá ser considerada desde a modelagem até a implementação.
+
+
+Entre as medidas previstas estão:
+
+
+* autenticação de usuários;
+* autorização baseada em perfil;
+* armazenamento seguro de senhas por meio de hash;
+* validação das informações recebidas pela API;
+* restrição de acesso a recursos conforme as responsabilidades do usuário;
+* tratamento adequado de erros;
+* proteção contra acesso indevido aos dados.
+
+
+A **Lei Geral de Proteção de Dados Pessoais (LGPD)** deverá ser considerada nas decisões relacionadas ao tratamento e armazenamento de dados pessoais.
+
+
+Como o GAAP possui serviços de fisioterapia, psicologia e nutrição, eventuais informações relacionadas à saúde deverão receber tratamento compatível com as exigências aplicáveis aos dados pessoais sensíveis.
+
+
+Entretanto, o cenário estabelece que **registros clínicos detalhados estão fora do escopo do recorte inicial**, portanto o projeto acadêmico não deverá implementar um prontuário clínico completo.
+
+
+---
+
+
+## 9. Itens fora do escopo
+
+
+Para manter o foco no backend da agenda e da operação de treinamento, os seguintes recursos não fazem parte do recorte inicial:
+
+
+* pagamentos;
+* gateway de pagamento;
+* cobrança recorrente;
+* controle financeiro;
+* prontuário clínico detalhado;
+* assinatura digital de documentos clínicos;
+* cálculos avançados de força por sexo ou idade;
+* aplicativo mobile;
+* integração com QR Code;
+* integração com WhatsApp;
+* envio de notificações por e-mail;
+* funcionamento offline;
+* dashboards avançados;
+* data warehouse;
+* suporte a múltiplos clientes por meio de arquitetura multi-tenant;
+* integrações públicas externas;
+* geração de arquivos PDF;
+* upload de fotografias.
+
+
+Esses recursos poderão ser considerados futuramente, mas não devem fazer parte do MVP definido para este projeto.
+
+
+---
+
+
+## 10. Oportunidade
+
+
+A principal oportunidade identificada está na **centralização das informações da operação esportiva em uma única API**, permitindo que os diferentes perfis utilizem os mesmos dados e regras de negócio.
+
+
+A aplicação de validações automáticas para conflitos, bloqueios e capacidade pode reduzir inconsistências nos agendamentos, enquanto o controle de presença e os relatórios de treino fornecem uma base organizada para o acompanhamento das atividades.
+
+
+A arquitetura também poderá servir como base para futuras extensões do sistema, sem que essas funcionalidades precisem ser implementadas no recorte atual.
+
+
+---
+
+
+## 11. Evoluções futuras
+
+
+Embora estejam fora do escopo do MVP, o cenário prevê possibilidades de evolução do sistema, como:
+
+
+* controle de créditos e pagamentos;
+* lista de espera;
+* notificações de vencimento e lembretes;
+* perfil unificado do estudante;
+* avaliação física;
+* dashboards e recursos de BI;
+* webhooks;
+* aplicativo mobile.
+
+
+Essas funcionalidades não serão tratadas como requisitos do sistema atual, mas podem ser consideradas extensões futuras.
+
+
+---
+
+
+## 12. Conclusão
+
+
+O projeto propõe o desenvolvimento de um **backend para o Sistema de Gestão de Atletas de Alta Performance (GAAP)**, com foco na organização da agenda e no suporte às atividades de treinamento.
+
+
+A solução deverá centralizar os cadastros básicos, a disponibilidade, os bloqueios, os agendamentos, a consulta de agenda, o controle de presença, o registro das atividades e os relatórios de treino, utilizando autenticação, autorização e validações para garantir o funcionamento adequado da operação.
+
+
+O recorte foi definido de maneira a concentrar o esforço do projeto acadêmico nas funcionalidades essenciais do backend, mantendo fora do MVP recursos financeiros, clínicos avançados, mobile, integrações externas e análises avançadas.
+
+
+Dessa forma, o GAAP inicial deverá fornecer uma base funcional, testada e documentada para apoiar a operação da escola de treinamento e possibilitar futuras evoluções do sistema.
