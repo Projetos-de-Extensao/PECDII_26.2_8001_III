@@ -2,70 +2,57 @@
 id: brainstorm
 title: Brainstorm
 ---
- 
-## Introdução
-<p align = "justify">
-O brainstorm é uma técnica de elicitação de requisitos que consiste em reunir a equipe e discutir sobre diversos tópicos gerais do projeto apresentados no documento problema de negócio. No brainstorm o diálogo é incentivado e críticas são evitadas para permitir que todos colaborem com suas próprias ideias.
-</p>
- 
+
 ## Metodologia
+
 <p align = "justify">
-A equipe se reuniu para debater ideias gerais sobre o projeto via..., começou .... e terminou..., onde o XXXX XXXX foi o moderador, direcionando a equipe com questões pré-elaboradas, e transcrevendo as respostas para o documento.
+A equipe se reuniu para debater ideias gerais sobre o projeto na sala 208 do IBMEC(barra), começou entre o intervalo da aula de projeto CDIA2 e o final do intervalo, onde o Brenno Marques foi o moderador, direcionando a equipe com questões pré-elaboradas, e o Rodrigo Aquino transcrevendo as respostas para o documento.
 </p>
  
 ## Brainstorm
  
 ## Versão 1.0
  
-## Perguntas
+## Perguntas (respondidas pelos membros do grupo)
  
 ### 1. Qual o objetivo principal da aplicação?
  
 <p align = "justify">
-<b>XXXX</b> - Deve ser uma plataforma onde qualquer pessoa possa...
-</p>
+<b>Brenno</b> - Agendar reuniões e atividades
  
-<b>ZZZ</b> - A plataforma deve fornece...
+<b>Brenno</b> - Visualizar agendamentos
  
-<b>YYYY</b> - O objetivo da aplicação é....
- 
-<b>WWWW</b> - O principal objetivo da aplicação é a...
- 
-<b>KKKK</b> - A plataforma deve gerenciar...
+<b>Juan</b> - Centralizar as informações de agendamentos
 </p>
  
 ---
  
-### 2. Como será o processo para cadastrar um novo cliente?
+### 2. Quem vai utilizar?
  
 <p align = "justify">
-<b>XXXX</b> - O moderador deverá fazer login e...
+<b>Brenno</b> - Alunos e analistas
  
-<b>YYYY</b> - O cliente...
+<b>Juan</b> - Treinadores e Profissionais de saúde
  
-<b>WWWW</b> - Com o usuário logado, ele deverá...
+<b>Bernardo</b> - Administradores
 
-<b>ZZZZ</b> - O cliente...
- 
-<b>KKK</b> - O cliente...
+<b>Rodrigo</b> - Pais/Responsáveis dos alunos
+</p>
  
 ---
  
-### 3. Como será a forma de adicionar produtos?
+### 3. Como é o processo de agendamento?
  
 <p align = "justify">
-<b>XXXX</b> - O cliente ao cadastrar...
+<b>Brenno</b> - Verificação de disponibilidade do local
+ 
+<b>Bernardo</b> - Verificação de disponibilidade dos profissionais
+ 
+<b>Rodrigo</b> - Capacidade do local para as atividades em grupo
+ 
+<b>Caio</b> - Verificação de horários sobrepostos
 </p>
- 
-<p align = "justify">
-<b>YYYYY</b> - O produto tem...
-</p>
- 
-<b>ZZZZ</b> - O produto....
- 
-<b>XXXX</b> - O produto....
 
- 
 ---
  
 ### 4. Outras perguntas pertinentes ao contexto
