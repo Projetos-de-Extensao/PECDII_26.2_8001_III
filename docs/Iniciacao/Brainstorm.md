@@ -13,7 +13,7 @@ A equipe se reuniu para debater ideias gerais sobre o projeto na sala 208 do IBM
  
 ## Versão 1.0
  
-## Perguntas (respondidas pelos membros do grupo)
+## Perguntas (respondidas pelos membros do grupo) e Ideias dos membros
  
 ### 1. Qual o objetivo principal da aplicação?
  
@@ -55,29 +55,74 @@ A equipe se reuniu para debater ideias gerais sobre o projeto na sala 208 do IBM
 
 ---
  
-### 4. Outras perguntas pertinentes ao contexto
+### 4. Quais informações devem ser protegidas?
 
 <p align = "justify">
-<b>XXXX</b> - Com a localização...
+<b>Brenno</b> - CPF
  
-<b>YYYY</b> - O cliente...
+<b>Rodrigo</b> - Dados médicos e Dados financeiros
  
-<b>ZZZ</b> - O cliente...
+<b>Caio</b> - Dados sensíveis 
+</p>
  
 ---
  
-### 5. "Outras perguntas pertinentes ao contexto", Como seria a forma de adicionar do cliente adicionar os produtos ?
+### 5. Reagendamento e Cancelamento
 <p align = "justify">
-<b>XXX</b> - O cliente....
+<b>Juan</b> - Tempo mínimo
+
+<b>Bernardo</b> - Notificar incluídos
+
+<b>Rodrigo</b> - Multas?(deverá ser consultadas nas regras do negócio com PO)
 </p>
  
-### 6. Quais informações seriam interessante para o cliente?
-<p align = "justify">
-   <b>XXX</b> - Informações...
-   
-   <b>ZZZZ</b> - O cliente usuário poderá acessar informações...
+---
 
-   <b>WWWWs</b> - O usuário poderá ver scouts de partidas do torneio, ver as regras dos torneios, locais e data das partidas.
+### 6. Painel administrativo
+<p align = "justify">
+   <b>Brenno</b> - Adicionar locais, atividades, unidades e etc
+   
+   <b>Brenno</b> - Cadastrar alunos e professores
+
+   <b>Juan</b> - Condições de ativos
+
+   <b>Rodrigo</b> - Remover locais, atividades, unidades e etc
+   
+</p>
+
+---
+
+### 7. O que notificar?
+<p align = "justify">
+   <b>Brenno</b> - Novas atividades disponíveis
+   
+   <b>Bernardo</b> - Fatura de pagamento
+
+   <b>Juan</b> - Imprevisto com profissionais(ex: cancelamento de aulas)
+
+   <b>Rodrigo</b> - Imprevistos gerais, eventos, confirmação das ações(agendamento e cancelamento)
+   
+</p>
+
+---
+
+### 8. Área de avaliações
+<p align = "justify">
+   <b>Brenno</b> - Feedback dos alunos sobre os professores e atividades 
+   <b>Juan</b> - Avaliação dos alunos(quanto a desempenho e evolução) 
+</p>
+
+---
+
+### 9. Regras de negócio
+<p align = "justify">
+   <b>Brenno</b> - agendamento baseado em créditos, disponibilidade, só responsáveis podem agendar, apenas os administradores podem criar atividades e cadastrar alunos e professores
+   
+   <b>Brenno</b> - Crianças devem possuir um responsável
+
+   <b>Juan</b> - Visualizar apenas o próprio histórico, registros de falta
+
+   <b>Rodrigo</b> - conflito de horários e locais
    
 </p>
  
