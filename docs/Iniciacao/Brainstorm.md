@@ -158,4 +158,4 @@ Através da aplicação da técnica, foi possível elicitar alguns dos primeiros
 ## Autor(es)
 | Data | Versão | Descrição | Autor(es) |
 | -- | -- | -- | -- |
-| DD/MM/YYYY | 1.0 | Criação do documento | XXX XXXX, XXXX XXXX, YYY YYYY e ZZZ XXXX |
+| 14/09/2026 | 1.0 | Criação do documento | Brenno Marques, Rodrigo Aquino, Bernardo Chagas, Juan Lucas Pereira, Caio Magalhães|
