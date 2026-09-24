@@ -5,22 +5,37 @@ title: Protótipo Baixa Fidelidade
 ## Introdução
 
 <p align = "justify">
-A construção do protótipo de alta fidelidade auxilia a equipe de desenvolvimento a encontrar um nível de detalhes abrangentes, extrair funcionalidades, testar usabilidade, e também fornece uma base para o gerenciamento do projeto pois com o protótipo é possível realizar estimativas de quanto tempo será necessário desempenhar em cada funcionalidade.
+O protótipo de baixa fidelidade é uma etapa essencial no desenvolvimento do projeto, agindo como a ponte entre a ideia abstrata e a implementação real.
+
+Aqui estão os principais motivos que justificam a sua importância:
+
+Validação Rápida da Arquitetura de Informação: Permite testar a disposição dos elementos, o fluxo de telas e a hierarquia dos dados com a equipe ou clientes antes de escrever qualquer linha de código.
+
+Economia de Tempo e Recurso (Baixo Custo de Mudança): Alterar uma tela em formato de desenho/texto leva segundos. Descobrir que uma regra de negócio ou campo está faltando depois que o banco de dados e a API já foram codificados custa dezenas de horas de retrabalho.
+
+Clareza para o Back-End: Ajuda os desenvolvedores a visualizarem exatamente quais endpoints (GET, POST, PUT, DELETE), parâmetros de busca, regras de acesso (perfis) e relacionamentos no banco de dados serão necessários para sustentar a interface.
+
+Foco na Funcionalidade (Sem Distrações Estéticas): Por não ter cores, logotipos ou tipografia refinada, as discussões se concentram 100% nas regras de negócio, na usabilidade e na lógica do sistema, sem perder tempo com "deveria ser azul ou verde".
+
+Facilidade na Identificação de Falhas de Escopo: Facilita notar lacunas no fluxo — como telas esquecidas (ex: onde tratar conflito de horários ou onde cadastrar os responsáveis) — antes de avançar para etapas mais complexas.
+
+Em resumo, ele funciona como a planta baixa de uma casa: ninguém constrói as paredes ou escolhe a pintura sem antes validar o desenho das salas e onde passam os canos.
 </p>
 
 ## Metodologia
 
 <p align = "justify">
-Iniciamos o projeto através dos levantamentos iniciais da equipe, após discussões a ferramenta Figma foi selecionada para produzir o protótipo de alta fidelidade com auxílio do Material Design Color Tool.
+Iniciamos o projeto através dos levantamentos iniciais da equipe, após discussões a ferramenta Figma foi selecionada para produzir o protótipo de baixa fidelidade com base em Wireframes de Baixa Fidelidade (Textual).
 </p>
 
 ## Protótipo de alta fidelidade
 
 ### Versão 1.0
 
-### Tela Login
+### Tela 1: Login e Autenticação
 
-[![Prototipo 1](../assets/Prototipo/image.png)](../assets/Prototipo/image.png)
+[![Prototipo 1](../assets/Prototipo/tela1_Login_Autenticacao.png)](../assets/Prototipo/tela1_Login_Autenticacao.png)
+
 
 ### Tela Cadastro 1
 
