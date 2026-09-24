@@ -41,9 +41,9 @@ Iniciamos o projeto através dos levantamentos iniciais da equipe, após discuss
 
 [![Prototipo 2](../assets/Prototipo/tela2_Dashboard_Administrativo.png)](../assets/Prototipo/tela2_Dashboard_Administrativo.png)
 
-### Tela Cadastro 2
+### Tela 3: Gestão de Alunos
 
-[![Prototipo 3](../assets/Prototipo/image.png)](../assets/Prototipo/image.png)
+[![Prototipo 3](../assets/Prototipo/tela3_GestaoAlunos.png)](../assets/Prototipo/tela3_GestaoAlunos.png)
 
 ### Tela Esqueceu Senha
 
