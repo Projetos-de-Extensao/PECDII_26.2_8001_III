@@ -37,9 +37,9 @@ Iniciamos o projeto através dos levantamentos iniciais da equipe, após discuss
 [![Prototipo 1](../assets/Prototipo/tela1_Login_Autenticacao.png)](../assets/Prototipo/tela1_Login_Autenticacao.png)
 
 
-### Tela Cadastro 1
+### Tela 2: Dashboard Administrativo
 
-[![Prototipo 2](../assets/Prototipo/image.png)](../assets/Prototipo/image.png)
+[![Prototipo 2](../assets/Prototipo/tela2_Dashboard_Administrativo.png)](../assets/Prototipo/tela2_Dashboard_Administrativo.png)
 
 ### Tela Cadastro 2
 
