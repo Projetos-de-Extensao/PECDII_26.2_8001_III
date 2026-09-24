@@ -1,0 +1,150 @@
+@startmindmap PKZ
+
+<style>
+mindmapDiagram {
+
+  .alunos {
+    BackgroundColor #E3F2FD
+    LineColor #1565C0
+  }
+
+  .turmas {
+    BackgroundColor #E8F5E9
+    LineColor #2E7D32
+  }
+
+  .agenda {
+    BackgroundColor #FFF3E0
+    LineColor #EF6C00
+  }
+
+  .espacos {
+    BackgroundColor #E0F2F1
+    LineColor #00695C
+  }
+
+  .presenca {
+    BackgroundColor #FCE4EC
+    LineColor #AD1457
+  }
+
+  .profissionais {
+    BackgroundColor #F3E5F5
+    LineColor #6A1B9A
+  }
+
+  .administracao {
+    BackgroundColor #FFFDE7
+    LineColor #F9A825
+  }
+
+  .comunicação {
+    BackgroundColor #eccde5
+    LineColor #e760c8
+  }
+
+  .seguranca {
+    BackgroundColor #EFEBE9
+    LineColor #4E342E
+  }
+
+  node {
+    RoundCorner 12
+    FontSize 14
+    FontColor #212121
+    LineThickness 1.2
+  }
+
+  rootNode {
+    BackgroundColor #263238
+    FontColor white
+    FontSize 20
+    FontStyle bold
+    RoundCorner 20
+  }
+}
+
+</style>
+
+
+* PKZ Lab - Sistema de Gestão
+
+left side
+
+** Alunos <<alunos>>
+*** Cadastro
+*** Informações pessoais
+*** Responsável
+*** Turma / Atividade
+*** Busca e filtros
+*** Histórico de presença
+
+** Presença e Acompanhamento <<presenca>>
+*** Registrar presença
+*** Registrar falta
+*** Frequência
+*** Histórico
+*** Realização das atividades
+
+** Profissionais <<profissionais>>
+*** Treinadores
+*** Saúde / Multidisciplinar
+**** Fisioterapeutas
+**** Psicólogos Esportivos
+**** Nutricionistas
+*** Área / Modalidade
+*** Turmas associadas /atendimento assocido
+*** Horários disponíveis
+*** Agenda de atividades
+
+** Espaços e Ativos <<espacos>>
+*** Espaços
+*** Capacidade
+*** Ocupação
+*** Disponibilidade
+*** Condição dos ativos
+*** Bloqueios / Manutenção
+
+
+right side
+
+** Turmas e Atividades <<turmas>>
+*** Modalidade
+*** Treinador responsável
+*** Dias e horários
+*** Alunos matriculados
+*** Espaço utilizado
+
+** Comunicação / Notificações <<comunicação>>
+*** Lembretes
+*** Cancelamentos / Alterações
+*** Comunicados gerais
+
+** Agenda <<agenda>>
+*** Agendamentos
+*** Horários
+*** Disponibilidade
+*** Bloqueios
+*** Conflitos de horários
+*** Consulta de agendas
+
+** Administração <<administracao>>
+*** Dashboard
+*** Relatórios
+*** Cadastro de alunos
+*** Cadastro de profissionais
+*** Cadastro de atividades / serviços
+*** Gerenciamento de agendamentos
+
+** Acesso e Segurança <<seguranca>>
+*** Autenticação
+*** Autorização
+*** Perfis de acesso
+**** Administradores
+**** Treinadores
+**** Profissionais de saúde
+**** Responsáveis
+*** Dados sensíveis
+*** Auditoria
+
+@endmindmap
