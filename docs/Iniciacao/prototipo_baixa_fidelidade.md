@@ -45,9 +45,9 @@ Iniciamos o projeto através dos levantamentos iniciais da equipe, após discuss
 
 [![Prototipo 3](../assets/Prototipo/tela3_GestaoAlunos.png)](../assets/Prototipo/tela3_GestaoAlunos.png)
 
-### Tela Esqueceu Senha
+### Tela 4: Registro de Presença e Acompanhamento
 
-[![Prototipo 4](../assets/Prototipo/image.png)](../assets/Prototipo/image.png)
+[![Prototipo 4](../assets/Prototipo/tela4_RegistroDePresenca.png)](../assets/Prototipo/tela4_RegistroDePresenca.png)
 
 ### Tela do Feed
 
