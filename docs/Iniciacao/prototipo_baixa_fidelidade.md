@@ -25,10 +25,10 @@ Em resumo, ele funciona como a planta baixa de uma casa: ninguém constrói as p
 ## Metodologia
 
 <p align = "justify">
-Iniciamos o projeto através dos levantamentos iniciais da equipe, após discussões a ferramenta Figma foi selecionada para produzir o protótipo de baixa fidelidade com base em Wireframes de Baixa Fidelidade (Textual).
+Iniciei o projeto através dos levantamentos iniciais da equipe, após discussões a ferramenta Figma foi selecionada para produzir o protótipo de baixa fidelidade com base em Wireframes de Baixa Fidelidade (Textual).
 </p>
 
-## Protótipo de alta fidelidade
+## Protótipo de baixa fidelidade
 
 ### Versão 1.0
 
@@ -57,107 +57,42 @@ Iniciamos o projeto através dos levantamentos iniciais da equipe, após discuss
 
 [![Prototipo 6](../assets/Prototipo/tela6_Agenda_Conflitos.png)](../assets/Prototipo/tela6_Agenda_Conflitos.png)
 
-### Tela Perfil
-
-[![Prototipo 7](../assets/Prototipo/image.png)](../assets/Prototipo/image.png)
-
-### Tela Cadastrar torneio 1
-
-[![Prototipo 8](../assets/Prototipo/image.png)](../assets/Prototipo/image.png)
-
-### Tela Cadastrar torneio 2
-
-[![Prototipo 9](../assets/Prototipo/image.png)](../assets/Prototipo/image.png)
-
-### Tela Cadastrar torneio 3
-
-[![Prototipo 10](../assets/Prototipo/image.png)](../assets/Prototipo/image.png)
-
-### Tela Cadastrar torneio 4
-
-[![Prototipo 11](../assets/Prototipo/image.png)](../assets/Prototipo/image.png)
-
-### Tela com meus torneios
-
-[![Prototipo 12](../assets/Prototipo/image.png)](../assets/Prototipo/image.png)
-
-### Tela de inscrição em torneio
-
-[![Prototipo 13](../assets/Prototipo/image.png)](../assets/Prototipo/image.png)
-
 <p align = "justify">
-Na primeira versão do protótipo utilizamos a ferramenta <a href="https://material.io/resources/color/#!/?view.left=0&view.right=0">Material Design Color Tool</a>  para auxiliar na criação da paleta de cores do aplicativo, definimos as cores base do aplicativo mas as cores definidas para as telas 12 e 13 ainda não foram decididas.
+Para conectar essa interface ao back-end, estas são as entidades primárias identificadas no mapa mental:
+
+1. User / Auth: ID, Nome, Email, SenhaHash, Perfil   (ADMIN, TREINADOR, SAUDE, RESPONSAVEL, ALUNOS).
+2. Aluno: ID, User_ID, Responsável_ID, DataNascimento, InformaçõesPessoais.
+3. Profissional: ID, User_ID, Especialidade (FISIOTERAPEUTA, TREINADOR, NUTRICIONISTA, PSICOLOGO), HorariosDisponiveis.
+4. Turma / Atividade: ID, Nome, Modalidade, Treinador_ID, Espaco_ID, DiasHorarios, CapacidadeMaxima.
+5. Agendamento: ID, Profissional_ID, Aluno_ID, Espaco_ID, DataHoraInicio, DataHoraFim, Status.
+6. Presença: ID, Aluno_ID, Turma_ID, Data, Status (PRESENTE, FALTA), Observacao.
+7. Espaco / Ativo: ID, Nome, Capacidade, StatusAtivo, Condicao.
+8. Auditoria: ID, User_ID, Acao, TabelaAfetada, Timestamp.
 </p>
 
-### Versão 2.0
-
-### Versão 1.0
-
-### Tela Login
-
-[![Prototipo 1](../assets/Prototipo/image.png)](../assets/Prototipo/image.png)
-
-### Tela Cadastro 1
-
-[![Prototipo 2](../assets/Prototipo/image.png)](../assets/Prototipo/image.png)
-
-### Tela Cadastro 2
-
-[![Prototipo 3](../assets/Prototipo/image.png)](../assets/Prototipo/image.png)
-
-### Tela Esqueceu Senha
-
-[![Prototipo 4](../assets/Prototipo/image.png)](../assets/Prototipo/image.png)
-
-### Tela do Feed
-
-[![Prototipo 5](../assets/Prototipo/image.png)](../assets/Prototipo/image.png)
-
-### Tela Feed com configurações
-
-[![Prototipo 6](../assets/Prototipo/image.png)](../assets/Prototipo/image.png)
-
-### Tela Perfil
-
-[![Prototipo 7](../assets/Prototipo/image.png)](../assets/Prototipo/image.png)
-
-### Tela Cadastrar torneio 1
-
-[![Prototipo 8](../assets/Prototipo/image.png)](../assets/Prototipo/image.png)
-
-### Tela Cadastrar torneio 2
-
-[![Prototipo 9](../assets/Prototipo/image.png)](../assets/Prototipo/image.png)
-
-### Tela Cadastrar torneio 3
-
-[![Prototipo 10](../assets/Prototipo/image.png)](../assets/Prototipo/image.png)
-
-### Tela Cadastrar torneio 4
-
-[![Prototipo 11](../assets/Prototipo/image.png)](../assets/Prototipo/image.png)
-
-### Tela com meus torneios
-
-[![Prototipo 12](../assets/Prototipo/image.png)](../assets/Prototipo/image.png)
-
-### Tela de inscrição em torneio
-
-[![Prototipo 13](../assets/Prototipo/image.png)](../assets/Prototipo/image.png)
-
-link para o `<a href="https://www.figma.com/">`Protótipo`</a>`
+link para o `<a href="https://www.figma.com/design/87VnCz8Xq9zmTTrBFEiL4y/prototipo-de-baixa-fidelidade?node-id=0-1&m=dev&t=LIhzbVnf63TpNRgt-1">`Protótipo`</a>`
 
 ## Conclusão
 
 <p align = "justify">
-A partir da elaboração do protótipo foi possível ter uma noção inicial da interface do usuário, definindo fluxo, paleta de cores, botões, app bars e diversas outras funcionalidades
+A partir deste protótipo de baixa fidelidade, é possível extrair e validar aspectos estruturais e técnicos do sistema antes de escrever código ou criar o design final:
+
+1- Arquitetura de Dados e Banco de Dados (Modelagem de Entidades): Revela as entidades principais (Aluno, Profissional, Turma, Agendamento, Espaço, Frequência) e como elas se relacionam (por exemplo: um aluno vinculado a um responsável, uma turma vinculada a um treinador e a um espaço).
+
+2- Definição das APIs / Endpoints REST: Permite listar as rotas necessárias para o back-end, como rotas para buscar/filtrar alunos, registrar presenças, consultar e bloquear horários de espaços e checar conflitos de agenda.
+
+3- Matriz de Permissões e Segurança (RBAC): Mapeia quais rotas e dados cada perfil de usuário (Admin, Treinador, Profissional de Saúde, Responsável/Aluno) pode visualizar ou alterar, facilitando a implementação de autenticação e autorização.
+
+4- Mapeamento de Regras de Negócio Críticas: Evidencia fluxos complexos e validações necessárias, tais como detecção automática de conflito de horários, cálculo de ocupação de espaços e bloqueio de locais em manutenção.
+
+5- Navegação e Usabilidade (Jornada do Usuário): Define o fluxo de telas e a hierarquia das informações, garantindo que o usuário consiga cumprir suas tarefas (como fazer uma chamada de presença ou agendar um atendimento) com poucos cliques.
+
+6- Escopo e Esforço de Desenvolvimento: Facilita a estimativa de tempo e complexidade para a equipe de desenvolvimento back-end e front-end, alinhando as expectativas entre desenvolvedores e partes interessadas.
 </p>
 
 ## Referências
 
-> Material Design Color Tool. Disponível em:  https://material.io/resources/color/#!/?view.left=0&view.right=0
-
-> PMI. Um guia do conhecimento em gerenciamento de projetos. Guia PMBOK® 5a. ed. EUA: Project Management Institute, 2013.
+> Tecnologias de IAs foram consultadas e serviram como um grande auxiliar no decorrer do projeto. A IA utilizada foi o Gemini.
 
 > Ferramenta Figma. Disponível em https://www.figma.com
 
@@ -165,7 +100,4 @@ A partir da elaboração do protótipo foi possível ter uma noção inicial da 
 
 | Data     | Versão | Descrição                            | Autor(es)                                                                            |
 | -------- | ------- | -------------------------------------- | ------------------------------------------------------------------------------------ |
-| 07/09/20 | 1.0     | Criação do documento                 | Lucas Alexandre e Matheus Estanislau                                                 |
-| 07/09/20 | 1.1     | Adicionado as imagens do protótipo    | Lucas Alexandre e Matheus Estanislau                                                 |
-| 07/09/20 | 1.2     | Adicionado conclusão e referências   | Lucas Alexandre e Matheus Estanislau                                                 |
-| 26/10/20 | 2.0     | Adicionada a versão 2.0 do protótipo | João Pedro, Lucas Alexandre, Matheus Estanislau, Moacir Mascarenha e Renan Cristyan |
+| 24/09/2026 | 1.0     | Criação do Protótipo de Baixa Fidelidade               | Rodrigo Aquino de Souza
