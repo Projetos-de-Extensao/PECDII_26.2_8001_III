@@ -49,9 +49,9 @@ Iniciamos o projeto através dos levantamentos iniciais da equipe, após discuss
 
 [![Prototipo 4](../assets/Prototipo/tela4_RegistroDePresenca.png)](../assets/Prototipo/tela4_RegistroDePresenca.png)
 
-### Tela do Feed
+### Tela 5: Gestão de Espaços e Ativos
 
-[![Prototipo 5](../assets/Prototipo/image.png)](../assets/Prototipo/image.png)
+[![Prototipo 5](../assets/Prototipo/tela5_GestaoEspaco_Ativos.png)](../assets/Prototipo/tela5_GestaoEspaco_Ativos.png)
 
 ### Tela Feed com configurações
 
