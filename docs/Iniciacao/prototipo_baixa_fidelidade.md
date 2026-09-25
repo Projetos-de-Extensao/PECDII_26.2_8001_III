@@ -53,9 +53,9 @@ Iniciamos o projeto através dos levantamentos iniciais da equipe, após discuss
 
 [![Prototipo 5](../assets/Prototipo/tela5_GestaoEspaco_Ativos.png)](../assets/Prototipo/tela5_GestaoEspaco_Ativos.png)
 
-### Tela Feed com configurações
+### Tela 6: Agenda e Conflitos
 
-[![Prototipo 6](../assets/Prototipo/image.png)](../assets/Prototipo/image.png)
+[![Prototipo 6](../assets/Prototipo/tela6_Agenda_Conflitos.png)](../assets/Prototipo/tela6_Agenda_Conflitos.png)
 
 ### Tela Perfil
 
