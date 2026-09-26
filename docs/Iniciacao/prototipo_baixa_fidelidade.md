@@ -4,29 +4,25 @@ title: Protótipo Baixa Fidelidade
 ---
 ## Introdução
 
-<p align = "justify">
 O protótipo de baixa fidelidade é uma etapa essencial no desenvolvimento do projeto, agindo como a ponte entre a ideia abstrata e a implementação real.
 
 Aqui estão os principais motivos que justificam a sua importância:
 
-Validação Rápida da Arquitetura de Informação: Permite testar a disposição dos elementos, o fluxo de telas e a hierarquia dos dados com a equipe ou clientes antes de escrever qualquer linha de código.
+- Validação Rápida da Arquitetura de Informação: Permite testar a disposição dos elementos, o fluxo de telas e a hierarquia dos dados com a equipe ou clientes antes de escrever qualquer linha de código.
 
-Economia de Tempo e Recurso (Baixo Custo de Mudança): Alterar uma tela em formato de desenho/texto leva segundos. Descobrir que uma regra de negócio ou campo está faltando depois que o banco de dados e a API já foram codificados custa dezenas de horas de retrabalho.
+- Economia de Tempo e Recurso (Baixo Custo de Mudança): Alterar uma tela em formato de desenho/texto leva segundos. Descobrir que uma regra de negócio ou campo está faltando depois que o banco de dados e a API já foram codificados custa dezenas de horas de retrabalho.
 
-Clareza para o Back-End: Ajuda os desenvolvedores a visualizarem exatamente quais endpoints (GET, POST, PUT, DELETE), parâmetros de busca, regras de acesso (perfis) e relacionamentos no banco de dados serão necessários para sustentar a interface.
+- Clareza para o Back-End: Ajuda os desenvolvedores a visualizarem exatamente quais endpoints (GET, POST, PUT, DELETE), parâmetros de busca, regras de acesso (perfis) e relacionamentos no banco de dados serão necessários para sustentar a interface.
 
-Foco na Funcionalidade (Sem Distrações Estéticas): Por não ter cores, logotipos ou tipografia refinada, as discussões se concentram 100% nas regras de negócio, na usabilidade e na lógica do sistema, sem perder tempo com "deveria ser azul ou verde".
+- Foco na Funcionalidade (Sem Distrações Estéticas): Por não ter cores, logotipos ou tipografia refinada, as discussões se concentram 100% nas regras de negócio, na usabilidade e na lógica do sistema, sem perder tempo com "deveria ser azul ou verde".
 
-Facilidade na Identificação de Falhas de Escopo: Facilita notar lacunas no fluxo — como telas esquecidas (ex: onde tratar conflito de horários ou onde cadastrar os responsáveis) — antes de avançar para etapas mais complexas.
+- Facilidade na Identificação de Falhas de Escopo: Facilita notar lacunas no fluxo — como telas esquecidas (ex: onde tratar conflito de horários ou onde cadastrar os responsáveis) — antes de avançar para etapas mais complexas.
 
 Em resumo, ele funciona como a planta baixa de uma casa: ninguém constrói as paredes ou escolhe a pintura sem antes validar o desenho das salas e onde passam os canos.
-</p>
 
 ## Metodologia
 
-<p align = "justify">
 Iniciei o projeto através dos levantamentos iniciais da equipe, após discussões a ferramenta Figma foi selecionada para produzir o protótipo de baixa fidelidade com base em Wireframes de Baixa Fidelidade (Textual).
-</p>
 
 ## Protótipo de baixa fidelidade
 
@@ -57,7 +53,7 @@ Iniciei o projeto através dos levantamentos iniciais da equipe, após discussõ
 
 [![Prototipo 6](../assets/Prototipo/tela6_Agenda_Conflitos.png)](../assets/Prototipo/tela6_Agenda_Conflitos.png)
 
-<p align = "justify">
+
 Para conectar essa interface ao back-end, estas são as entidades primárias identificadas no mapa mental:
 
 1. User / Auth: ID, Nome, Email, SenhaHash, Perfil   (ADMIN, TREINADOR, SAUDE, RESPONSAVEL, ALUNOS).
@@ -68,13 +64,11 @@ Para conectar essa interface ao back-end, estas são as entidades primárias ide
 6. Presença: ID, Aluno_ID, Turma_ID, Data, Status (PRESENTE, FALTA), Observacao.
 7. Espaco / Ativo: ID, Nome, Capacidade, StatusAtivo, Condicao.
 8. Auditoria: ID, User_ID, Acao, TabelaAfetada, Timestamp.
-</p>
 
-link para o `<a href="https://www.figma.com/design/87VnCz8Xq9zmTTrBFEiL4y/prototipo-de-baixa-fidelidade?node-id=0-1&m=dev&t=LIhzbVnf63TpNRgt-1">`Protótipo`</a>`
+[clique aqui para ver o Protótipo no figma](https://www.figma.com/design/87VnCz8Xq9zmTTrBFEiL4y/prototipo-de-baixa-fidelidade?node-id=0-1&m=dev&t=LIhzbVnf63TpNRgt-1)
 
 ## Conclusão
 
-<p align = "justify">
 A partir deste protótipo de baixa fidelidade, é possível extrair e validar aspectos estruturais e técnicos do sistema antes de escrever código ou criar o design final:
 
 1- Arquitetura de Dados e Banco de Dados (Modelagem de Entidades): Revela as entidades principais (Aluno, Profissional, Turma, Agendamento, Espaço, Frequência) e como elas se relacionam (por exemplo: um aluno vinculado a um responsável, uma turma vinculada a um treinador e a um espaço).
@@ -88,7 +82,6 @@ A partir deste protótipo de baixa fidelidade, é possível extrair e validar as
 5- Navegação e Usabilidade (Jornada do Usuário): Define o fluxo de telas e a hierarquia das informações, garantindo que o usuário consiga cumprir suas tarefas (como fazer uma chamada de presença ou agendar um atendimento) com poucos cliques.
 
 6- Escopo e Esforço de Desenvolvimento: Facilita a estimativa de tempo e complexidade para a equipe de desenvolvimento back-end e front-end, alinhando as expectativas entre desenvolvedores e partes interessadas.
-</p>
 
 ## Referências
 
