@@ -5,83 +5,90 @@ title: Diagrama de Casos de Uso
 
 ## Casos de Uso
 
+Os casos de uso descrevem as principais interações entre os usuários e o sistema de gestão do PKZ Lab, representando as funcionalidades disponíveis de acordo com os diferentes perfis de acesso. A documentação apresenta os atores envolvidos, as pré-condições, o fluxo básico, os fluxos alternativos e as pós-condições de cada caso de uso.
+
 ### Descrição:
 
-- Contas
-	- Criação
-	- Entrada
-	- Alteração
-	- Recuperar Senha
-	- Exclusão Lógica
-	- Visualização
 
-- Perfis
-	- Edição
-	- Pesquisar
-	- Visualização
-	- Seguir/Deixar de Seguir
+- Acesso e Segurança
+    
+    - Realizar Login
+    - Autenticar Usuário
+    - Controle de acesso por perfil
+        
+- Alunos
+    
+    - Gerenciar Alunos
+    - Consultar informações do aluno
+    - Consultar histórico de presença
+        
+- Profissionais
+    
+    - Gerenciar Profissionais
+    - Consultar horários e atividades associadas
+        
+- Turmas e Atividades
+    
+    - Gerenciar Turmas
+    - Associar alunos e profissionais
+    - Definir horários e espaços
+        
+- Agenda
+    
+    - Gerenciar Agendamentos
+    - Consultar horários
+    - Verificar disponibilidade e conflitos
+    - Cancelar agendamentos
+        
+- Presença e Acompanhamento
+    
+    - Registrar Presença
+    - Registrar Progresso do Aluno
+    - Consultar Desempenho
+        
+- Administração
+    
+    - Gerenciar Alunos
+    - Gerenciar Profissionais
+    - Gerenciar Turmas
+    - Gerenciar Agendamentos
+    - Consultar Relatórios
 
-- Postagens (Público) 	 	
-	- Criação
-	- Exclusão
-	- Interação
-	- Visualização
+### Realizar Login
 
-- Mensagens (Privado)
-	- Criação
-	- Exclusão
-	- Visualização
+**Atores:** Usuário, Sistema
 
-- Galerias
-	- Albuns
-- Blogs
-- Grupos
+**Pré-Condições:**
 
-### Criação de uma conta no sistema
+* Usuário deve estar previamente cadastrado no sistema.
+* Usuário deve possuir credenciais de acesso válidas.
 
-* Atores:
+**Fluxo Básico:**
 
-	- Usuário
-	- Sistema
+1. Usuário informa e-mail e senha.
+2. Sistema autentica o usuário.
+3. Sistema identifica o perfil de acesso.
+4. Sistema disponibiliza as funcionalidades permitidas para o perfil identificado.
 
-- Pré-Condições:
-	- Nenhuma
+**Fluxos Alternativos:**
 
-* Fluxo Básico:
-    1. Usuário fornece e-mail, senha e confirmações
-    2. Dados do Usuário são validados pelo Sistema
-    3. Dados do Usuário são encriptados pelo Sistema
-    4. Dados do Usuário são persistidos pelo Sistema
-    5. Sistema gera um link com prazo de expiração
-    6. Sistema envia e-mail de verificação, com o link, para o Usuário
-    7. Usuário confirma o e-mail antes do link expirar
-    8. Sistema confirma que o Cadastro do Usuário foi realizado com sucesso
-    9. Sistema redireciona o Usuário para a página de Entrada
+* **2a.** As credenciais informadas são inválidas.
 
-- Fluxos Alternativos:
-	- 2a. E-mail do Usuário é inválido
-		2a1. Sistema exibe mensagem de erro
-	- 2b. Senha do Usuário não respeita regras de segurança
-		- 2b1. Sistema exibe mensagem de erro
-	- 3a. Usuário tenta confirmar o e-mail depois de o link expirar
-		- 3a1. Sistema sugere que o Usuário realize um novo Cadastro
+  * **2a1.** Sistema informa que os dados de acesso são inválidos.
+  * **2a2.** Usuário pode tentar realizar o login novamente.
+* **3a.** Usuário não possui um perfil de acesso válido.
 
-### Entrada do usuário no sistema
+  * **3a1.** Sistema bloqueia o acesso às funcionalidades.
 
-- Atores:
-	- Usuário
-	- Sistema
+**Pós-Condições:**
 
-- Pré-Condições:
-	Usuário deve estar cadastrado
+* Usuário é autenticado e tem acesso às funcionalidades permitidas para seu perfil.
 
-- Fluxo Básico:
-    - 1. Usuário fornece e-mail e senha
-	- 2. Sistema autentica o Usuário
-	- 3. Sistema redireciona o Usuário para a página inicial
+**Regras de Negócio:**
 
-- Fluxos Alternativos:
-	- 2a. Dados do Usuário Inválidos
-		- 2a1. Sistema exibe mensagem de erro
-	- 3a. Primeio acesso do Usuário
-		- 3a1. Sistema redireciona o Usuário para a página de edição de perfil
+* **RN01.** Apenas usuários cadastrados podem acessar o sistema.
+* **RN02.** O acesso às funcionalidades deve respeitar o perfil de cada usuário.
+* **RN03.** Credenciais inválidas não devem permitir acesso ao sistema.
+
+---
+
