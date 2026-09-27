@@ -222,3 +222,53 @@ Os casos de uso descrevem as principais interações entre os usuários e o sist
 * **RN16.** A capacidade do espaço deve ser respeitada pela quantidade de alunos da turma.
 
 ---
+
+### Gerenciar Agendamentos
+
+**Atores:** Responsável, Profissional, Administrador, Sistema
+
+**Pré-Condições:**
+
+* Usuário deve estar autenticado.
+* O aluno deve estar cadastrado.
+* Deve existir um horário disponível para o agendamento.
+
+**Fluxo Básico:**
+
+1. Usuário acessa a agenda.
+2. Sistema apresenta os horários e agendamentos disponíveis de acordo com o perfil.
+3. Usuário seleciona a operação desejada.
+4. Usuário informa os dados do agendamento ou seleciona um agendamento existente.
+5. Sistema verifica a disponibilidade do profissional e do espaço.
+6. Sistema registra, altera ou cancela o agendamento conforme a operação.
+7. Sistema confirma a operação.
+
+**Fluxos Alternativos:**
+
+* **5a.** Existe conflito de horário.
+
+  * **5a1.** Sistema informa o conflito.
+  * **5a2.** Usuário deve selecionar outro horário disponível.
+* **5b.** Profissional ou espaço não está disponível.
+
+  * **5b1.** Sistema informa a indisponibilidade.
+* **6a.** Usuário seleciona um agendamento existente para cancelamento.
+
+  * **6a1.** Sistema apresenta os dados do agendamento.
+  * **6a2.** Usuário confirma o cancelamento.
+  * **6a3.** Sistema cancela o agendamento e atualiza a disponibilidade.
+
+**Pós-Condições:**
+
+* O agendamento é criado, alterado, consultado ou cancelado.
+* A disponibilidade do horário é atualizada quando necessário.
+
+**Regras de Negócio:**
+
+* **RN17.** Um aluno não pode possuir agendamentos conflitantes no mesmo horário.
+* **RN18.** Um profissional não pode possuir dois agendamentos no mesmo horário.
+* **RN19.** Um espaço não pode possuir agendamentos conflitantes no mesmo horário.
+* **RN20.** Um agendamento só pode ser realizado para aluno previamente cadastrado.
+* **RN21.** O cancelamento de um agendamento deve liberar o horário correspondente.
+
+---
