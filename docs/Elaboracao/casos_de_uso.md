@@ -92,3 +92,47 @@ Os casos de uso descrevem as principais interações entre os usuários e o sist
 
 ---
 
+### Gerenciar Alunos
+
+**Atores:** Administrador, Responsável, Sistema
+
+**Pré-Condições:**
+
+* Usuário deve estar autenticado.
+* Usuário deve possuir permissão para consultar ou alterar informações de alunos.
+
+**Fluxo Básico:**
+
+1. Usuário acessa o gerenciamento de alunos.
+2. Sistema apresenta os alunos disponíveis de acordo com o perfil de acesso.
+3. Usuário seleciona um aluno existente ou inicia um novo cadastro.
+4. Usuário informa ou altera os dados do aluno.
+5. Sistema valida as informações fornecidas.
+6. Sistema registra as informações.
+7. Sistema confirma a operação.
+
+**Fluxos Alternativos:**
+
+* **5a.** Existem dados obrigatórios ausentes.
+
+  * **5a1.** Sistema informa os dados que precisam ser preenchidos.
+* **5b.** Os dados informados são inválidos.
+
+  * **5b1.** Sistema solicita a correção das informações.
+* **3a.** Usuário não possui permissão para realizar a operação.
+
+  * **3a1.** Sistema bloqueia a operação.
+
+**Pós-Condições:**
+
+* Os dados do aluno são cadastrados ou atualizados conforme a operação realizada.
+
+**Regras de Negócio:**
+
+* **RN04.** Todo aluno deve possuir um cadastro antes de ser associado a uma turma ou agendamento.
+* **RN05.** Os dados do aluno devem ser armazenados de acordo com as permissões de acesso definidas.
+* **RN06.** Informações obrigatórias devem ser preenchidas antes da conclusão do cadastro.
+* **RN07.** O acesso às informações do aluno deve respeitar o perfil do usuário.
+
+---
+
