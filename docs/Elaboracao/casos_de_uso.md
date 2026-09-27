@@ -355,3 +355,41 @@ Os casos de uso descrevem as principais interações entre os usuários e o sist
 * **RN29.** Registros já realizados não devem ser alterados por usuários sem permissão.
 
 ---
+
+### Consultar Desempenho
+
+**Atores:** Responsável, Profissional, Sistema
+
+**Pré-Condições:**
+
+* Usuário deve estar autenticado.
+* O aluno deve estar cadastrado.
+* Devem existir informações disponíveis para consulta.
+
+**Fluxo Básico:**
+
+1. Usuário acessa o acompanhamento do aluno.
+2. Sistema apresenta os alunos disponíveis de acordo com o perfil.
+3. Usuário seleciona um aluno.
+4. Sistema apresenta as informações de acompanhamento disponíveis.
+5. Usuário consulta os dados de presença, frequência e progresso do aluno.
+
+**Fluxos Alternativos:**
+
+* **3a.** Usuário não possui permissão para consultar o aluno.
+
+  * **3a1.** Sistema bloqueia o acesso às informações.
+* **4a.** Não existem registros disponíveis.
+
+  * **4a1.** Sistema informa que não há informações para consulta.
+
+**Pós-Condições:**
+
+* Usuário consulta as informações de desempenho e acompanhamento permitidas pelo seu perfil de acesso.
+
+**Regras de Negócio:**
+
+* **RN30.** O Responsável só pode consultar informações dos alunos vinculados a ele.
+* **RN31.** O acesso às informações deve respeitar o perfil e as permissões do usuário.
+* **RN32.** Informações de acompanhamento não podem ser disponibilizadas a usuários sem autorização.
+* **RN33.** O sistema deve apresentar apenas informações registradas e disponíveis para consulta.
