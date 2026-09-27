@@ -313,3 +313,45 @@ Os casos de uso descrevem as principais interações entre os usuários e o sist
 * **RN25.** A frequência deve ser atualizada a partir dos registros de presença e ausência.
 
 ---
+
+### Registrar Progresso do Aluno
+
+**Atores:** Profissional, Sistema
+
+**Pré-Condições:**
+
+* Profissional deve estar autenticado.
+* O aluno deve estar cadastrado.
+* O profissional deve possuir permissão para registrar informações de acompanhamento.
+
+**Fluxo Básico:**
+
+1. Profissional acessa o acompanhamento dos alunos.
+2. Sistema apresenta os alunos disponíveis para acompanhamento.
+3. Profissional seleciona um aluno.
+4. Sistema apresenta os registros de acompanhamento existentes.
+5. Profissional registra as informações referentes ao progresso do aluno.
+6. Sistema valida e armazena as informações.
+7. Sistema confirma o registro.
+
+**Fluxos Alternativos:**
+
+* **3a.** O profissional não possui permissão para acessar o aluno.
+
+  * **3a1.** Sistema bloqueia o acesso às informações.
+* **5a.** Existem informações obrigatórias ausentes.
+
+  * **5a1.** Sistema solicita a complementação do registro.
+
+**Pós-Condições:**
+
+* O registro de acompanhamento do aluno é armazenado e fica disponível para consulta conforme as permissões do usuário.
+
+**Regras de Negócio:**
+
+* **RN26.** Apenas profissionais autorizados podem registrar informações de acompanhamento.
+* **RN27.** O registro deve estar associado ao aluno e ao profissional responsável pelo acompanhamento.
+* **RN28.** Informações de acompanhamento devem respeitar as permissões de acesso definidas pelo sistema.
+* **RN29.** Registros já realizados não devem ser alterados por usuários sem permissão.
+
+---
