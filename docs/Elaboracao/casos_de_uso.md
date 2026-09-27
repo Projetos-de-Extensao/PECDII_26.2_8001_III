@@ -136,3 +136,43 @@ Os casos de uso descrevem as principais interações entre os usuários e o sist
 
 ---
 
+### Gerenciar Profissionais
+
+**Atores:** Administrador, Sistema
+
+**Pré-Condições:**
+
+* Administrador deve estar autenticado.
+* Administrador deve possuir permissão para gerenciar profissionais.
+
+**Fluxo Básico:**
+
+1. Administrador acessa o gerenciamento de profissionais.
+2. Sistema apresenta os profissionais cadastrados.
+3. Administrador seleciona um profissional existente ou inicia um novo cadastro.
+4. Administrador informa ou altera os dados do profissional.
+5. Sistema valida as informações.
+6. Sistema registra as informações.
+7. Sistema confirma a operação.
+
+**Fluxos Alternativos:**
+
+* **5a.** Existem dados obrigatórios ausentes.
+
+  * **5a1.** Sistema solicita o preenchimento dos dados.
+* **5b.** Profissional já está cadastrado.
+
+  * **5b1.** Sistema informa a existência do cadastro e impede a duplicação.
+
+**Pós-Condições:**
+
+* Os dados do profissional são cadastrados ou atualizados.
+
+**Regras de Negócio:**
+
+* **RN08.** Um profissional deve possuir cadastro antes de ser associado a uma turma ou agendamento.
+* **RN09.** Cada profissional deve possuir um perfil ou área de atuação definida.
+* **RN10.** Um profissional não pode possuir cadastros duplicados.
+* **RN11.** Apenas usuários autorizados podem cadastrar ou alterar profissionais.
+
+---
