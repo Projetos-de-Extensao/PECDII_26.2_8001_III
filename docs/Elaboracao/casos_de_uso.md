@@ -176,3 +176,49 @@ Os casos de uso descrevem as principais interações entre os usuários e o sist
 * **RN11.** Apenas usuários autorizados podem cadastrar ou alterar profissionais.
 
 ---
+
+### Gerenciar Turmas
+
+**Atores:** Administrador, Profissional, Sistema
+
+**Pré-Condições:**
+
+* Usuário deve estar autenticado.
+* A modalidade ou atividade deve estar previamente cadastrada.
+* Deve existir profissional disponível para associação à turma.
+
+**Fluxo Básico:**
+
+1. Usuário acessa o gerenciamento de turmas.
+2. Sistema apresenta as turmas cadastradas.
+3. Usuário seleciona uma turma existente ou inicia um novo cadastro.
+4. Usuário informa modalidade, profissional responsável, horário e espaço.
+5. Sistema verifica a disponibilidade do profissional e do espaço.
+6. Sistema registra ou atualiza a turma.
+7. Sistema confirma a operação.
+
+**Fluxos Alternativos:**
+
+* **5a.** O profissional já possui outra atividade no horário informado.
+
+  * **5a1.** Sistema informa o conflito.
+* **5b.** O espaço não está disponível no horário informado.
+
+  * **5b1.** Sistema informa a indisponibilidade.
+* **4a.** Existem informações obrigatórias ausentes.
+
+  * **4a1.** Sistema solicita o preenchimento dos dados.
+
+**Pós-Condições:**
+
+* A turma é cadastrada ou atualizada com suas informações de modalidade, profissional, horário e espaço.
+
+**Regras de Negócio:**
+
+* **RN12.** Uma turma deve possuir um profissional responsável.
+* **RN13.** Uma turma deve estar associada a uma modalidade ou atividade.
+* **RN14.** Um profissional não pode ser associado a duas atividades conflitantes no mesmo horário.
+* **RN15.** Um espaço não pode ser utilizado simultaneamente por turmas incompatíveis.
+* **RN16.** A capacidade do espaço deve ser respeitada pela quantidade de alunos da turma.
+
+---
