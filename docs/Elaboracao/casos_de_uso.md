@@ -272,3 +272,44 @@ Os casos de uso descrevem as principais interações entre os usuários e o sist
 * **RN21.** O cancelamento de um agendamento deve liberar o horário correspondente.
 
 ---
+
+### Registrar Presença
+
+**Atores:** Profissional, Sistema
+
+**Pré-Condições:**
+
+* Profissional deve estar autenticado.
+* A turma ou atividade deve estar cadastrada.
+* Os alunos devem estar associados à turma ou atividade.
+
+**Fluxo Básico:**
+
+1. Profissional seleciona a turma ou atividade.
+2. Sistema apresenta os alunos associados.
+3. Profissional registra a presença ou ausência de cada aluno.
+4. Sistema registra as informações.
+5. Sistema atualiza o histórico de presença e a frequência.
+
+**Fluxos Alternativos:**
+
+* **2a.** Não existem alunos associados à turma.
+
+  * **2a1.** Sistema informa que não há alunos para registrar.
+* **3a.** O registro de presença está incompleto.
+
+  * **3a1.** Sistema solicita a conclusão do registro.
+
+**Pós-Condições:**
+
+* A presença ou ausência dos alunos é registrada no histórico.
+* A frequência do aluno é atualizada.
+
+**Regras de Negócio:**
+
+* **RN22.** Apenas alunos associados à turma podem ter presença registrada nela.
+* **RN23.** Cada aluno deve possuir apenas um registro de presença por atividade realizada.
+* **RN24.** O registro de presença deve estar associado à turma ou atividade correspondente.
+* **RN25.** A frequência deve ser atualizada a partir dos registros de presença e ausência.
+
+---
