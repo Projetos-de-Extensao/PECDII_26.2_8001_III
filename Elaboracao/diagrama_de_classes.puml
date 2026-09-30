@@ -1,0 +1,68 @@
+@startuml
+title Diagrama de Classes - Backend GAAP (Sem Atributos)
+
+hide attributes
+skinparam classAttributeIconSize 0
+
+' --- INTERFACES ---
+interface IAutenticavel {
+  + realizarLogin()
+}
+
+interface IAgendavel {
+  + verificarDisponibilidade()
+  + registrarBloqueio()
+}
+
+' --- CLASSES DE USUÁRIO E PERFIS ---
+abstract class Usuario
+class Administrador
+class Profissional
+class Treinador
+class ProfissionalSaude
+class Responsavel
+
+' --- CLASSES DE DOMÍNIO ---
+class Aluno
+class Servico
+class Turma
+class Agendamento
+class Espaco
+class Presenca
+class RelatorioTreino
+class Bloqueio
+
+' --- RELACIONAMENTOS DE HERANÇA E REALIZAÇÃO ---
+IAutenticavel <|.. Usuario
+
+Usuario <|-- Administrador
+Usuario <|-- Profissional
+Usuario <|-- Responsavel
+
+Profissional <|-- Treinador
+Profissional <|-- ProfissionalSaude
+
+IAgendavel <|.. Profissional
+IAgendavel <|.. Espaco
+
+' --- ASSOCIAÇÕES ---
+Responsavel "1" -- "1..*" Aluno : gerencia >
+Turma "1..*" -- "1" Servico : referente a >
+Turma "1" -- "1..*" Aluno : possui >
+Turma "1..*" -- "1" Profissional : conduzida por >
+Turma "1..*" -- "1" Espaco : alocada em >
+
+Agendamento "1..*" -- "1" Aluno : associado a >
+Agendamento "1..*" -- "1" Profissional : realizado por >
+Agendamento "1..*" -- "1" Servico : tipo de >
+Agendamento "1..*" -- "1" Espaco : ocorre em >
+
+Agendamento "1" -- "0..1" Presenca : gera >
+Turma "1" -- "0..*" Presenca : gera >
+
+Treinador "1" -- "0..*" RelatorioTreino : cria >
+RelatorioTreino "1" -- "1" Aluno : avalia >
+
+Bloqueio "1..*" -- "1" IAgendavel : aplica-se a >
+
+@enduml

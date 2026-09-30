@@ -1,0 +1,132 @@
+@startuml pkzlab
+title Diagrama de Casos de Uso — PKZ Lab
+
+left to right direction
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam linetype polyline
+skinparam nodesep 25
+skinparam ranksep 70
+skinparam actorStyle awesome
+skinparam ArrowColor #555555
+skinparam ArrowThickness 1
+skinparam actor {
+  BorderColor #333333
+  BackgroundColor white
+}
+skinparam usecase {
+  BorderColor #333333
+  BackgroundColor white
+}
+skinparam package {
+  BorderColor #888888
+  BackgroundColor #F8F8F8
+  FontStyle bold
+}
+
+' ===== ATORES =====
+actor "Usuário" as Usuario
+actor "Responsável" as Responsavel
+actor "Administrador" as Admin
+actor "Profissional" as Profissional
+
+Usuario -[hidden]right- Responsavel
+Responsavel -[hidden]right- Admin
+Admin -[hidden]right- Profissional
+
+Responsavel -left-|> Usuario
+Admin -left-|> Usuario
+Profissional -left-|> Usuario
+
+' ===== SISTEMA =====
+rectangle "Sistema PKZ Lab" {
+
+  package "Acesso e Segurança" {
+    usecase "Realizar Login" as Login
+    usecase "Autenticar Usuário" as Autenticar
+    usecase "Controlar Acesso\npor Perfil" as ControleAcesso
+  }
+
+  package "Gestão de Alunos" {
+    usecase "Gerenciar Alunos" as GerenciarAlunos
+  }
+
+  package "Turmas e Atividades" {
+    usecase "Gerenciar Turmas" as GerenciarTurmas
+    usecase "Associar Alunos e\nProfissionais" as Associar
+    usecase "Definir Horários\ne Espaços" as DefinirHorario
+    usecase "Verificar Disponibilidade\ne Conflitos" as Verificar
+  }
+
+  package "Agenda" {
+    usecase "Gerenciar Agendamentos" as GerenciarAgendamentos
+    usecase "Consultar Horários" as ConsultarHorarios
+    usecase "Cancelar Agendamento" as Cancelar
+  }
+
+  package "Presença e Acompanhamento" {
+    usecase "Registrar Presença" as RegistrarPresenca
+    usecase "Registrar Progresso\ndo Aluno" as RegistrarProgresso
+    usecase "Consultar Desempenho" as ConsultarDesempenho
+    usecase "Consultar Histórico\nde Presença" as Historico
+    usecase "Consultar Informações\ndo Aluno" as ConsultarAluno
+  }
+
+  package "Gestão de Profissionais" {
+    usecase "Gerenciar Profissionais" as GerenciarProfissionais
+    usecase "Consultar Horários e\nAtividades Associadas" as ConsultarAtividades
+  }
+
+  package "Administração" {
+    usecase "Consultar Relatórios" as Relatorios
+  }
+
+  ' --- coluna principal (ordem visual, de cima para baixo) ---
+  Login -[hidden]right- GerenciarAlunos
+  GerenciarAlunos -[hidden]right- GerenciarAgendamentos
+  GerenciarAgendamentos -[hidden]right- GerenciarTurmas
+  GerenciarTurmas -[hidden]right- GerenciarProfissionais
+  GerenciarProfissionais -[hidden]right- ConsultarAtividades
+  ConsultarAtividades -[hidden]right- Relatorios
+  Relatorios -[hidden]right- ConsultarDesempenho
+  ConsultarDesempenho -[hidden]right- RegistrarPresenca
+  RegistrarPresenca -[hidden]right- RegistrarProgresso
+
+  ' --- include / extend (sempre para a coluna da direita) ---
+  Login .down.> Autenticar : <<include>>
+  Login .down.> ControleAcesso : <<include>>
+
+  GerenciarTurmas .down.> Associar : <<include>>
+  GerenciarTurmas .down.> DefinirHorario : <<include>>
+  GerenciarTurmas .down.> Verificar : <<include>>
+
+  GerenciarAgendamentos .down.> ConsultarHorarios : <<include>>
+  GerenciarAgendamentos .down.> Verificar : <<include>>
+  GerenciarAgendamentos <.down. Cancelar : <<extend>>
+
+  ConsultarDesempenho .down.> Historico : <<include>>
+  ConsultarDesempenho .down.> ConsultarAluno : <<include>>
+}
+
+' ===== ASSOCIAÇÕES =====
+Usuario --> Login
+
+Responsavel --> GerenciarAlunos
+Responsavel --> GerenciarAgendamentos
+Responsavel --> ConsultarDesempenho
+
+Admin --> GerenciarAlunos
+Admin --> GerenciarTurmas
+Admin --> GerenciarAgendamentos
+Admin --> GerenciarProfissionais
+Admin --> Relatorios
+
+Profissional --> GerenciarTurmas
+Profissional --> GerenciarAgendamentos
+Profissional --> RegistrarPresenca
+Profissional --> RegistrarProgresso
+Profissional --> ConsultarDesempenho
+Profissional --> ConsultarAtividades
+
+@enduml
