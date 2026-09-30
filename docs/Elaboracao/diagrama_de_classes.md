@@ -1,128 +1,139 @@
 ---
-id: diagrama_de_cclasses
+
+id: diagrama_de_classes
 title: Diagrama de Classes
----
+--------------------------
 
-## Diagrama de Classes
+# Diagrama de Classes
 
-### Objetivo
+## Objetivo
 
-O Diagrama de Classes é uma representação visual das classes, seus atributos, métodos e os relacionamentos entre elas. Ele é fundamental para a modelagem orientada a objetos e serve como base para a implementação do sistema.
+Representar os principais conceitos do domínio da PKZ Lab e os relacionamentos necessários para organizar usuários, alunos, responsáveis, profissionais, serviços, turmas, atividades, agendamentos, presença, acompanhamento e espaços.
 
-### Componentes do Diagrama de Classes
+Este documento apresenta uma visão **conceitual** do domínio. O diagrama utiliza somente nomes de classes, relacionamentos e multiplicidades, sem atributos, métodos ou detalhes de implementação.
 
-Este documento define um modelo para:
+## Diagrama
 
-1. **Inserção do Diagrama de Classes Conceitual** (visão de domínio).  
-2. **Evolução para o Diagrama de Classes de Especificação** (visão de projeto).  
+```plantuml
+@startuml
 
-Ambos devem ser derivados de:
+title Diagrama de Classes Conceitual - PKZ Lab
 
-- Casos de uso;
-- Diagrama de casos de uso;
-- Documento de levantamento de requisitos;
-- Protótipo de baixa fidelidade.
+' =========================
+' Classes
+' =========================
 
-### Fontes de entrada obrigatórias
+class Usuario
+class Aluno
+class Responsavel
+class Profissional
+class Servico
+class Turma
+class Atividade
+class Agendamento
+class Presenca
+class Acompanhamento
+class Espaco
 
-- **Levantamento de requisitos**: requisitos funcionais e não funcionais.
-- **Casos de uso**: atores, fluxos principal e alternativos.
-- **Diagrama de casos de uso**: escopo e fronteiras do sistema.
-- **Protótipo de baixa fidelidade**: entidades percebidas na interface e regras de navegação.
+' =========================
+' Generalização
+' =========================
 
-### 1) Diagrama de Classes Conceitual
+Usuario <|-- Aluno
+Usuario <|-- Responsavel
+Usuario <|-- Profissional
 
-#### 1.1 Finalidade
+' =========================
+' Alunos e responsáveis
+' =========================
 
-Representar conceitos do domínio, suas responsabilidades e relacionamentos, sem detalhes de implementação.
+Responsavel "0..*" -- "0..*" Aluno : acompanha
 
-#### 1.2 Escopo
+' =========================
+' Profissionais e serviços
+' =========================
 
-- Entidades de negócio;
-- Objetos de valor;
-- Regras de associação e cardinalidade;
-- Generalizações relevantes.
+Profissional "0..*" -- "1..*" Servico : atua em
 
-#### 1.3 Notação mínima
+' =========================
+' Turmas e atividades
+' =========================
 
-Para cada classe conceitual:
+Atividade "1" -- "0..*" Turma : possui
 
-- **Nome**;
-- **Descrição curta**;
-- **Atributos de domínio** (sem tipos técnicos, quando possível);
-- **Relacionamentos** com multiplicidade;
-- **Restrições de negócio** (opcional).
+Profissional "1" -- "0..*" Turma : responsável por
 
-#### 1.4 Rastreabilidade
+Aluno "0..*" -- "0..*" Turma : participa
 
-| Classe Conceitual | Requisito(s) | Caso(s) de Uso | Tela/Protótipo |
-|---|---|---|---|
-| `<Classe>` | `RF-xx` | `UC-xx` | `Tela xx` |
+Espaco "1" -- "0..*" Turma : utiliza
 
-#### 1.5 Critérios de validação
+' =========================
+' Agendamentos
+' =========================
 
-- Cada classe deve ter vínculo com ao menos um requisito/caso de uso;
-- Não incluir classes técnicas (ex.: repositório, controller);
-- Terminologia alinhada ao domínio do problema.
+Aluno "1" -- "0..*" Agendamento : possui
 
-### 2) Transição para Diagrama de Classes de Especificação
+Profissional "1" -- "0..*" Agendamento : realiza
 
-#### 2.1 Objetivo
-Refinar o modelo conceitual para uma estrutura orientada à implementação.
+Servico "1" -- "0..*" Agendamento : refere-se a
 
-#### 2.2 Regras de refinamento
+Espaco "1" -- "0..*" Agendamento : ocorre em
 
-- Converter conceitos em classes de software quando aplicável;
-- Definir tipos de atributos e visibilidade;
-- Incluir operações principais;
-- Aplicar estereótipos quando necessário (ex.: `<<entity>>`, `<<service>>`, `<<boundary>>`);
-- Preservar rastreabilidade com requisitos e casos de uso.
+' =========================
+' Presença
+' =========================
 
-#### 2.3 Itens esperados por classe
+Aluno "1" -- "0..*" Presenca : possui
 
-- **Nome da classe**;
-- **Atributos** (`nome: tipo [visibilidade]`);
-- **Métodos/operações** (`assinatura`);
-- **Responsabilidade**;
-- **Dependências e associações**;
-- **Restrições/invariantes** (quando houver).
+Turma "1" -- "0..*" Presenca : registra
+
+Profissional "1" -- "0..*" Presenca : registra
+
+' =========================
+' Acompanhamento
+' =========================
+
+Aluno "1" -- "0..*" Acompanhamento : possui
+
+Profissional "1" -- "0..*" Acompanhamento : realiza
+
+@enduml
+```
+
+## Classes Representadas
+
+* **Usuario**
+* **Aluno**
+* **Responsavel**
+* **Profissional**
+* **Servico**
+* **Turma**
+* **Atividade**
+* **Agendamento**
+* **Presenca**
+* **Acompanhamento**
+* **Espaco**
+
+## Relacionamentos Principais
+
+* Usuário possui especializações em **Aluno**, **Responsável** e **Profissional**.
+* **Responsável** acompanha alunos.
+* **Profissional** atua em serviços.
+* **Atividade** possui turmas.
+* **Profissional** é responsável por turmas.
+* **Aluno** participa de turmas.
+* **Turma** utiliza espaços.
+* **Aluno**, **Profissional**, **Serviço** e **Espaço** relacionam-se aos **Agendamentos**.
+* **Presença** relaciona aluno, turma e profissional.
+* **Acompanhamento** relaciona aluno e profissional.
+
+## Observação
+
+Este diagrama corresponde à visão conceitual do domínio. Conforme o projeto evoluir, poderá ser criado o **Diagrama de Classes de Especificação**, acrescentando atributos, tipos, métodos, visibilidade e outros detalhes necessários à implementação.
+
+O modelo conceitual deve permanecer alinhado aos requisitos e casos de uso do sistema.
 
 
-### 3) Diagrama de Classes de Especificação
-
-#### 3.1 Conteúdo mínimo
-
-- Classes de domínio e de apoio à aplicação;
-- Interfaces relevantes;
-- Associações, agregações/composições e heranças;
-- Multiplicidades e navegabilidade;
-- Operações alinhadas aos fluxos dos casos de uso.
-
-#### 3.2 Rastreabilidade
-
-| Classe de Especificação | Origem Conceitual | Requisito(s) | Caso(s) de Uso |
-|---|---|---|---|
-| `<ClasseSpec>` | `<ClasseConceitual>` | `RF-xx` | `UC-xx` |
-
-#### 3.3 Critérios de qualidade
-
-- Cobertura dos requisitos funcionais;
-- Coesão alta e acoplamento controlado;
-- Nomes consistentes com o domínio;
-- Ausência de classes sem responsabilidade clara.
-
-
-### 4) Estrutura de versionamento e revisão
-
-- **Versão**: `v0.1`, `v0.2`...
-- **Data**: `dd/mm/aaaa`
-- **Autor(es)**: `<nome>`
-- **Revisor(es)**: `<nome>`
-- **Resumo da alteração**: `<descrição curta>`
-
-### 5) Entregáveis
-
-- Diagrama de Classes Conceitual (imagem + fonte);
-- Diagrama de Classes de Especificação (imagem + fonte);
-- Tabelas de rastreabilidade preenchidas;
-- Registro de validação com equipe e stakeholders.
+| Data | Versão | Descrição | Autor(es) |
+| -- | -- | -- | -- |
+| 23/09/2026 | 1.0 | Criação da versão inicial | Brenno Marques Silva |
