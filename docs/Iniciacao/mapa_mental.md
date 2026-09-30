@@ -29,6 +29,8 @@ O mapa mental apresenta uma visão geral do sistema de gestão do PKZ Lab, organ
 
 ![Mapa mental da PKZ Lab](./Images/PKZ_Mapa_Mental1.png)
 
+>Código-fonte: [mapa_mental.md](mapa_mental.puml)
+
 A primeira versão do mapa mental apresenta a estrutura geral do sistema, destacando os principais grupos de funcionalidades identificados durante o levantamento inicial dos requisitos.
 
 Entre os principais grupos representados estão:
