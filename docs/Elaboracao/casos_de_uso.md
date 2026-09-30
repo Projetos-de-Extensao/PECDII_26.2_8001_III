@@ -7,6 +7,12 @@ title: Diagrama de Casos de Uso
 
 Os casos de uso descrevem as principais interações entre os usuários e o sistema de gestão do PKZ Lab, representando as funcionalidades disponíveis de acordo com os diferentes perfis de acesso. A documentação apresenta os atores envolvidos, as pré-condições, o fluxo básico, os fluxos alternativos e as pós-condições de cada caso de uso.
 
+## Diagrama
+
+![Diagrama de Casos de Uso da PKZ Lab](./Imagem/pkz_lab_casos_de_uso.png)
+
+> Código-fonte: [diagrama_caso_de_uso.puml](diagrama_caso_de_uso.puml)
+
 ### Descrição:
 
 
@@ -393,3 +399,5 @@ Os casos de uso descrevem as principais interações entre os usuários e o sist
 * **RN31.** O acesso às informações deve respeitar o perfil e as permissões do usuário.
 * **RN32.** Informações de acompanhamento não podem ser disponibilizadas a usuários sem autorização.
 * **RN33.** O sistema deve apresentar apenas informações registradas e disponíveis para consulta.
+
+## Imagem do diagrama de uso
