@@ -1,129 +1,188 @@
 @startuml
-
-skinparam classAttributeIconSize 0
 skinparam linetype ortho
-skinparam nodesep 80
-skinparam ranksep 60
+skinparam nodesep 60
+skinparam ranksep 70
 
 ' ==========================================
-' DECLARAÇÃO DAS CLASSES
+' ENUMS
 ' ==========================================
+enum StatusSessao {
+    SOLICITADA
+    CONFIRMADA
+    REALIZADA
+    CANCELADA
+}
+
+' ==========================================
+' AGREGADOR RAIZ / SISTEMA (PKZLab)
+' ==========================================
+class PKZLab {
+    - id: int
+    - nome: String
+    - cnpj: String
+    + adicionarUsuario(usuario: Usuario): void
+    + removerUsuario(usuario: Usuario): void
+    + cadastrarSala(sala: Sala): void
+    + removerSala(sala: Sala): void
+    + registrarSessao(sessao: Sessao): void
+}
+
+' ==========================================
+' HIERARQUIA DE USUÁRIOS
+' ==========================================
+
+abstract class django_auth_user {
+    - id: integer
+    - password: string
+    - last_login: datetime
+    - is_superuser: boolean
+    - username: string
+    - first_name: string
+    - last_name: string
+    - email: string
+    - is_staff: boolean
+    - is_active: boolean
+    - date_joined: datetime
+}
 
 abstract class Usuario {
-    + Nome: String
-    + Email: String
-    + Telefone: String
-    + DataNascimento: Date
-    + realizarLogin()
-    + realizarLogout()
-    + verificarCredenciais()
-    + atualizarSenha()
+    - telefone: String
+    - dataNascimento: Date
+    - endereco: String
+    + realizarLogin(nomeUsuario: String, senha: String): boolean
+    + realizarLogout(): void
+    + atualizarSenha(senhaAntiga: String, senhaNova: String): boolean
 }
 
 class Administrador {
-    + cadastrarUsuario()
-    + removerUsuario()
-    + atualizarUsuario()
-    + cadastrarSala()
-    + removerSala()
-    + atualizarSala()
-    + criarSessao()
-    + cancelarSessao()
-    + atualizarSessao()
+    - tipoContrato: String
+    + cadastrarUsuario(usuario: Usuario): void
+    + desativarUsuario(usuario: Usuario): void
+    + cadastrarSala(sala: Sala): void
+    + aprovarSessao(sessao: Sessao): void
+    + desaprovarSessao(sessao: Sessao, motivo: String): void
 }
 
 class Responsavel {
-    + Endereco: String
+    - parentesco: String
+    + adicionarDependente(aluno: Aluno): void
+    + removerDependente(aluno: Aluno): void
+    + transferirResponsabilidade(aluno: Aluno, EmailNovoResponsavel: Responsavel): void
+    + agendarSessao(sala: Sala, dataHora: DateTime, duracao: TimeSpan): Sessao
+    + cancelarSessao(sessao: Sessao, motivo: String): void
+
+}
+
+enum TipoResponsavel {
+    PAI
+    MAE
+    TUTOR
+    OUTRO
+    NENHUM
+    PROPRIO
 }
 
 class Aluno {
-    + Matricula: String
-    + Endereco: String
+    - matricula: String
+    - responsavel: TipoResponsavel
+    - creditos: int
+    + agendarSessao(sala: Sala, dataHora: DateTime, duracao: TimeSpan): Sessao
+    + cancelarSessao(sessao: Sessao, motivo: String): void
+    + assumirTutoria(): void
 }
 
 abstract class Profissional {
-    + Contrato: String
+    - tipoContrato: String
+    - formacao: String
+    + solicitarSessao(sala: Sala, dataHora: DateTime, duracao: TimeSpan, creditosNecessarios: int): Sessao
+    + cancelarSessao(sessao: Sessao, motivo: String): void
+    + gerarLaudo(sessao: Sessao, aluno: Aluno, linkArquivo: String): Laudo
 }
 
 class Professor {
-}
-
-class Psicologo {
+    - especialidade: String
 }
 
 class Nutricionista {
+    - CRN: String
 }
 
-class PKZLab {
-    + adicionarUsuario()
-    + removerUsuario()
-    + atualizarUsuario()
-    + cadastrarSala()
-    + removerSala()
-    + atualizarSala()
-    + criarSessao()
-    + cancelarSessao()
-    + atualizarSessao()
+class Psicologo {
+    - CRP: String
 }
 
-class Relatorio {
-    + GerarRelatorio()
+class Fisioterapeuta{
+    - CREFITO: String
 }
 
-class Sala {
-    + Numero: int
-    + Capacidade: int
-}
+django_auth_user <|-- Usuario
 
-class Sessao {
-    + DataHora: DateTime
-    + Duracao: TimeSpan
-}
-
-class Presenca {
-    + Status: boolean
-    + registrarPresenca()
-}
-
-' ==========================================
-' ESTRUTURA DE GRADE (ALINHAMENTO VISUAL)
-' ==========================================
-
-' --- LINHA 1 para LINHA 2: Herança de Usuario ---
 Usuario <|-- Administrador
 Usuario <|-- Responsavel
 Usuario <|-- Aluno
 Usuario <|-- Profissional
 
-' Trava a ordem horizontal da Linha 2:
-Administrador -[hidden]right-> Responsavel
-Responsavel "1" <-right-> "0..*" Aluno
-Aluno -[hidden]right-> Profissional
+Profissional <|-- Professor
+Profissional <|-- Nutricionista
+Profissional <|-- Psicologo
+Profissional <|-- Fisioterapeuta
 
-' --- Herança de Profissional (Empilhados à Direita) ---
-' 1. Posiciona as 3 subclasses na coluna à direita de Profissional:
-Profissional <|-right- Psicologo
-Profissional <|-right- Nutricionista
-Profissional <|-right- Professor
+Responsavel "0..1" o-- "1..*" Aluno
 
-' --- LINHA 2 para LINHA 3: PKZLab (Esquerda) e Relatorio (Centro-Direita) ---
-Administrador "0..*" --> "1" PKZLab
-Responsavel "0..*" <--o "1" PKZLab
-Aluno "0..*" <--o "1" PKZLab
-Profissional "0..*" <--o "1" PKZLab
+TipoResponsavel -[hidden]left-> Aluno
 
-Aluno "1" <-up-> "0..*" Relatorio
-Profissional "1" <--> "0..*" Relatorio
+' ==========================================
+' SESSÃO, SALA E AGENDAMENTO
+' ==========================================
+class Sala {
+    - id: int
+    - numero: int
+    - capacidade: int
+}
 
-' --- LINHA 3 para LINHA 4: Sala, Sessao e Presenca ---
-PKZLab "1" o--> "0..*" Sala
-PKZLab "1" o--> "0..*" Sessao
+class Sessao {
+    - id: int
+    - dataHora: DateTime
+    - duracao: TimeSpan
+    - status: StatusSessao
+    - creditosNecessarios: int
+    - motivoCancelamento: String
+    + registrarPresenca(aluno: Aluno, presente: boolean): void
+}
 
-Aluno "0..*" <---> "0..*" Sessao
-Profissional "1" <---> "0..*" Sessao
+class Presenca {
+    - id: int
+    - status: boolean
+    - justificativa: String
+}
 
-' Trava a ordem horizontal da Linha 4 (Base):
-Sala "1" <-right-> "0..*" Sessao
-Sessao "1" *-down-> "0..*" Presenca
+class Laudo {
+    - id: int
+    - dataGeracao: Date
+    - linkArquivo: String
+}
+
+' ==========================================
+' RELACIONAMENTOS DO PKZLab E ADMINISTRAÇÃO
+' ==========================================
+PKZLab "1" o-- "0..*" Usuario
+PKZLab "1" *-- "0..*" Sala
+PKZLab "1" *-- "0..*" Sessao
+
+Administrador ..> PKZLab
+
+' ==========================================
+' RELACIONAMENTOS OPERACIONAIS
+' ==========================================
+Profissional "1" <-- "0..*" Sessao
+Sala "1" <-- "0..*" Sessao
+
+Sessao "1" *-- "0..*" Presenca
+Presenca "0..*" --> "1" Aluno
+
+Sessao "1" <-- "0..*" Laudo
+Laudo "0..*" --> "1" Aluno
+
+StatusSessao -[hidden]right-> Sessao
 
 @enduml
