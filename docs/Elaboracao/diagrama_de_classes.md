@@ -1,139 +1,258 @@
 ---
-
 id: diagrama_de_classes
 title: Diagrama de Classes
---------------------------
+---
 
 # Diagrama de Classes
 
 ## Objetivo
 
-Representar os principais conceitos do domínio da PKZ Lab e os relacionamentos necessários para organizar usuários, alunos, responsáveis, profissionais, serviços, turmas, atividades, agendamentos, presença, acompanhamento e espaços.
+Representar os principais conceitos e entidades de domínio da PKZ Lab, detalhando a estrutura de usuários e papéis (integrados ao modelo de autenticação), salas, sessões operacionais, controle de presenças, geração de laudos e a gestão centralizada do sistema.
 
-Este documento apresenta uma visão **conceitual** do domínio. O diagrama utiliza somente nomes de classes, relacionamentos e multiplicidades, sem atributos, métodos ou detalhes de implementação.
+Diferente da versão inicial puramente conceitual, este modelo evolui para uma visão de **especificação/projeto**, detalhando atributos, tipos de dados, visibilidade, métodos e enums auxiliares.
 
 ## Diagrama
 
 ```plantuml
 @startuml
+skinparam linetype ortho
+skinparam nodesep 60
+skinparam ranksep 70
 
-title Diagrama de Classes Conceitual - PKZ Lab
+' ==========================================
+' ENUMS
+' ==========================================
+enum StatusSessao {
+    SOLICITADA
+    CONFIRMADA
+    REALIZADA
+    CANCELADA
+}
 
-' =========================
-' Classes
-' =========================
+' ==========================================
+' AGREGADOR RAIZ / SISTEMA (PKZLab)
+' ==========================================
+class PKZLab {
+    - id: int
+    - nome: String
+    - cnpj: String
+    + adicionarUsuario(usuario: Usuario): void
+    + removerUsuario(usuario: Usuario): void
+    + cadastrarSala(sala: Sala): void
+    + removerSala(sala: Sala): void
+    + registrarSessao(sessao: Sessao): void
+}
 
-class Usuario
-class Aluno
-class Responsavel
-class Profissional
-class Servico
-class Turma
-class Atividade
-class Agendamento
-class Presenca
-class Acompanhamento
-class Espaco
+' ==========================================
+' HIERARQUIA DE USUÁRIOS
+' ==========================================
 
-' =========================
-' Generalização
-' =========================
+abstract class django_auth_user {
+    - id: integer
+    - password: string
+    - last_login: datetime
+    - is_superuser: boolean
+    - username: string
+    - first_name: string
+    - last_name: string
+    - email: string
+    - is_staff: boolean
+    - is_active: boolean
+    - date_joined: datetime
+}
 
-Usuario <|-- Aluno
+abstract class Usuario {
+    - telefone: String
+    - dataNascimento: Date
+    - endereco: String
+    + realizarLogin(nomeUsuario: String, senha: String): boolean
+    + realizarLogout(): void
+    + atualizarSenha(senhaAntiga: String, senhaNova: String): boolean
+}
+
+class Administrador {
+    - tipoContrato: String
+    + cadastrarUsuario(usuario: Usuario): void
+    + desativarUsuario(usuario: Usuario): void
+    + cadastrarSala(sala: Sala): void
+    + aprovarSessao(sessao: Sessao): void
+    + desaprovarSessao(sessao: Sessao, motivo: String): void
+}
+
+class Responsavel {
+    - parentesco: String
+    + adicionarDependente(aluno: Aluno): void
+    + removerDependente(aluno: Aluno): void
+    + transferirResponsabilidade(aluno: Aluno, EmailNovoResponsavel: Responsavel): void
+    + agendarSessao(sala: Sala, dataHora: DateTime, duracao: TimeSpan): Sessao
+    + cancelarSessao(sessao: Sessao, motivo: String): void
+}
+
+enum TipoResponsavel {
+    PAI
+    MAE
+    TUTOR
+    OUTRO
+    NENHUM
+    PROPRIO
+}
+
+class Aluno {
+    - matricula: String
+    - responsavel: TipoResponsavel
+    - creditos: int
+    + agendarSessao(sala: Sala, dataHora: DateTime, duracao: TimeSpan): Sessao
+    + cancelarSessao(sessao: Sessao, motivo: String): void
+    + assumirTutoria(): void
+}
+
+abstract class Profissional {
+    - tipoContrato: String
+    - formacao: String
+    + solicitarSessao(sala: Sala, dataHora: DateTime, duracao: TimeSpan, creditosNecessarios: int): Sessao
+    + cancelarSessao(sessao: Sessao, motivo: String): void
+    + gerarLaudo(sessao: Sessao, aluno: Aluno, linkArquivo: String): Laudo
+}
+
+class Professor {
+    - especialidade: String
+}
+
+class Nutricionista {
+    - CRN: String
+}
+
+class Psicologo {
+    - CRP: String
+}
+
+class Fisioterapeuta {
+    - CREFITO: String
+}
+
+django_auth_user <|-- Usuario
+
+Usuario <|-- Administrador
 Usuario <|-- Responsavel
+Usuario <|-- Aluno
 Usuario <|-- Profissional
 
-' =========================
-' Alunos e responsáveis
-' =========================
+Profissional <|-- Professor
+Profissional <|-- Nutricionista
+Profissional <|-- Psicologo
+Profissional <|-- Fisioterapeuta
 
-Responsavel "0..*" -- "0..*" Aluno : acompanha
+Responsavel "0..1" o-- "1..*" Aluno
 
-' =========================
-' Profissionais e serviços
-' =========================
+TipoResponsavel -[hidden]left-> Aluno
 
-Profissional "0..*" -- "1..*" Servico : atua em
+' ==========================================
+' SESSÃO, SALA E AGENDAMENTO
+' ==========================================
+class Sala {
+    - id: int
+    - numero: int
+    - capacidade: int
+}
 
-' =========================
-' Turmas e atividades
-' =========================
+class Sessao {
+    - id: int
+    - dataHora: DateTime
+    - duracao: TimeSpan
+    - status: StatusSessao
+    - creditosNecessarios: int
+    - motivoCancelamento: String
+    + registrarPresenca(aluno: Aluno, presente: boolean): void
+}
 
-Atividade "1" -- "0..*" Turma : possui
+class Presenca {
+    - id: int
+    - status: boolean
+    - justificativa: String
+}
 
-Profissional "1" -- "0..*" Turma : responsável por
+class Laudo {
+    - id: int
+    - dataGeracao: Date
+    - linkArquivo: String
+}
 
-Aluno "0..*" -- "0..*" Turma : participa
+' ==========================================
+' RELACIONAMENTOS DO PKZLab E ADMINISTRAÇÃO
+' ==========================================
+PKZLab "1" o-- "0..*" Usuario
+PKZLab "1" *-- "0..*" Sala
+PKZLab "1" *-- "0..*" Sessao
 
-Espaco "1" -- "0..*" Turma : utiliza
+Administrador ..> PKZLab
 
-' =========================
-' Agendamentos
-' =========================
+' ==========================================
+' RELACIONAMENTOS OPERACIONAIS
+' ==========================================
+Profissional "1" <-- "0..*" Sessao
+Sala "1" <-- "0..*" Sessao
 
-Aluno "1" -- "0..*" Agendamento : possui
+Sessao "1" *-- "0..*" Presenca
+Presenca "0..*" --> "1" Aluno
 
-Profissional "1" -- "0..*" Agendamento : realiza
+Sessao "1" <-- "0..*" Laudo
+Laudo "0..*" --> "1" Aluno
 
-Servico "1" -- "0..*" Agendamento : refere-se a
-
-Espaco "1" -- "0..*" Agendamento : ocorre em
-
-' =========================
-' Presença
-' =========================
-
-Aluno "1" -- "0..*" Presenca : possui
-
-Turma "1" -- "0..*" Presenca : registra
-
-Profissional "1" -- "0..*" Presenca : registra
-
-' =========================
-' Acompanhamento
-' =========================
-
-Aluno "1" -- "0..*" Acompanhamento : possui
-
-Profissional "1" -- "0..*" Acompanhamento : realiza
+StatusSessao -[hidden]right-> Sessao
 
 @enduml
+
 ```
 
-## Classes Representadas
+## Classes e Estruturas Representadas
 
-* **Usuario**
-* **Aluno**
-* **Responsavel**
-* **Profissional**
-* **Servico**
-* **Turma**
-* **Atividade**
-* **Agendamento**
-* **Presenca**
-* **Acompanhamento**
-* **Espaco**
+### Núcleo de Domínio e Usuários
+
+* **PKZLab**: Raiz agregadora que centraliza o cadastro de usuários, salas físicas e registro de sessões.
+* **django_auth_user**: Classe base de autenticação do Django contendo credenciais e metadados de acesso.
+* **Usuario**: Generalização base de perfil do domínio contendo dados pessoais e operações de conta.
+* **Administrador**: Gerencia usuários, salas e realiza a moderação/aprovação de sessões.
+* **Responsavel**: Agrega e gerencia dependentes (`Aluno`), podendo solicitar e cancelar sessões para eles.
+* **Aluno**: Entidade atendida pelo sistema, associada a uma cota de créditos e dependência de tutoria.
+* **Profissional**: Especialista multidisciplinar que solicita sessões, registra laudos e atende alunos.
+* **Professor**, **Nutricionista**, **Psicologo**, **Fisioterapeuta**: Especializações com registros de conselho ou áreas de atuação específicas.
+
+
+
+### Operação e Agendamento
+
+* **Sala**: Espaço físico alocado para a realização de sessões com capacidade definida.
+* **Sessao**: Evento que une profissional, sala, alunos e horário, gerido pelo ciclo de vida definido em `StatusSessao`.
+* **Presenca**: Registro de comparecimento ou justificativa de ausência de um aluno em determinada sessão.
+* **Laudo**: Documento e parecer técnico emitido por um profissional para um aluno com vínculo à sessão realizada.
+
+### Enumeradores
+
+* **StatusSessao**: Estados possíveis de uma sessão (`SOLICITADA`, `CONFIRMADA`, `REALIZADA`, `CANCELADA`).
+* **TipoResponsavel**: Vínculos de parentesco e tutoria (`PAI`, `MAE`, `TUTOR`, `OUTRO`, `NENHUM`, `PROPRIO`).
 
 ## Relacionamentos Principais
 
-* Usuário possui especializações em **Aluno**, **Responsável** e **Profissional**.
-* **Responsável** acompanha alunos.
-* **Profissional** atua em serviços.
-* **Atividade** possui turmas.
-* **Profissional** é responsável por turmas.
-* **Aluno** participa de turmas.
-* **Turma** utiliza espaços.
-* **Aluno**, **Profissional**, **Serviço** e **Espaço** relacionam-se aos **Agendamentos**.
-* **Presença** relaciona aluno, turma e profissional.
-* **Acompanhamento** relaciona aluno e profissional.
+* **Herança de Autenticação e Perfis**: `Usuario` herda de `django_auth_user`, sendo especializado em `Administrador`, `Responsavel`, `Aluno` e `Profissional`.
+* **Especializações Profissionais**: `Profissional` especializa-se em `Professor`, `Nutricionista`, `Psicologo` e `Fisioterapeuta`.
+* **Tutoria**: `Responsavel` agrega de 1 a muitos (`1..*`) dependentes do tipo `Aluno`.
+* **Composição da Raiz (`PKZLab`)**: Agrega usuários (`0..*`) e compõe salas (`0..*`) e sessões (`0..*`).
+* **Gestão Administrativa**: `Administrador` possui dependência de uso (`..>`) sobre `PKZLab` para execução de rotinas operacionais e moderação.
+* **Alocação de Sessão**: Cada `Sessao` vincula-se a 1 `Profissional` e 1 `Sala`.
+* **Acompanhamento e Registro**:
+* Uma `Sessao` compõe múltiplos registros de `Presenca`, cada um associado a 1 `Aluno`.
+* Uma `Sessao` referencia múltiplos registros de `Laudo`, cada um emitido para 1 `Aluno`.
 
-## Observação
 
-Este diagrama corresponde à visão conceitual do domínio. Conforme o projeto evoluir, poderá ser criado o **Diagrama de Classes de Especificação**, acrescentando atributos, tipos, métodos, visibilidade e outros detalhes necessários à implementação.
 
-O modelo conceitual deve permanecer alinhado aos requisitos e casos de uso do sistema.
+## Observações
 
+* O modelo foi atualizado da visão puramente conceitual para a visão de **especificação/projeto**, formalizando assinaturas de métodos, atributos, tipos e visibilidades.
+* O mapeamento foi preparado para integração direta com a arquitetura do framework Django (utilizando a extensão da tabela `django_auth_user`).
+
+## Histórico de Versões
 
 | Data | Versão | Descrição | Autor(es) |
-| -- | -- | -- | -- |
-| 23/09/2026 | 1.0 | Criação da versão inicial | Brenno Marques Silva |
+| --- | --- | --- | --- |
+| 23/09/2026 | 1.0 | Criação da versão inicial (conceitual) | Brenno Marques Silva |
+| 10/21/2026 | 1.1 | Atualização para diagrama de especificação (adição de métodos, atributos, visibilidade, herança Django e revisão das entidades operacionais) | Brenno Marques Silva |
