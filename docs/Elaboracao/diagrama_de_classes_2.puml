@@ -1,0 +1,74 @@
+@startuml
+
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam nodesep 120
+skinparam ranksep 80
+
+abstract class Usuario {
+    + Nome: String
+    + Email: String
+    + Telefone: String
+    + DataNascimento: Date
+    + realizarLogin()
+    + realizarLogout()
+    + verificarCredenciais()
+    + atualizarSenha()
+}
+
+class Administrador {
+    + GerenciarUsuarios()
+    + GerenciarSessoes()
+    + GerenciarSalas()
+}
+
+class Aluno {
+    + Matricula: String
+    + Endereco: String
+}
+
+class Relatorio {
+    + GerarRelatorio()
+}
+
+class Sala {
+    + Numero: int
+    + Capacidade: int
+}
+
+class Sessao {
+    + DataHora: DateTime
+    + Duracao: TimeSpan
+}
+
+class Presenca {
+    + Status: boolean
+    + registrarPresenca()
+}
+
+class Professor {
+    + Especialidade: String
+}
+
+
+Usuario <|-- Administrador
+Usuario <|-l- Aluno
+Usuario <|-- Professor
+
+Administrador "1" <.. "0..*" Sessao
+Administrador "1" <.. "0..*" Sala
+Administrador "1" <.. "0..*" Aluno
+Administrador "1" <.. "0..*" Professor
+Administrador -- Professor
+
+Aluno "1" <-left-> "0..*" Sessao
+
+Sessao "0..*" <--> "1" Sala
+Sessao "0..*" <..> "1" Professor
+Sessao  "1" <--> "0..*" Presenca
+
+Relatorio "0..*" <--> "1" Aluno
+Relatorio "0..*" <--> "1" Professor
+
+
+@enduml
