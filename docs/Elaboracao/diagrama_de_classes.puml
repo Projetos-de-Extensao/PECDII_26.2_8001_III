@@ -1,68 +1,188 @@
 @startuml
-title Diagrama de Classes - Backend GAAP (Sem Atributos)
+skinparam linetype ortho
+skinparam nodesep 60
+skinparam ranksep 70
 
-hide attributes
-skinparam classAttributeIconSize 0
-
-' --- INTERFACES ---
-interface IAutenticavel {
-  + realizarLogin()
+' ==========================================
+' ENUMS
+' ==========================================
+enum StatusSessao {
+    SOLICITADA
+    CONFIRMADA
+    REALIZADA
+    CANCELADA
 }
 
-interface IAgendavel {
-  + verificarDisponibilidade()
-  + registrarBloqueio()
+' ==========================================
+' AGREGADOR RAIZ / SISTEMA (PKZLab)
+' ==========================================
+class PKZLab {
+    - id: int
+    - nome: String
+    - cnpj: String
+    + adicionarUsuario(usuario: Usuario): void
+    + removerUsuario(usuario: Usuario): void
+    + cadastrarSala(sala: Sala): void
+    + removerSala(sala: Sala): void
+    + registrarSessao(sessao: Sessao): void
 }
 
-' --- CLASSES DE USUÁRIO E PERFIS ---
-abstract class Usuario
-class Administrador
-class Profissional
-class Treinador
-class ProfissionalSaude
-class Responsavel
+' ==========================================
+' HIERARQUIA DE USUÁRIOS
+' ==========================================
 
-' --- CLASSES DE DOMÍNIO ---
-class Aluno
-class Servico
-class Turma
-class Agendamento
-class Espaco
-class Presenca
-class RelatorioTreino
-class Bloqueio
+abstract class django_auth_user {
+    - id: integer
+    - password: string
+    - last_login: datetime
+    - is_superuser: boolean
+    - username: string
+    - first_name: string
+    - last_name: string
+    - email: string
+    - is_staff: boolean
+    - is_active: boolean
+    - date_joined: datetime
+}
 
-' --- RELACIONAMENTOS DE HERANÇA E REALIZAÇÃO ---
-IAutenticavel <|.. Usuario
+abstract class Usuario {
+    - telefone: String
+    - dataNascimento: Date
+    - endereco: String
+    + realizarLogin(nomeUsuario: String, senha: String): boolean
+    + realizarLogout(): void
+    + atualizarSenha(senhaAntiga: String, senhaNova: String): boolean
+}
+
+class Administrador {
+    - tipoContrato: String
+    + cadastrarUsuario(usuario: Usuario): void
+    + desativarUsuario(usuario: Usuario): void
+    + cadastrarSala(sala: Sala): void
+    + aprovarSessao(sessao: Sessao): void
+    + desaprovarSessao(sessao: Sessao, motivo: String): void
+}
+
+class Responsavel {
+    - parentesco: String
+    + adicionarDependente(aluno: Aluno): void
+    + removerDependente(aluno: Aluno): void
+    + transferirResponsabilidade(aluno: Aluno, EmailNovoResponsavel: Responsavel): void
+    + agendarSessao(sala: Sala, dataHora: DateTime, duracao: TimeSpan): Sessao
+    + cancelarSessao(sessao: Sessao, motivo: String): void
+
+}
+
+enum TipoResponsavel {
+    PAI
+    MAE
+    TUTOR
+    OUTRO
+    NENHUM
+    PROPRIO
+}
+
+class Aluno {
+    - matricula: String
+    - responsavel: TipoResponsavel
+    - creditos: int
+    + agendarSessao(sala: Sala, dataHora: DateTime, duracao: TimeSpan): Sessao
+    + cancelarSessao(sessao: Sessao, motivo: String): void
+    + assumirTutoria(): void
+}
+
+abstract class Profissional {
+    - tipoContrato: String
+    - formacao: String
+    + solicitarSessao(sala: Sala, dataHora: DateTime, duracao: TimeSpan, creditosNecessarios: int): Sessao
+    + cancelarSessao(sessao: Sessao, motivo: String): void
+    + gerarLaudo(sessao: Sessao, aluno: Aluno, linkArquivo: String): Laudo
+}
+
+class Professor {
+    - especialidade: String
+}
+
+class Nutricionista {
+    - CRN: String
+}
+
+class Psicologo {
+    - CRP: String
+}
+
+class Fisioterapeuta{
+    - CREFITO: String
+}
+
+django_auth_user <|-- Usuario
 
 Usuario <|-- Administrador
-Usuario <|-- Profissional
 Usuario <|-- Responsavel
+Usuario <|-- Aluno
+Usuario <|-- Profissional
 
-Profissional <|-- Treinador
-Profissional <|-- ProfissionalSaude
+Profissional <|-- Professor
+Profissional <|-- Nutricionista
+Profissional <|-- Psicologo
+Profissional <|-- Fisioterapeuta
 
-IAgendavel <|.. Profissional
-IAgendavel <|.. Espaco
+Responsavel "0..1" o-- "1..*" Aluno
 
-' --- ASSOCIAÇÕES ---
-Responsavel "1" -- "1..*" Aluno : gerencia >
-Turma "1..*" -- "1" Servico : referente a >
-Turma "1" -- "1..*" Aluno : possui >
-Turma "1..*" -- "1" Profissional : conduzida por >
-Turma "1..*" -- "1" Espaco : alocada em >
+TipoResponsavel -[hidden]left-> Aluno
 
-Agendamento "1..*" -- "1" Aluno : associado a >
-Agendamento "1..*" -- "1" Profissional : realizado por >
-Agendamento "1..*" -- "1" Servico : tipo de >
-Agendamento "1..*" -- "1" Espaco : ocorre em >
+' ==========================================
+' SESSÃO, SALA E AGENDAMENTO
+' ==========================================
+class Sala {
+    - id: int
+    - numero: int
+    - capacidade: int
+}
 
-Agendamento "1" -- "0..1" Presenca : gera >
-Turma "1" -- "0..*" Presenca : gera >
+class Sessao {
+    - id: int
+    - dataHora: DateTime
+    - duracao: TimeSpan
+    - status: StatusSessao
+    - creditosNecessarios: int
+    - motivoCancelamento: String
+    + registrarPresenca(aluno: Aluno, presente: boolean): void
+}
 
-Treinador "1" -- "0..*" RelatorioTreino : cria >
-RelatorioTreino "1" -- "1" Aluno : avalia >
+class Presenca {
+    - id: int
+    - status: boolean
+    - justificativa: String
+}
 
-Bloqueio "1..*" -- "1" IAgendavel : aplica-se a >
+class Laudo {
+    - id: int
+    - dataGeracao: Date
+    - linkArquivo: String
+}
+
+' ==========================================
+' RELACIONAMENTOS DO PKZLab E ADMINISTRAÇÃO
+' ==========================================
+PKZLab "1" o-- "0..*" Usuario
+PKZLab "1" *-- "0..*" Sala
+PKZLab "1" *-- "0..*" Sessao
+
+Administrador ..> PKZLab
+
+' ==========================================
+' RELACIONAMENTOS OPERACIONAIS
+' ==========================================
+Profissional "1" <-- "0..*" Sessao
+Sala "1" <-- "0..*" Sessao
+
+Sessao "1" *-- "0..*" Presenca
+Presenca "0..*" --> "1" Aluno
+
+Sessao "1" <-- "0..*" Laudo
+Laudo "0..*" --> "1" Aluno
+
+StatusSessao -[hidden]right-> Sessao
 
 @enduml
