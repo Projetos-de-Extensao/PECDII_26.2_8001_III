@@ -2,8 +2,12 @@
 
 skinparam classAttributeIconSize 0
 skinparam linetype ortho
-skinparam nodesep 120
-skinparam ranksep 80
+skinparam nodesep 80
+skinparam ranksep 60
+
+' ==========================================
+' DECLARAÇÃO DAS CLASSES
+' ==========================================
 
 abstract class Usuario {
     + Nome: String
@@ -17,14 +21,49 @@ abstract class Usuario {
 }
 
 class Administrador {
-    + GerenciarUsuarios()
-    + GerenciarSessoes()
-    + GerenciarSalas()
+    + cadastrarUsuario()
+    + removerUsuario()
+    + atualizarUsuario()
+    + cadastrarSala()
+    + removerSala()
+    + atualizarSala()
+    + criarSessao()
+    + cancelarSessao()
+    + atualizarSessao()
+}
+
+class Responsavel {
+    + Endereco: String
 }
 
 class Aluno {
     + Matricula: String
     + Endereco: String
+}
+
+abstract class Profissional {
+    + Contrato: String
+}
+
+class Professor {
+}
+
+class Psicologo {
+}
+
+class Nutricionista {
+}
+
+class PKZLab {
+    + adicionarUsuario()
+    + removerUsuario()
+    + atualizarUsuario()
+    + cadastrarSala()
+    + removerSala()
+    + atualizarSala()
+    + criarSessao()
+    + cancelarSessao()
+    + atualizarSessao()
 }
 
 class Relatorio {
@@ -46,29 +85,45 @@ class Presenca {
     + registrarPresenca()
 }
 
-class Professor {
-    + Especialidade: String
-}
+' ==========================================
+' ESTRUTURA DE GRADE (ALINHAMENTO VISUAL)
+' ==========================================
 
-
+' --- LINHA 1 para LINHA 2: Herança de Usuario ---
 Usuario <|-- Administrador
-Usuario <|-l- Aluno
-Usuario <|-- Professor
+Usuario <|-- Responsavel
+Usuario <|-- Aluno
+Usuario <|-- Profissional
 
-Administrador "1" <.. "0..*" Sessao
-Administrador "1" <.. "0..*" Sala
-Administrador "1" <.. "0..*" Aluno
-Administrador "1" <.. "0..*" Professor
-Administrador -- Professor
+' Trava a ordem horizontal da Linha 2:
+Administrador -[hidden]right-> Responsavel
+Responsavel "1" <-right-> "0..*" Aluno
+Aluno -[hidden]right-> Profissional
 
-Aluno "1" <-left-> "0..*" Sessao
+' --- Herança de Profissional (Empilhados à Direita) ---
+' 1. Posiciona as 3 subclasses na coluna à direita de Profissional:
+Profissional <|-right- Psicologo
+Profissional <|-right- Nutricionista
+Profissional <|-right- Professor
 
-Sessao "0..*" <--> "1" Sala
-Sessao "0..*" <..> "1" Professor
-Sessao  "1" <--> "0..*" Presenca
+' --- LINHA 2 para LINHA 3: PKZLab (Esquerda) e Relatorio (Centro-Direita) ---
+Administrador "0..*" --> "1" PKZLab
+Responsavel "0..*" <--o "1" PKZLab
+Aluno "0..*" <--o "1" PKZLab
+Profissional "0..*" <--o "1" PKZLab
 
-Relatorio "0..*" <--> "1" Aluno
-Relatorio "0..*" <--> "1" Professor
+Aluno "1" <-up-> "0..*" Relatorio
+Profissional "1" <--> "0..*" Relatorio
 
+' --- LINHA 3 para LINHA 4: Sala, Sessao e Presenca ---
+PKZLab "1" o--> "0..*" Sala
+PKZLab "1" o--> "0..*" Sessao
+
+Aluno "0..*" <---> "0..*" Sessao
+Profissional "1" <---> "0..*" Sessao
+
+' Trava a ordem horizontal da Linha 4 (Base):
+Sala "1" <-right-> "0..*" Sessao
+Sessao "1" *-down-> "0..*" Presenca
 
 @enduml
