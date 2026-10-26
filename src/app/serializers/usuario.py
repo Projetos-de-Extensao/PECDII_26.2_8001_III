@@ -8,6 +8,6 @@ class UsuarioSerializer(serializers.ModelSerializer):
             'id', 
             'nome_completo',
             'nome_usuario',
-            'senha',
+            'perfil',
         ]
         read_only_fields = ['id']
