@@ -1,10 +1,11 @@
-from rest_framework import viewsets, generics
-from rest_framework.response import Response
-from rest_framework.decorators import action
+from rest_framework import viewsets
 
 from app.models.usuario import Usuario
 from app.serializers.usuario import UsuarioSerializer
+from app.permissions.usuario import PermissaoUsuario
+
 
 class UsuarioViewSet(viewsets.ModelViewSet):
     queryset = Usuario.objects.all()
     serializer_class = UsuarioSerializer
+    permission_classes = [PermissaoUsuario]
