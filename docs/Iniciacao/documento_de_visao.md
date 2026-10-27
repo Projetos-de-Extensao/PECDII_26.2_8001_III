@@ -1,87 +1,130 @@
+# Documento de Visão — Backend GAAP (PKZ Lab)
+ 
+| Item | Informação |
+|------|------------|
+| **Projeto** | Backend do GAAP (Gestão de Atletas de Alta Performance) |
+| **Equipe** | Bernardo Chagas, Brenno Marques, Caio Magalhães, Juan Lucas Pereira e Rodrigo Aquino |
+| **Versão / Data** | 1.0 — 27/10/2026 |
+ 
 ---
-id: documento_de_visao
-title: Documento de Visão
+ 
+## 1. Problema
+ 
+A PKZ Lab é uma escola de treinamento esportivo com serviços de treino, fisioterapia, psicologia e nutrição. Hoje a operação depende de controles dispersos e de marcações feitas manualmente por WhatsApp. Não existe uma fonte única e confiável sobre agenda, vagas, presença e relatórios de treino.
+ 
+Consequências:
+ 
+- conflitos de horário entre sessões, profissionais e espaços;
+- atividades com mais estudantes do que o limite de vagas;
+- dificuldade para saber quais horários estão livres;
+- falta de histórico organizado de presença e de atividades realizadas;
+- risco de acesso indevido a informações, pois cada profissional tem uma função diferente.
 ---
-## Introdução
-
-<p align = "justify">
-O propósito deste documento é fornecer uma visão geral sobre o projeto que será realizado na disciplina Arquitetura e Desenho de Software 2020/1, na Universidade de Brasília. Sendo assim, Nesse documento serão descritas de maneira resumida as principais funcionalidades, usabilidades, o problema que será abordado e os objetivos da equipe.
-</p>
-
-## Descrição do Problema 
-
-<p align = "justify">
-Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.
-</p>
-
-### Problema
-
-Dificuldade em gerenciar e organizar...
-
-### Impactados
-
-Usuários....
-
-### Consequência
-
-A criação de novos....
-
-### Solução
-
-Utilizar a aplicação que será desenvolvida visando resolver...
-
-## Objetivos
-
-<p align = "justify">
-O objetivo da equipe de desenvolvimento é fornecer...
-</p>
-
-## Descrição do Usuário 
-
-<p align = "justify">
-Os usuários serão....
-</p>
-
-## Recursos do produto
-
-### Conta
-
-<p align = "justify">
-O cliente poderá realizar seu cadastro....
-</p>
-
-### Loja
-
-<p align = "justify">
-O cliente poderá cadastrar uma loja única....
-</p>
-
-### Produto
-
-<p align = "justify">
-O cliente poderá cadastrar....
-</p>
-
-### Pesquisa sobre Lojas
-
-<p align = "justify">
-O cliente poderá pesquisar...
-</p>
-
-## Restrições
-
-<p align = "justify">
-A aplicação não será responsável...
-</p>
-
-## Referências Bibliográficas
-
-> Documento de visão. Disponível em https://www... Acesso em dd/MM/yyYY
-
-> Documento de visão. Disponível em  Acesso em dd/MM/yyYY
-
+ 
+## 2. Objetivo
+ 
+**Objetivo geral:** entregar, em 2026.2, uma **API REST funcional, testada e documentada** que centralize a agenda e a operação de treinamento da PKZ Lab e aplique as regras de negócio no servidor.
+ 
+**A API deve:**
+ 
+1. autenticar usuários e autorizar o acesso por perfil;
+2. manter os cadastros de estudantes, profissionais, serviços e espaços;
+3. configurar disponibilidades e bloqueios;
+4. criar agendamentos recusando conflito de horário, horário bloqueado e excesso de capacidade;
+5. permitir a consulta de agenda conforme o perfil;
+6. registrar presença ou falta e a realização da atividade;
+7. permitir criar e finalizar relatórios de treino;
+8. registrar em auditoria as ações relevantes;
+9. ter todos os endpoints documentados.
+---
+ 
+## 3. Usuários
+ 
+O MVP possui **exatamente três perfis**.
+ 
+| Perfil | Pode | Não pode |
+|--------|------|----------|
+| **Administrador** | Gerenciar estudantes, profissionais, serviços e espaços; configurar disponibilidades e bloqueios; administrar agendamentos; consultar pendências | — |
+| **Treinador** | Consultar a agenda sob sua responsabilidade; registrar presença ou falta; registrar a atividade realizada; criar e finalizar relatórios de treino | Executar funções administrativas; ver agendas de outros profissionais |
+| **Profissional de saúde** (fisioterapia, psicologia ou nutrição) | Consultar a agenda e os atendimentos do serviço ao qual está vinculado | Ver atendimentos de outros serviços; executar funções administrativas |
+ 
+**Estudante e responsável** não são perfis do MVP. O acesso deles depende de validação com a PKZ Lab.
+ 
+---
+ 
+## 4. Escopo
+ 
+### 4.1 Dentro do MVP
+ 
+| ID | Funcionalidade |
+|----|----------------|
+| F01 | Autenticação, com senhas protegidas por hash |
+| F02 | Autorização por perfil |
+| F03 | Cadastro de estudantes |
+| F04 | Cadastro de profissionais |
+| F05 | Cadastro de serviços |
+| F06 | Cadastro de espaços, com capacidade |
+| F07 | Disponibilidade de profissionais e espaços |
+| F08 | Bloqueios de agenda |
+| F09 | Agendamento com validação de conflito, bloqueio e capacidade |
+| F10 | Consulta de agenda por perfil |
+| F11 | Registro de presença e falta |
+| F12 | Registro de atividade realizada |
+| F13 | Relatório de treino (criar e finalizar) |
+| F14 | Auditoria de ações relevantes |
+| F15 | Documentação da API |
+| F16 | Consulta simples de pendências (administrador) |
+ 
+### 4.2 Regras de negócio do MVP
+ 
+- **RN01** — Cada usuário só acessa o que o seu perfil permite.
+- **RN02** — O profissional de saúde só vê atendimentos do seu serviço.
+- **RN03** — Horário bloqueado não recebe agendamentos.
+- **RN04** — Não pode haver agendamentos sobrepostos para o mesmo profissional ou espaço.
+- **RN05** — Um agendamento não pode ultrapassar a capacidade.
+- **RN06** — Só o administrador cadastra estudantes, profissionais, serviços, espaços, disponibilidades e bloqueios.
+- **RN07** — Presença ou falta só é registrada em agendamento existente, por treinador ou profissional autorizado.
+- **RN08** — Só o treinador cria e finaliza relatórios de treino.
+- **RN09** — Senhas nunca são guardadas em texto puro.
+- **RN10** — Ações relevantes geram registro de auditoria.
+As validações RN03, RN04 e RN05 ocorrem no backend.
+ 
+### 4.3 Fora do MVP
+ 
+- Notificações (WhatsApp, e-mail, confirmações, avisos, faturas).
+- Prontuário clínico detalhado e assinatura digital.
+- Aplicativo mobile, QR Code e operação offline.
+- Dashboards avançados, BI e data warehouse.
+- Multi-tenancy e integrações públicas.
+- Geração de PDF e upload de fotografias.
+- Avaliações de professores e de desempenho dos estudantes.
+### 4.4 Pendente de validação com a PKZ Lab (fora do MVP até validar)
+ 
+- Acesso de estudantes e responsáveis, e vínculo de menores com responsáveis.
+- Cancelamento e reagendamento (quem pode e prazo mínimo).
+- Gestão de ativos e equipamentos.
+- Controle de turmas.
+---
+ 
+## 5. Restrições
+ 
+| Tipo | Restrição |
+|------|-----------|
+| **Prazo** | Um semestre (2026.2), em fases RUP/UP |
+| **Custo** | Sem despesa financeira; o custo é o tempo da equipe |
+| **Tecnologia** | Python e Django; banco de dados relacional normalizado com ORM e migrações; API REST |
+| **Ferramentas** | Git, GitHub (Issues, Projects e pull requests) e Visual Studio Code |
+| **Fluxo de trabalho** | `main` protegida; um branch por issue; todo código entra por pull request revisado por pelo menos um integrante |
+| **Segurança e LGPD** | Senhas com hash; validação dos dados recebidos; dados sensíveis (CPF e dados médicos) protegidos; informações de saúde tratadas como dados pessoais sensíveis; sem prontuário clínico |
+| **Qualidade** | Testes automatizados cobrindo as regras RN01 a RN10, executados em integração contínua |
+| **Artefatos** | Diagramas de casos de uso, classes, sequência (confirmar agendamento e finalizar relatório) e entidade-relacionamento, versionados no repositório |
+| **Entrega** | Somente backend: sem interface gráfica, sem app mobile |
+ 
+---
+ 
+ 
 ## Versionamento
-| Data | Versão | Descrição | Autor(es) |
-| -- | -- | -- | -- |
-| DD/MM/YYYY | 1.0 | Criação do documento | XXX XXXX e ZZZ ZZZZ | 
-
+ 
+| Data | Versão | Descrição | Autor |
+|------|-------:|-----------|-------|
+| 27/10/2026 | 1.0 | Criação do Documento de Visão | Caio Magalhães |
