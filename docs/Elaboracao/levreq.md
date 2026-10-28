@@ -7,12 +7,13 @@ title: Levantamento de Requisitos
 
 Este documento detalha os requisitos do backend de agenda e operação de
 treinamentos da PKZ Lab. O escopo segue o [Documento de Visão](../Iniciacao/documento_de_visao.md)
-e não inclui notificações, pagamentos, ativos, turmas, avaliações ou acesso
-direto de estudantes e responsáveis.
+e não inclui notificações, pagamentos, ativos, turmas ou avaliações.
 
 ## Stakeholders e perfis
 
 - **Administrador:** gerencia cadastros, espaços, disponibilidade, bloqueios e agendamentos.
+- **Responsável:** usuário vinculado a um ou mais alunos, com acesso limitado aos recursos autorizados para esse vínculo.
+- **Aluno:** usuário que acessa os próprios agendamentos e registros autorizados.
 - **Treinador:** consulta sua agenda, registra presença e atividade realizada e gerencia relatórios de treino.
 - **Profissional de saúde:** consulta os atendimentos do serviço ao qual está vinculado e registra presença autorizada.
 - **PKZ Lab:** valida regras de operação e critérios de aceite.

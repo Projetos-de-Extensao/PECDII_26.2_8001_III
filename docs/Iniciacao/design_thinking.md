@@ -72,9 +72,10 @@ As principais necessidades identificadas foram:
 **Pontos de vista:**
 
 - O administrador precisa configurar a operação em um único lugar para reduzir inconsistências.
+- O responsável precisa acompanhar os alunos vinculados, respeitando as permissões do seu vínculo.
+- O aluno precisa consultar seus próprios agendamentos e registros autorizados.
 - O treinador precisa consultar sua agenda e registrar as atividades para acompanhar os estudantes.
 - O profissional de saúde precisa acessar somente os atendimentos sob sua responsabilidade para preservar a segurança das informações.
-- O acesso de estudantes ou responsáveis não faz parte do MVP e depende de validação futura.
 
 ### 3.3. Ideação
 
@@ -89,7 +90,7 @@ As ideias foram priorizadas por contribuição ao problema, viabilidade no perí
 5. presença, atividade realizada e relatório de treino;
 6. auditoria e documentação.
 
-Ativos, notificações, créditos, pagamentos, avaliações, turmas e acesso direto de estudantes ou responsáveis continuam fora do MVP e dependem de validação futura.
+Ativos, notificações, créditos, pagamentos, avaliações e turmas continuam fora do MVP e dependem de validação futura. As permissões detalhadas de alunos e responsáveis ainda devem ser validadas com a PKZ Lab.
 
 ### 3.4. Prototipagem
 
@@ -118,7 +119,7 @@ Os próximos passos são validar o escopo com o stakeholder, detalhar casos de u
 ## 5. Checklist para conversar com o stakeholder
 
 - [ ] Confirmar os perfis de usuário e suas permissões.
-- [ ] Confirmar se estudantes ou responsáveis terão acesso ao sistema.
+- [ ] Confirmar as permissões detalhadas de alunos e responsáveis.
 - [ ] Confirmar quem pode criar, cancelar e reagendar agendamentos.
 - [ ] Definir prazo mínimo e regras para cancelamento e reagendamento.
 - [ ] Confirmar quais serviços, atividades e profissionais farão parte do MVP.

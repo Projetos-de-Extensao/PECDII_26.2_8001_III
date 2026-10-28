@@ -77,7 +77,9 @@ Além da implementação das funcionalidades, o projeto deverá possuir testes a
 ## 3. Público e perfis de acesso
 
 
-O sistema terá três perfis principais de usuários.
+O sistema terá os perfis de Administrador, Responsável, Aluno, Treinador e
+Profissional de Saúde. Aluno e Responsável também são usuários do sistema,
+com permissões limitadas aos seus próprios dados e aos vínculos autorizados.
 
 
 ### Administrador

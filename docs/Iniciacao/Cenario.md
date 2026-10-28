@@ -26,6 +26,8 @@ A turma deverá projetar e entregar, em quatro meses, o backend de um recorte in
 | Perfil | Responsabilidades iniciais |
 |---|---|
 | Administrador | Mantém alunos, profissionais, serviços, horários e bloqueios; consulta pendências. |
+| Responsável | Acompanha os alunos vinculados e acessa os recursos autorizados pelo sistema. |
+| Aluno | Consulta os próprios agendamentos e registros autorizados. |
 | Treinador | Consulta a agenda sob sua responsabilidade, registra presença/falta e cria relatórios de treino. |
 | Profissional de saúde | Consulta apenas os atendimentos atribuídos ao seu serviço e agenda. |
 
@@ -81,7 +83,7 @@ O banco relacional deve usar chaves primárias, chaves estrangeiras, restriçõe
 
 ## 8. Artefatos UML obrigatórios
 
-1. Diagrama de casos de uso com os três perfis e os casos prioritários.
+1. Diagrama de casos de uso com os perfis de usuário e os casos prioritários.
 2. Diagrama de classes do domínio, com atributos relevantes, associações, multiplicidades e responsabilidades.
 3. Diagrama de sequência para o caso "Confirmar agendamento", evidenciando validação de capacidade, conflito e bloqueio.
 4. Diagrama de sequência para o caso "Finalizar relatório de treino".

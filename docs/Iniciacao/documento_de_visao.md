@@ -40,15 +40,21 @@ Consequências:
  
 ## 3. Usuários
  
-O MVP possui **exatamente três perfis**.
+O domínio possui os perfis de usuário **Administrador, Responsável, Aluno,
+Treinador e Profissional de saúde**. Administrador, Responsável, Aluno e
+Profissional são especializações de `Usuario`; Treinador e as especialidades
+de saúde são especializações de Profissional.
  
 | Perfil | Pode | Não pode |
 |--------|------|----------|
 | **Administrador** | Gerenciar estudantes, profissionais, serviços e espaços; configurar disponibilidades e bloqueios; administrar agendamentos; consultar pendências | — |
+| **Responsável** | Acessar os recursos permitidos para acompanhar alunos sob sua responsabilidade e realizar ações autorizadas | Acessar dados ou operações fora de seus vínculos |
+| **Aluno** | Acessar os recursos permitidos para acompanhar seus próprios agendamentos e registros | Acessar dados de outros alunos ou funções administrativas |
 | **Treinador** | Consultar a agenda sob sua responsabilidade; registrar presença ou falta; registrar a atividade realizada; criar e finalizar relatórios de treino | Executar funções administrativas; ver agendas de outros profissionais |
 | **Profissional de saúde** (fisioterapia, psicologia ou nutrição) | Consultar a agenda e os atendimentos do serviço ao qual está vinculado | Ver atendimentos de outros serviços; executar funções administrativas |
- 
-**Estudante e responsável** não são perfis do MVP. O acesso deles depende de validação com a PKZ Lab.
+
+As permissões efetivas de Aluno e Responsável devem respeitar seus vínculos
+com os alunos e as regras de autorização do backend.
  
 ---
  
@@ -98,9 +104,9 @@ As validações RN03, RN04 e RN05 ocorrem no backend.
 - Multi-tenancy e integrações públicas.
 - Geração de PDF e upload de fotografias.
 - Avaliações de professores e de desempenho dos estudantes.
-### 4.4 Pendente de validação com a PKZ Lab (fora do MVP até validar)
+### 4.4 Pendente de validação com a PKZ Lab
  
-- Acesso de estudantes e responsáveis, e vínculo de menores com responsáveis.
+- Permissões detalhadas de Alunos e Responsáveis e vínculo de menores com responsáveis.
 - Cancelamento e reagendamento (quem pode e prazo mínimo).
 - Gestão de ativos e equipamentos.
 - Controle de turmas.

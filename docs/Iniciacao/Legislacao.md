@@ -36,8 +36,10 @@ O projeto prevê alunos menores de idade e vínculos com responsáveis. O ECA (L
 
 Implicações para o desenvolvimento:
 
-- No MVP, não haverá acesso de estudantes ou responsáveis. O profissional só
-  poderá acessar os atendimentos do serviço sob sua responsabilidade.
+- Alunos e responsáveis são usuários do sistema e seus acessos devem ser
+  limitados aos dados e operações autorizados pelos respectivos vínculos. O
+  profissional só poderá acessar os atendimentos do serviço sob sua
+  responsabilidade.
 - Verificar autorização em cada endpoint e para cada objeto solicitado. Não confiar em identificadores enviados pelo cliente da API como prova de vínculo ou permissão.
 - Evitar divulgar dados de menores em respostas, mensagens de erro, logs, exemplos de API, fixtures e documentação. Usar dados sintéticos em desenvolvimento e testes.
 - Projetar as mensagens e contratos da API para permitir que uma interface apresente informações de tratamento em linguagem clara e apropriada, sem armazenar consentimento ou declaração de responsável por padrão, a menos que haja requisito aprovado.
