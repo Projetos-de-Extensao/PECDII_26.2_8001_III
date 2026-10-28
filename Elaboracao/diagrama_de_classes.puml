@@ -99,7 +99,7 @@ abstract class Profissional {
     + gerarLaudo(sessao: Sessao, aluno: Aluno, linkArquivo: String): Laudo
 }
 
-class Professor {
+class Treinador {
     - especialidade: String
 }
 
@@ -122,7 +122,7 @@ Usuario <|-- Responsavel
 Usuario <|-- Aluno
 Usuario <|-- Profissional
 
-Profissional <|-- Professor
+Profissional <|-- Treinador
 Profissional <|-- Nutricionista
 Profissional <|-- Psicologo
 Profissional <|-- Fisioterapeuta
