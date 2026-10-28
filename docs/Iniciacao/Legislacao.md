@@ -36,7 +36,8 @@ O projeto prevê alunos menores de idade e vínculos com responsáveis. O ECA (L
 
 Implicações para o desenvolvimento:
 
-- Implementar autorização por vínculo: um responsável só pode consultar ou operar dados dos estudantes associados à sua conta, e um profissional só pode acessar os atendimentos sob sua responsabilidade.
+- No MVP, não haverá acesso de estudantes ou responsáveis. O profissional só
+  poderá acessar os atendimentos do serviço sob sua responsabilidade.
 - Verificar autorização em cada endpoint e para cada objeto solicitado. Não confiar em identificadores enviados pelo cliente da API como prova de vínculo ou permissão.
 - Evitar divulgar dados de menores em respostas, mensagens de erro, logs, exemplos de API, fixtures e documentação. Usar dados sintéticos em desenvolvimento e testes.
 - Projetar as mensagens e contratos da API para permitir que uma interface apresente informações de tratamento em linguagem clara e apropriada, sem armazenar consentimento ou declaração de responsável por padrão, a menos que haja requisito aprovado.
@@ -67,7 +68,7 @@ As medidas abaixo são salvaguardas de engenharia derivadas dos princípios lega
 5. Manter auditoria de ações relevantes com usuário, ação, recurso e instante, sem gravar senhas, tokens, conteúdo clínico ou payloads completos desnecessários. Proteger os registros contra alteração por usuários comuns.
 6. Usar canal criptografado em produção, guardar segredos fora do código-fonte, restringir acesso ao banco e às cópias de segurança e testar o procedimento de restauração.
 7. Definir dados sintéticos para desenvolvimento e testes. Não usar dados reais de alunos em ambientes acadêmicos ou repositórios.
-8. Tratar a exclusão e a correção de dados de forma consistente entre registros relacionados, respeitando obrigações de retenção e mantendo apenas a trilha de auditoria necessária.
+8. Tratar a exclusão e a correção de dados de forma consistente entre registros relacionados, respeitando obrigações de retenção e mantendo apenas a trilha de auditoria necessária.a necessária.
 9. Separar ambientes de desenvolvimento, teste e produção; limitar dados e credenciais por ambiente e nunca incluir segredos no repositório.
 10. Preparar registros técnicos e procedimento interno para detectar, conter e investigar incidentes. Não inserir dados pessoais em rastreamento de erros ou alertas sem necessidade.
 11. Testar autorização positiva e negativa para cada perfil, incluindo tentativas de consultar ou alterar registros de outro aluno, responsável ou profissional.
@@ -105,3 +106,4 @@ Para a equipe de desenvolvimento, os deveres mais diretamente traduzidos em cód
 | Data | Versão | Descrição | Autor |
 |---|---:|---|---|
 | 29/09/2026 | 1.0 | Elaboração do levantamento de leis e regras aplicáveis ao escopo do GAAP | Bernardo Chagas |
+| 10/28/26 | 1.1 | Correções de coerência e escopo | Brenno Marques Silva |

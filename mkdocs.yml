@@ -34,8 +34,6 @@ nav:
   - Transição:
       - Index: Transicao/index.md
 
-  - Bibliografia: Disciplina/Bibliografia.md
-
 extra_css:
   - css/extra.css
 
@@ -62,6 +60,9 @@ markdown_extensions:
   - pymdownx.emoji:
       emoji_index: !!python/name:material.extensions.emoji.twemoji ''
       emoji_generator: !!python/name:material.extensions.emoji.to_svg ''
+  # PlantUML diagrams
+  - plantuml_markdown:
+      server: https://www.plantuml.com/plantuml
   # Code Blocks
   - pymdownx.highlight:
       anchor_linenums: true
@@ -91,9 +92,6 @@ markdown_extensions:
       permalink: true
 
 plugins:
-  - plantuml:
-      puml_url: https://www.plantuml.com/plantuml/
-      puml_keyword: plantuml
   - minify:
       minify_html: true
   - search

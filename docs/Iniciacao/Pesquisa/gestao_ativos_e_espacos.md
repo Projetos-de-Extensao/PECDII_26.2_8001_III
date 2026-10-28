@@ -3,7 +3,7 @@ id: pesquisa_ativos_e_espacos
 title: Gestão de Ativos e Espaços
 ---
 
-# Gestão de Ativos e Espaços
+# Pesquisa sobre Espaços e Ativos
 
 > Pesquisa sobre gestão de ativos e gestão de espaços e como esses conceitos podem ser aplicados ao projeto **PKZ Lab**, que integra atividades esportivas e atendimentos especializados voltados ao público infantil.
 
@@ -181,7 +181,14 @@ Uma gestão integrada de ativos e espaços poderia trazer:
 - **Integração entre esporte e atendimento**: possibilita administrar no mesmo sistema espaços esportivos e espaços destinados aos profissionais de saúde.
 - **Melhor planejamento**: facilita saber quais recursos estão disponíveis antes de realizar uma reserva.
 
-## 10. O que pode ser aproveitado no projeto PKZ Lab?
+## 10. Decisão de escopo
+
+No MVP, somente o cadastro, a capacidade, a disponibilidade e os bloqueios de
+**espaços** serão implementados. Ativos, manutenção e associação de
+equipamentos são possibilidades para uma evolução futura e não são requisitos
+aprovados da entrega atual.
+
+## 11. O que pode ser aproveitado em uma evolução?
 
 A pesquisa sugere algumas funcionalidades que podem ser avaliadas como requisitos do sistema:
 
@@ -191,11 +198,11 @@ A pesquisa sugere algumas funcionalidades que podem ser avaliadas como requisito
 | Espaços | Informações de capacidade e finalidade |
 | Espaços | Controle de disponibilidade |
 | Espaços | Bloqueio temporário |
-| Ativos | Cadastro de equipamentos |
+| Ativos | Cadastro de equipamentos (futuro) |
 | Ativos | Associação do ativo a um espaço |
 | Ativos | Controle do estado do equipamento |
-| Manutenção | Registro de manutenção |
-| Manutenção | Indisponibilização de ativos/espaços |
+| Manutenção | Registro de manutenção (futuro) |
+| Manutenção | Indisponibilização de ativos/espaços (futuro) |
 | Agendamento | Reserva de espaços |
 | Agendamento | Verificação de conflitos |
 | Profissionais | Associação de profissionais aos espaços/atividades |
@@ -210,3 +217,9 @@ A pesquisa sugere algumas funcionalidades que podem ser avaliadas como requisito
 - **PubMed — Integrating Psychological Care into Pediatric Sports Medicine (2026)**: modelos de integração entre psicologia e medicina esportiva pediátrica.
 - **PubMed — Interdisciplinary Return to Play Management for Pediatric Concussion**: colaboração interdisciplinar envolvendo fisioterapeutas e outros profissionais no acompanhamento de atletas jovens.
 - **PubMed — Pediatric Physical Therapy Management (2026)**: destaca planos de cuidado colaborativos e encaminhamento para outros profissionais no atendimento pediátrico.
+
+## Autor(es)
+
+| Data | Versão | Descrição | Autor(es) |
+| --- | --- | --- | --- |
+| 10/28/26 | 1.1 | Correções de coerência e escopo | Brenno Marques Silva |

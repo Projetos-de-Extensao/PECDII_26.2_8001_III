@@ -5,7 +5,7 @@ title: Apps Semelhantes
 
 # Análise de Aplicações Similares e Benchmarks de Mercado
 
-Para apoiar o aprimoramento do sistema de gerenciamento da **PKZ LAB**, foram analisadas plataformas corporativas e operacionais que cobrem desde a rotina de agendamentos e gestão de espaços até o acompanhamento de dados de rendimento e gestão desportiva.
+Para apoiar o aprimoramento do sistema de gerenciamento da **PKZ LAB**, foram analisadas plataformas corporativas e operacionais. Esta é uma pesquisa de referência; as funcionalidades abaixo não são requisitos do MVP.
 
 ---
 
@@ -66,6 +66,12 @@ Para apoiar o aprimoramento do sistema de gerenciamento da **PKZ LAB**, foram an
 | :--- | :--- | :--- |
 | **Cadastro de Alunos** | Prontuário biomédico, histórico técnico e contratos. | Registro civil, anamnese básica e dados de responsáveis. |
 | **Agenda de Atividades** | Monitoramento de macrociclos de treino e carga fisiológica. | Grade horária de aulas, reservas e controle de check-in. |
-| **Controle de Turmas** | Divisão por categorias de base, níveis de rendimento e elencos. | Alocação por salas, professores e limite de vagas por horário. |
-| **Dashboard de Controle** | Insights táticos, índices de fadiga e disponibilidade médica. | Gráficos de adimplência, fluxo de caixa e taxas de ocupação. |
-| **Relatórios de Performance** | Gráficos de evolução de força, velocidade, testes físicos e scout. | Relatórios de frequência, assiduidade e conceitos avaliativos. |
+| **Controle de Turmas** | Referência para evolução futura. | Referência para evolução futura; não faz parte do MVP. |
+| **Dashboard de Controle** | Referência analítica. | Fora do MVP atual. |
+| **Relatórios de Performance** | Referência para evolução futura. | O MVP limita-se a relatórios de treino. |
+
+## Autor(es)
+
+| Data | Versão | Descrição | Autor(es) |
+| --- | --- | --- | --- |
+| 10/28/26 | 1.1 | Correções de coerência e escopo | Brenno Marques Silva |

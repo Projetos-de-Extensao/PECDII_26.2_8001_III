@@ -20,14 +20,14 @@ title: Design Thinking
 
 A PKZ Lab é uma escola de treinamento esportivo que atende estudantes e possui profissionais de treino, fisioterapia, psicologia e nutrição. Atualmente, parte da operação depende de controles dispersos e marcações manuais, dificultando o controle de horários, profissionais, espaços, vagas, presença e registros de treinamento.
 
-O projeto propõe uma API REST para centralizar essas informações e aplicar as regras de negócio do GAAP. O objetivo é desenvolver uma solução funcional, testada e documentada para autenticação, cadastros, agenda, notificações e acompanhamento das atividades.
+O projeto propõe uma API REST para centralizar essas informações e aplicar as regras de negócio do GAAP. O objetivo é desenvolver uma solução funcional, testada e documentada para autenticação, cadastros, agenda e acompanhamento das atividades.
 
 ### Público-alvo
 
-- **Administrador:** gerencia estudantes, profissionais, serviços, espaços, ativos, disponibilidades, bloqueios e agendamentos.
+- **Administrador:** gerencia estudantes, profissionais, serviços, espaços, disponibilidades, bloqueios e agendamentos.
 - **Treinador/coach:** consulta sua agenda, registra presença e atividade realizada e produz relatórios de treino.
 - **Profissional de saúde:** consulta os atendimentos relacionados aos serviços sob sua responsabilidade.
-- **Estudante ou responsável:** possibilidade identificada no brainstorm, ainda pendente de validação.
+- **Estudante ou responsável:** não possui acesso no MVP; eventual acesso depende de validação futura.
 
 ### Escopo do MVP
 
@@ -35,13 +35,12 @@ O MVP contempla:
 
 - autenticação e autorização por perfil;
 - cadastro de estudantes, profissionais e serviços;
-- gestão de ativos e espaços;
+- gestão de espaços;
 - disponibilidade e bloqueios;
 - agendamentos com validação de conflitos e capacidade;
 - consulta de agenda;
 - registro de presença e realização da atividade;
 - relatórios de treino;
-- notificações por WhatsApp/e-mail;
 - auditoria e documentação da API.
 
 Pagamentos, cobrança, prontuário clínico detalhado, assinatura digital, cálculos avançados de força, aplicativo mobile, QR Code, operação offline, dashboards avançados, data warehouse, multi-tenancy, integrações públicas, PDF e upload de fotografias permanecem fora do escopo inicial.
@@ -62,7 +61,7 @@ As principais necessidades identificadas foram:
 | Operação com diferentes profissionais | Restringir acesso por perfil e serviço. |
 | Acompanhamento de atividades | Registrar presença, realização e relatório de treino. |
 | Uso de espaços e equipamentos | Controlar disponibilidade, bloqueios e manutenção. |
-| Comunicação sobre a agenda | Enviar notificações de confirmações, cancelamentos e avisos. |
+| Comunicação sobre a agenda | Registrar os eventos na API; notificações ficam fora do MVP. |
 
 **As necessidades devem ser confirmadas com o stakeholder.**
 
@@ -75,7 +74,7 @@ As principais necessidades identificadas foram:
 - O administrador precisa configurar a operação em um único lugar para reduzir inconsistências.
 - O treinador precisa consultar sua agenda e registrar as atividades para acompanhar os estudantes.
 - O profissional de saúde precisa acessar somente os atendimentos sob sua responsabilidade para preservar a segurança das informações.
-- O estudante ou responsável pode precisar acompanhar ou solicitar agendamentos, mas esse acesso ainda precisa ser definido.
+- O acesso de estudantes ou responsáveis não faz parte do MVP e depende de validação futura.
 
 ### 3.3. Ideação
 
@@ -84,37 +83,35 @@ O brainstorm levantou ideias de cadastro de alunos e profissionais, agenda, cont
 As ideias foram priorizadas por contribuição ao problema, viabilidade no período acadêmico, segurança, consistência dos dados e possibilidade de teste. Para o MVP, foram selecionadas:
 
 1. autenticação, autorização e cadastros básicos;
-2. gestão de espaços, ativos, disponibilidades e bloqueios;
+2. gestão de espaços, disponibilidades e bloqueios;
 3. agendamento e consulta de agenda;
 4. validação de conflitos e capacidade;
 5. presença, atividade realizada e relatório de treino;
-6. notificações;
-7. auditoria e documentação.
+6. auditoria e documentação.
 
-Créditos, pagamentos, avaliações e acesso direto de responsáveis continuam como possibilidades dependentes de validação.
+Ativos, notificações, créditos, pagamentos, avaliações, turmas e acesso direto de estudantes ou responsáveis continuam fora do MVP e dependem de validação futura.
 
 ### 3.4. Prototipagem
 
-**Ainda não foi feita.** A equipe ainda não desenvolveu um protótipo alinhado aos fluxos do GAAP. Essa etapa deverá representar, no mínimo, autenticação, cadastros, configuração de disponibilidade, agendamento, consulta de agenda, notificações, registro de presença e relatório de treino.
+O protótipo de baixa fidelidade já representa os fluxos de autenticação, cadastros, disponibilidade, agendamento, presença e agenda. Ele é um artefato de apoio à especificação da API, não uma interface incluída na entrega.
 
 ### 3.5. Teste
 
-**Ainda não foi feito.** Não há registro de testes com usuários ou feedback formal da PKZ Lab.
+Ainda não há registro de testes com usuários ou feedback formal da PKZ Lab; essa validação permanece pendente.
 
 Após a definição dos fluxos, deverão ser validados com o stakeholder:
 
 - perfis e permissões;
 - conflitos, capacidade, disponibilidade e bloqueios;
-- notificações e seus eventos;
-- uso de espaços e ativos;
+- uso de espaços;
 - presença, relatórios e auditoria;
 - proteção de dados pessoais e sensíveis.
 
-Os testes técnicos deverão cobrir as regras de negócio, autorização, persistência, notificações e tratamento de erros.
+Os testes técnicos deverão cobrir as regras de negócio, autorização, persistência e tratamento de erros.
 
 ## 4. Conclusão
 
-O Design Thinking organizou o problema da PKZ Lab e direcionou o projeto para um MVP de backend focado em agenda e operação. A solução deverá centralizar os dados, controlar os recursos envolvidos nos agendamentos, reduzir conflitos, permitir o acompanhamento das atividades e comunicar eventos relevantes por notificações.
+O Design Thinking organizou o problema da PKZ Lab e direcionou o projeto para um MVP de backend focado em agenda e operação. A solução deverá centralizar os dados, controlar os espaços envolvidos nos agendamentos, reduzir conflitos e permitir o acompanhamento das atividades. Notificações ficam como evolução futura.
 
 Os próximos passos são validar o escopo com o stakeholder, detalhar casos de uso e critérios de aceitação, definir os contratos da API, desenvolver o protótipo, implementar o MVP e realizar os testes.
 
@@ -126,11 +123,9 @@ Os próximos passos são validar o escopo com o stakeholder, detalhar casos de u
 - [ ] Definir prazo mínimo e regras para cancelamento e reagendamento.
 - [ ] Confirmar quais serviços, atividades e profissionais farão parte do MVP.
 - [ ] Definir como funciona a capacidade de cada atividade e espaço.
-- [ ] Confirmar quais espaços e ativos precisam ser cadastrados.
+- [x] Confirmar que espaços fazem parte do MVP e ativos ficam para evolução.
 - [ ] Definir como bloqueios, manutenção e indisponibilidade serão registrados.
-- [ ] Confirmar quais eventos gerarão notificações.
-- [ ] Definir os canais de notificação: WhatsApp, e-mail ou ambos.
-- [ ] Definir quem receberá cada notificação e em que momento.
+- [x] Confirmar que notificações ficam fora do MVP.
 - [ ] Confirmar quais dados pessoais e sensíveis serão armazenados.
 - [ ] Definir regras de acesso a dados de saúde e relatórios.
 - [ ] Validar os critérios de aceite do MVP.
@@ -150,4 +145,5 @@ Os próximos passos são validar o escopo com o stakeholder, detalhar casos de u
 
 | Data | Versão | Descrição | Autor(es) |
 |---|---:|---|---|
-| 21/09/2026 | 1.1 | Inclusão de notificações, remoção da prototipagem desenvolvida, síntese do documento e checklist do stakeholder | Brenno Marques |
+| 28/10/2026 | 1.2 | Alinhamento do escopo, prototipagem e validações ao MVP aprovado | Equipe do projeto |
+| 10/28/26 | 1.3 | Correções de coerência e escopo | Brenno Marques Silva |

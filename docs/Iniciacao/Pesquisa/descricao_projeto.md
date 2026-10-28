@@ -56,6 +56,7 @@ O sistema deverá permitir:
 * cadastro e manutenção de estudantes;
 * cadastro e manutenção de profissionais;
 * cadastro e gerenciamento de serviços;
+* cadastro e gerenciamento de espaços;
 * configuração de disponibilidade e bloqueios;
 * criação e gerenciamento de agendamentos;
 * consulta de agendas;
@@ -360,7 +361,7 @@ Para manter o foco no backend da agenda e da operação de treinamento, os segui
 * aplicativo mobile;
 * integração com QR Code;
 * integração com WhatsApp;
-* envio de notificações por e-mail;
+* envio de notificações por e-mail (fora do MVP);
 * funcionamento offline;
 * dashboards avançados;
 * data warehouse;
@@ -426,3 +427,9 @@ O recorte foi definido de maneira a concentrar o esforço do projeto acadêmico 
 
 
 Dessa forma, o GAAP inicial deverá fornecer uma base funcional, testada e documentada para apoiar a operação da escola de treinamento e possibilitar futuras evoluções do sistema.
+
+## Autor(es)
+
+| Data | Versão | Descrição | Autor(es) |
+| --- | --- | --- | --- |
+| 10/28/26 | 1.1 | Correções de coerência e escopo | Brenno Marques Silva |
