@@ -114,7 +114,7 @@ abstract class Profissional {
     + gerarLaudo(sessao: Sessao, aluno: Aluno, linkArquivo: String): Laudo
 }
 
-class Professor {
+class Treinador {
     - especialidade: String
 }
 
@@ -137,7 +137,7 @@ Usuario <|-- Responsavel
 Usuario <|-- Aluno
 Usuario <|-- Profissional
 
-Profissional <|-- Professor
+Profissional <|-- Treinador
 Profissional <|-- Nutricionista
 Profissional <|-- Psicologo
 Profissional <|-- Fisioterapeuta
@@ -215,7 +215,7 @@ StatusSessao -[hidden]right-> Sessao
 * **Responsavel**: Agrega e gerencia dependentes (`Aluno`), podendo solicitar e cancelar sessões para eles.
 * **Aluno**: Entidade atendida pelo sistema, associada a uma cota de créditos e dependência de tutoria.
 * **Profissional**: Especialista multidisciplinar que solicita sessões, registra laudos e atende alunos.
-* **Professor**, **Nutricionista**, **Psicologo**, **Fisioterapeuta**: Especializações com registros de conselho ou áreas de atuação específicas.
+* **Treinador**, **Nutricionista**, **Psicologo**, **Fisioterapeuta**: Especializações com registros de conselho ou áreas de atuação específicas.
 
 
 
@@ -234,7 +234,7 @@ StatusSessao -[hidden]right-> Sessao
 ## Relacionamentos Principais
 
 * **Herança de Autenticação e Perfis**: `Usuario` herda de `django_auth_user`, sendo especializado em `Administrador`, `Responsavel`, `Aluno` e `Profissional`.
-* **Especializações Profissionais**: `Profissional` especializa-se em `Professor`, `Nutricionista`, `Psicologo` e `Fisioterapeuta`.
+* **Especializações Profissionais**: `Profissional` especializa-se em `Treinador`, `Nutricionista`, `Psicologo` e `Fisioterapeuta`.
 * **Tutoria**: `Responsavel` agrega de 1 a muitos (`1..*`) dependentes do tipo `Aluno`.
 * **Composição da Raiz (`PKZLab`)**: Agrega usuários (`0..*`) e compõe salas (`0..*`) e sessões (`0..*`).
 * **Gestão Administrativa**: `Administrador` possui dependência de uso (`..>`) sobre `PKZLab` para execução de rotinas operacionais e moderação.
