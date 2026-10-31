@@ -5,15 +5,13 @@ from rest_framework.routers import DefaultRouter
 
 # Import your views here.
 from app.views.usuarioView import UsuarioView
+from app.views.salaView import SalaView
 
 
 router = DefaultRouter()
 
-router.register(
-    r'usuarios',
-    UsuarioView,
-    basename='usuario'
-)
+router.register(r'usuarios', UsuarioView, basename='usuario')
+router.register(r'salas', SalaView, basename='sala')
 
 
 urlpatterns = [
