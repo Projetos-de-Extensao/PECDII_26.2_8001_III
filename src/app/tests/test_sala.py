@@ -1,4 +1,5 @@
 from django.db import IntegrityError
+from django.db import transaction
 from django.test import TestCase
 
 from app.models import Sala
@@ -19,7 +20,9 @@ class SalaTests(TestCase):
 
     def test_capacidade_da_sala_deve_ser_maior_que_zero(self):
         with self.assertRaises(IntegrityError):
-            Sala.objects.create(numero=102, capacidade=0)
+            with transaction.atomic():
+                Sala.objects.create(numero=102, capacidade=0)
 
         with self.assertRaises(IntegrityError):
-            Sala.objects.create(numero=103, capacidade=-5)
+            with transaction.atomic():
+                Sala.objects.create(numero=103, capacidade=-5)
