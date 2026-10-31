@@ -64,7 +64,6 @@ class Administrador {
 }
 
 class Responsavel {
-    - parentesco: String
     + adicionarDependente(aluno: Aluno): void
     + removerDependente(aluno: Aluno): void
     + transferirResponsabilidade(aluno: Aluno, EmailNovoResponsavel: Responsavel): void
@@ -83,7 +82,7 @@ enum TipoResponsavel {
 }
 
 class Aluno {
-    - matricula: String
+    - matricula: String Unique
     - responsavel: TipoResponsavel
     - creditos: int
     + agendarSessao(sala: Sala, dataHora: DateTime, duracao: TimeSpan): Sessao
@@ -104,15 +103,15 @@ class Treinador {
 }
 
 class Nutricionista {
-    - CRN: String
+    - CRN: String Unique
 }
 
 class Psicologo {
-    - CRP: String
+    - CRP: String Unique
 }
 
 class Fisioterapeuta{
-    - CREFITO: String
+    - CREFITO: String Unique
 }
 
 AbstractUser <|-- Usuario
