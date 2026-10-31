@@ -131,3 +131,17 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+
+# Custom user model
+
+AUTH_USER_MODEL = 'app.Usuario'
+
+# Django REST Framework settings
+
+# Aplicar depois dos testes, para que o sistema de autenticação funcione corretamente.
+# REST_FRAMEWORK = {
+#     'DEFAULT_PERMISSION_CLASSES': [
+#         'rest_framework.permissions.IsAuthenticated',
+#     ],
+# }

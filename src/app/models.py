@@ -1,3 +1,4 @@
 from django.db import models
 
-# Create your models here.
+# Import your models here.
+from app.models import Usuario

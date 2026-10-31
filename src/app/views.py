@@ -1,3 +1,4 @@
 from django.shortcuts import render
 
-# Create your views here.
+# Import your views here.
+from app.views import UsuarioView
