@@ -31,7 +31,7 @@ class PKZLab {
 ' HIERARQUIA DE USUÁRIOS
 ' ==========================================
 
-abstract class django_auth_user {
+abstract class AbstractUser {
     - id: integer
     - password: string
     - last_login: datetime
@@ -115,7 +115,7 @@ class Fisioterapeuta{
     - CREFITO: String
 }
 
-django_auth_user <|-- Usuario
+AbstractUser <|-- Usuario
 
 Usuario <|-- Administrador
 Usuario <|-- Responsavel
