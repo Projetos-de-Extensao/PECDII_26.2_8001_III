@@ -1,7 +1,10 @@
 
 from django.db import models
+from django.core.exceptions import ValidationError
 
 from .usuarioModel import Usuario
+from .salaModel import Sala
+from .sessaoModel import Sessao
 
 
 class Profissional(Usuario):
@@ -10,3 +13,29 @@ class Profissional(Usuario):
 
     class Meta:
         abstract = True
+
+    def solicitarSessao(self, sala, dataHora, duracao, creditosNecessarios):
+        if not isinstance(sala, Sala) or sala.pk is None:
+            raise ValidationError(
+                "A sala deve estar cadastrada."
+            )
+
+        sessao = Sessao(
+            sala=sala,
+            dataHora=dataHora,
+            duracao=duracao,
+            creditosNecessarios=creditosNecessarios,
+        )
+
+        sessao.full_clean()
+        sessao.save()
+
+        return sessao
+
+    def cancelarSessao(self, sessao, motivo):
+        if not isinstance(sessao, Sessao):
+            raise ValidationError(
+                "A sessão informada é inválida."
+            )
+
+        sessao.cancelar(motivo)
