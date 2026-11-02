@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 
 from app.models import Administrador, Sessao, Usuario, Sala
-from app.serializers import SalaSerializer
+from app.serializers import UsuarioSerializer, SalaSerializer
 from app.permissions.administradorPermission import IsAdministrador
 
 class AdministradorView(ViewSet):
@@ -231,6 +231,74 @@ class AdministradorView(ViewSet):
             {
                 "mensagem": "Sala cadastrada com sucesso.",
                 "sala": SalaSerializer(sala).data
+            },
+            status=status.HTTP_201_CREATED
+        )
+
+
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="usuarios"
+    )
+    def cadastrar_usuario(self, request):
+        """
+        Cadastra um novo usuário no sistema PKZ Lab.
+
+        Somente administradores autenticados e ativos
+        podem executar esta operação.
+
+        Utiliza UsuarioSerializer para validar os dados
+        recebidos e Administrador.cadastrarUsuario()
+        para registrar o usuário no banco de dados.
+
+        A senha é protegida utilizando set_password().
+
+        Args:
+            request: Requisição HTTP com os dados do usuário.
+
+        Returns:
+            Response: Dados públicos do usuário cadastrado
+            ou erros de validação.
+        """
+
+        # Valida os dados recebidos pela API.
+        serializer = UsuarioSerializer(data=request.data)
+
+        serializer.is_valid(raise_exception=True)
+
+        # Copia os dados validados para evitar modificações
+        # diretas na estrutura interna do serializer.
+        dados = serializer.validated_data.copy()
+
+        # Separa a senha dos demais atributos.
+        senha = dados.pop("password")
+
+        # Cria uma instância ainda não salva.
+        usuario = Usuario(**dados)
+
+        # Protege a senha utilizando o hashing do Django.
+        usuario.set_password(senha)
+
+        # Recupera o administrador autenticado.
+        administrador = self.obter_administrador(request)
+
+        try:
+            # Executa o método exigido pelo diagrama UML.
+            administrador.cadastrarUsuario(usuario)
+
+        except ValidationError as erro:
+            # Retorna HTTP 400 caso o modelo rejeite o cadastro.
+            return Response(
+                {"erro": erro.messages},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Retorna os dados públicos do usuário cadastrado.
+        return Response(
+            {
+                "mensagem": "Usuário cadastrado com sucesso.",
+                "usuario": UsuarioSerializer(usuario).data
             },
             status=status.HTTP_201_CREATED
         )

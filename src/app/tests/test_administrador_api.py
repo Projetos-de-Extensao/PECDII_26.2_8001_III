@@ -499,3 +499,173 @@ class AdministradorAPITests(TestCase):
         self.assertFalse(
             Sala.objects.filter(numero=107).exists()
         )
+
+    def test_administrador_cadastra_usuario(self):
+        """
+        Verifica se um administrador consegue cadastrar
+        um usuário por meio da API administrativa.
+
+        Confirma também o armazenamento seguro da senha.
+        """
+
+        self.autenticar_administrador()
+
+        url = reverse("administrador-cadastrar-usuario")
+
+        dados = {
+            "username": "novo_usuario",
+            "email": "novo@email.com",
+            "password": "senhaSegura123"
+        }
+
+        response = self.client.post(
+            url,
+            dados,
+            format="json"
+        )
+
+        self.assertEqual(response.status_code, 201)
+
+        # Recupera o usuário cadastrado.
+        usuario = Usuario.objects.get(
+            username="novo_usuario"
+        )
+
+        # Confirma que a senha foi protegida.
+        self.assertTrue(
+            usuario.check_password("senhaSegura123")
+        )
+
+        # A senha original não pode estar armazenada.
+        self.assertNotEqual(
+            usuario.password,
+            "senhaSegura123"
+        )
+
+        # A senha não pode aparecer na resposta.
+        self.assertNotIn(
+            "password",
+            response.data["usuario"]
+        )
+
+    def test_usuario_comum_nao_cadastra_usuario(self):
+        """
+        Verifica se usuários comuns não conseguem
+        cadastrar contas pela API administrativa.
+        """
+
+        self.client.force_authenticate(
+            user=self.usuario
+        )
+
+        url = reverse("administrador-cadastrar-usuario")
+
+        dados = {
+            "username": "usuario_indevido",
+            "password": "senhaSegura123"
+        }
+
+        response = self.client.post(
+            url,
+            dados,
+            format="json"
+        )
+
+        self.assertEqual(response.status_code, 403)
+
+        self.assertFalse(
+            Usuario.objects.filter(
+                username="usuario_indevido"
+            ).exists()
+        )
+
+    def test_cadastrar_usuario_sem_senha(self):
+        """
+        Verifica se a API exige uma senha
+        durante o cadastro de usuários.
+        """
+
+        self.autenticar_administrador()
+
+        url = reverse("administrador-cadastrar-usuario")
+
+        dados = {
+            "username": "usuario_sem_senha",
+            "email": "teste@email.com"
+        }
+
+        response = self.client.post(
+            url,
+            dados,
+            format="json"
+        )
+
+        self.assertEqual(response.status_code, 400)
+
+        self.assertIn(
+            "password",
+            response.data
+        )
+
+
+    def test_cadastrar_usuario_duplicado(self):
+        """
+        Verifica se a API impede o cadastro
+        de usuários com usernames duplicados.
+        """
+
+        self.autenticar_administrador()
+
+        url = reverse("administrador-cadastrar-usuario")
+
+        dados = {
+            "username": "usuario_api",
+            "password": "senhaSegura123"
+        }
+
+        response = self.client.post(
+            url,
+            dados,
+            format="json"
+        )
+
+        self.assertEqual(response.status_code, 400)
+
+        self.assertEqual(
+            Usuario.objects.filter(
+                username="usuario_api"
+            ).count(),
+            1
+        )
+
+    def test_cadastro_nao_concede_privilegios(self):
+        """
+        Verifica se campos administrativos enviados
+        indevidamente no JSON não concedem privilégios.
+        """
+
+        self.autenticar_administrador()
+
+        url = reverse("administrador-cadastrar-usuario")
+
+        dados = {
+            "username": "usuario_privilegios",
+            "password": "senhaSegura123",
+            "is_superuser": True,
+            "is_staff": True
+        }
+
+        response = self.client.post(
+            url,
+            dados,
+            format="json"
+        )
+
+        self.assertEqual(response.status_code, 201)
+
+        usuario = Usuario.objects.get(
+            username="usuario_privilegios"
+        )
+
+        self.assertFalse(usuario.is_superuser)
+        self.assertFalse(usuario.is_staff)
