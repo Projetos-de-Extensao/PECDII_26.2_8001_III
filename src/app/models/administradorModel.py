@@ -192,9 +192,7 @@ class Administrador(Usuario):
             motivo (str): Justificativa da desaprovação.
 
         Raises:
-            ValidationError: Caso a sessão seja inválida,
-                não esteja cadastrada ou não esteja
-                aguardando aprovação.
+            ValidationError: Caso o objeto informado não seja uma Sessao
         """
 
         # Verifica se o objeto informado é uma sessão.
@@ -203,18 +201,6 @@ class Administrador(Usuario):
                 "O objeto informado deve ser uma Sessao."
             )
 
-        # Impede a desaprovação de sessões não cadastradas.
-        if sessao._state.adding:
-            raise ValidationError(
-                "A sessão precisa estar cadastrada."
-            )
-
-        # Apenas sessões solicitadas podem ser desaprovadas.
-        if sessao.status != StatusSessao.SOLICITADA:
-            raise ValidationError(
-                "Apenas sessões solicitadas podem ser desaprovadas."
-            )
-
-        # Reutiliza o método de cancelamento já existente.
+        # Reutiliza o método de rejeição já existente.
         # Ele valida o motivo e registra a alteração no banco.
-        sessao.cancelar(motivo)
+        sessao.rejeitar(motivo)

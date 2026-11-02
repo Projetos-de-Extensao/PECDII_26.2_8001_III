@@ -44,7 +44,7 @@ class Sessao(models.Model):
     def cancelar(self, motivo):
         if self._state.adding:
             raise ValidationError('A sessão precisa estar cadastrada para ser cancelada.')
-        if self.status not in (StatusSessao.SOLICITADA, StatusSessao.CONFIRMADA):
+        if self.status not in (StatusSessao.CONFIRMADA):
             raise ValidationError('A sessão não pode ser cancelada no estado atual.')
 
         if not isinstance(motivo, str) or not motivo.strip():
@@ -52,6 +52,20 @@ class Sessao(models.Model):
 
         motivo = motivo.strip()
         self.status = StatusSessao.CANCELADA
+        self.motivoCancelamento = motivo
+        self.save(update_fields=['status', 'motivoCancelamento'])
+
+    def rejeitar(self, motivo):
+        if self._state.adding:
+            raise ValidationError('A sessão precisa estar cadastrada para ser rejeitada.')
+        if self.status != StatusSessao.SOLICITADA:
+            raise ValidationError('Apenas sessões solicitadas podem ser rejeitadas.')
+
+        if not isinstance(motivo, str) or not motivo.strip():
+            raise ValidationError('O motivo da rejeição é obrigatório.')
+
+        motivo = motivo.strip()
+        self.status = StatusSessao.REJETADA
         self.motivoCancelamento = motivo
         self.save(update_fields=['status', 'motivoCancelamento'])
 
