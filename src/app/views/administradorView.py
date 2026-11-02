@@ -6,9 +6,9 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 
-from app.models import Administrador, Sessao, Usuario
+from app.models import Administrador, Sessao, Usuario, Sala
+from app.serializers import SalaSerializer
 from app.permissions.administradorPermission import IsAdministrador
-
 
 class AdministradorView(ViewSet):
     """
@@ -176,4 +176,61 @@ class AdministradorView(ViewSet):
                 "is_active": usuario.is_active
             },
             status=status.HTTP_200_OK
+        )
+
+
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="salas"
+    )
+    def cadastrar_sala(self, request):
+        """
+        Cadastra uma nova sala no sistema PKZ Lab.
+
+        Somente administradores autenticados e ativos
+        podem executar esta operação.
+
+        Utiliza SalaSerializer para validar os dados
+        recebidos e Administrador.cadastrarSala()
+        para realizar o cadastro no banco de dados.
+
+        Args:
+            request: Requisição HTTP contendo os dados da sala.
+
+        Returns:
+            Response: Dados da sala cadastrada ou erros
+            de validação.
+        """
+
+        # Valida os dados recebidos utilizando o serializer existente.
+        serializer = SalaSerializer(data=request.data)
+
+        # Retorna HTTP 400 caso os dados sejam inválidos.
+        serializer.is_valid(raise_exception=True)
+
+        # Cria uma instância de Sala sem salvá-la no banco.
+        sala = Sala(**serializer.validated_data)
+
+        # Recupera o administrador autenticado.
+        administrador = self.obter_administrador(request)
+
+        try:
+            # Executa a regra de negócio definida no modelo.
+            administrador.cadastrarSala(sala)
+
+        except ValidationError as erro:
+            # Retorna HTTP 400 quando o cadastro é inválido.
+            return Response(
+                {"erro": erro.messages},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Retorna os dados da sala cadastrada.
+        return Response(
+            {
+                "mensagem": "Sala cadastrada com sucesso.",
+                "sala": SalaSerializer(sala).data
+            },
+            status=status.HTTP_201_CREATED
         )

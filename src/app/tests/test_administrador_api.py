@@ -369,3 +369,133 @@ class AdministradorAPITests(TestCase):
 
         # O modelo deve rejeitar a operação.
         self.assertEqual(response.status_code, 400)
+
+
+    def test_administrador_cadastra_sala(self):
+        """
+        Verifica se um administrador consegue cadastrar
+        uma sala válida pela API administrativa.
+        """
+
+        # Autentica o administrador.
+        self.autenticar_administrador()
+
+        # Obtém a URL do endpoint administrativo.
+        url = reverse("administrador-cadastrar-sala")
+
+        # Define os dados da nova sala.
+        dados = {
+            "numero": 105,
+            "capacidade": 25
+        }
+
+        # Envia a requisição de cadastro.
+        response = self.client.post(
+            url,
+            dados,
+            format="json"
+        )
+
+        # Confirma que o cadastro foi realizado.
+        self.assertEqual(response.status_code, 201)
+
+        # Verifica se a sala foi salva no banco.
+        self.assertTrue(
+            Sala.objects.filter(
+                numero=105,
+                capacidade=25
+            ).exists()
+        )
+
+    def test_cadastrar_sala_capacidade_invalida(self):
+        """
+        Verifica se a API impede o cadastro de salas
+        com capacidade igual ou inferior a zero.
+        """
+
+        self.autenticar_administrador()
+
+        url = reverse("administrador-cadastrar-sala")
+
+        # Capacidade zero viola a regra do modelo Sala.
+        dados = {
+            "numero": 106,
+            "capacidade": 0
+        }
+
+        response = self.client.post(
+            url,
+            dados,
+            format="json"
+        )
+
+        # O cadastro deve ser rejeitado.
+        self.assertEqual(response.status_code, 400)
+
+        # Confirma que nenhuma sala inválida foi cadastrada.
+        self.assertFalse(
+            Sala.objects.filter(numero=106).exists()
+        )
+
+    def test_cadastrar_sala_duplicada(self):
+        """
+        Verifica se a API impede o cadastro de duas
+        salas com o mesmo número.
+        """
+
+        self.autenticar_administrador()
+
+        url = reverse("administrador-cadastrar-sala")
+
+        # A sala 301 já foi criada no setUp.
+        dados = {
+            "numero": 301,
+            "capacidade": 30
+        }
+
+        response = self.client.post(
+            url,
+            dados,
+            format="json"
+        )
+
+        # O cadastro duplicado deve ser rejeitado.
+        self.assertEqual(response.status_code, 400)
+
+        # Deve continuar existindo somente uma sala 301.
+        self.assertEqual(
+            Sala.objects.filter(numero=301).count(),
+            1
+        )
+
+    def test_usuario_comum_nao_cadastra_sala(self):
+        """
+        Verifica se usuários comuns não conseguem
+        cadastrar salas pela API administrativa.
+        """
+
+        # Autentica como usuário comum.
+        self.client.force_authenticate(
+            user=self.usuario
+        )
+
+        url = reverse("administrador-cadastrar-sala")
+
+        dados = {
+            "numero": 107,
+            "capacidade": 15
+        }
+
+        response = self.client.post(
+            url,
+            dados,
+            format="json"
+        )
+
+        # A permissão administrativa deve bloquear o acesso.
+        self.assertEqual(response.status_code, 403)
+
+        # Confirma que a sala não foi cadastrada.
+        self.assertFalse(
+            Sala.objects.filter(numero=107).exists()
+        )
