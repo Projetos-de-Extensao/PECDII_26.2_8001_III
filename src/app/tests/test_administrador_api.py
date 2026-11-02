@@ -276,3 +276,96 @@ class AdministradorAPITests(TestCase):
             sessao.status,
             StatusSessao.REALIZADA
         )
+
+
+    def test_administrador_desativa_usuario(self):
+        """
+        Verifica se um administrador consegue
+        desativar uma conta de usuário pela API.
+        """
+
+        self.autenticar_administrador()
+
+        url = reverse(
+            "administrador-desativar-usuario",
+            kwargs={"usuario_id": self.usuario.pk}
+        )
+
+        response = self.client.post(url)
+
+        # Atualiza os dados do usuário.
+        self.usuario.refresh_from_db()
+
+        # Confirma que a operação foi realizada.
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(self.usuario.is_active)
+
+        # O usuário deve continuar cadastrado.
+        self.assertTrue(
+            Usuario.objects.filter(pk=self.usuario.pk).exists()
+        )
+
+    def test_usuario_comum_nao_desativa_usuario(self):
+        """
+        Verifica se um usuário comum não consegue
+        desativar contas de outros usuários.
+        """
+
+        # Autentica como usuário comum.
+        self.client.force_authenticate(user=self.usuario)
+
+        url = reverse(
+            "administrador-desativar-usuario",
+            kwargs={"usuario_id": self.administrador.pk}
+        )
+
+        response = self.client.post(url)
+
+        self.administrador.refresh_from_db()
+
+        # A operação deve ser proibida.
+        self.assertEqual(response.status_code, 403)
+
+        # A conta administrativa permanece ativa.
+        self.assertTrue(self.administrador.is_active)
+
+
+    def test_desativar_usuario_inexistente(self):
+        """
+        Verifica se a API retorna HTTP 404 quando
+        o usuário informado não existe.
+        """
+
+        self.autenticar_administrador()
+
+        url = reverse(
+            "administrador-desativar-usuario",
+            kwargs={"usuario_id": 99999}
+        )
+
+        response = self.client.post(url)
+
+        self.assertEqual(response.status_code, 404)
+
+
+    def test_desativar_usuario_ja_inativo(self):
+        """
+        Verifica se a API rejeita uma tentativa
+        de desativar um usuário já desativado.
+        """
+
+        # Desativa previamente o usuário.
+        self.usuario.is_active = False
+        self.usuario.save(update_fields=["is_active"])
+
+        self.autenticar_administrador()
+
+        url = reverse(
+            "administrador-desativar-usuario",
+            kwargs={"usuario_id": self.usuario.pk}
+        )
+
+        response = self.client.post(url)
+
+        # O modelo deve rejeitar a operação.
+        self.assertEqual(response.status_code, 400)

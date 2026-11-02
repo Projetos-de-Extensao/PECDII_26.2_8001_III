@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
 
 from rest_framework import status
@@ -5,7 +6,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 
-from app.models import Administrador, Sessao
+from app.models import Administrador, Sessao, Usuario
 from app.permissions.administradorPermission import IsAdministrador
 
 
@@ -117,6 +118,62 @@ class AdministradorView(ViewSet):
                 "sessao_id": sessao.pk,
                 "status": sessao.status,
                 "motivo": sessao.motivoCancelamento
+            },
+            status=status.HTTP_200_OK
+        )
+
+
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path=r"usuarios/(?P<usuario_id>[0-9]+)/desativar"
+    )
+    def desativar_usuario(self, request, usuario_id=None):
+        """
+        Desativa uma conta de usuário do PKZ Lab.
+
+        Somente administradores autenticados podem
+        executar esta operação.
+
+        A desativação utiliza o método desativarUsuario()
+        do modelo Administrador, preservando o registro
+        do usuário no banco de dados.
+
+        Args:
+            request: Requisição HTTP recebida.
+            usuario_id: Identificador do usuário a desativar.
+
+        Returns:
+            Response: Resultado da operação administrativa.
+        """
+
+        # Localiza o usuário informado na requisição.
+        # Retorna HTTP 404 caso ele não exista.
+        usuario = get_object_or_404(
+            Usuario,
+            pk=usuario_id
+        )
+
+        # Recupera o administrador autenticado.
+        administrador = self.obter_administrador(request)
+
+        try:
+            # Executa a regra de negócio existente no modelo.
+            administrador.desativarUsuario(usuario)
+
+        except ValidationError as erro:
+            # Retorna HTTP 400 quando a desativação é inválida.
+            return Response(
+                {"erro": erro.messages},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Confirma que o usuário foi desativado.
+        return Response(
+            {
+                "mensagem": "Usuário desativado com sucesso.",
+                "usuario_id": usuario.pk,
+                "is_active": usuario.is_active
             },
             status=status.HTTP_200_OK
         )
