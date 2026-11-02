@@ -3,3 +3,8 @@ from .salaModel import Sala
 from .alunoModel import Aluno
 from .sessaoModel import Sessao
 from app.Enums import TipoResponsavel
+from .profissionalModel import Profissional
+from .treinadorModel import Treinador
+from .nutricionistaModel import Nutricionista
+from .psicologoModel import Psicologo
+from .fisioterapeutaModel import Fisioterapeuta
