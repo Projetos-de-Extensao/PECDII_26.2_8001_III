@@ -54,3 +54,32 @@ class Sessao(models.Model):
         self.status = StatusSessao.CANCELADA
         self.motivoCancelamento = motivo
         self.save(update_fields=['status', 'motivoCancelamento'])
+
+    def confirmar(self):
+        if self._state.adding:
+            raise ValidationError('A sessão precisa estar cadastrada para ser confirmada.')
+        if self.status != StatusSessao.SOLICITADA:
+            raise ValidationError('Apenas sessões solicitadas podem ser confirmadas.')
+
+        self.status = StatusSessao.CONFIRMADA
+        self.save(update_fields=['status'])
+
+    @classmethod
+    def solicitar(cls, sala, dataHora, duracao, creditosNecessarios):
+        if not isinstance(sala, Sala) or sala.pk is None:
+            raise ValidationError(
+                "A sala deve estar cadastrada."
+            )
+
+        sessao = cls(
+            sala=sala,
+            dataHora=dataHora,
+            duracao=duracao,
+            creditosNecessarios=creditosNecessarios,
+            status=StatusSessao.SOLICITADA,
+        )
+
+        sessao.full_clean()
+        sessao.save()
+
+        return sessao

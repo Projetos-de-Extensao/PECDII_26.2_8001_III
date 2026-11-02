@@ -20,15 +20,7 @@ class Profissional(Usuario):
                 "A sala deve estar cadastrada."
             )
 
-        sessao = Sessao(
-            sala=sala,
-            dataHora=dataHora,
-            duracao=duracao,
-            creditosNecessarios=creditosNecessarios,
-        )
-
-        sessao.full_clean()
-        sessao.save()
+        sessao = Sessao.solicitar(sala, dataHora, duracao, creditosNecessarios)
 
         return sessao
 

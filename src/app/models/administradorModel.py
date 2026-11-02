@@ -166,9 +166,7 @@ class Administrador(Usuario):
             sessao (Sessao): Sessão que será aprovada.
 
         Raises:
-            ValidationError: Caso a sessão seja inválida,
-                não esteja cadastrada ou possua um
-                status incompatível com a aprovação.
+            ValidationError: Caso o objeto informado não seja uma Sessao
         """
 
         # Verifica se o objeto recebido é uma sessão.
@@ -177,23 +175,8 @@ class Administrador(Usuario):
                 "O objeto informado deve ser uma Sessao."
             )
 
-        # Verifica se a sessão já foi cadastrada.
-        if sessao._state.adding:
-            raise ValidationError(
-                "A sessão precisa estar cadastrada."
-            )
-
-        # Apenas sessões solicitadas podem ser aprovadas.
-        if sessao.status != StatusSessao.SOLICITADA:
-            raise ValidationError(
-                "Apenas sessões solicitadas podem ser aprovadas."
-            )
-
         # Atualiza o status da sessão para confirmada.
-        sessao.status = StatusSessao.CONFIRMADA
-
-        # Salva somente o campo alterado.
-        sessao.save(update_fields=["status"])
+        sessao.confirmar()
 
 
     def desaprovarSessao(self, sessao, motivo):
