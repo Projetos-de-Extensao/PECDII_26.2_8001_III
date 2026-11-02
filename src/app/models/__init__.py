@@ -3,3 +3,4 @@ from .salaModel import Sala
 from .alunoModel import Aluno
 from .sessaoModel import Sessao
 from app.Enums import TipoResponsavel
+from .administradorModel import Administrador

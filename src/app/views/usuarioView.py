@@ -1,12 +1,38 @@
 from rest_framework.viewsets import ModelViewSet
-from rest_framework import permissions
+from rest_framework.permissions import IsAuthenticated
 
 from app.models import Usuario
 from app.serializers import UsuarioSerializer
+from app.permissions.administradorPermission import IsAdministrador
+
 
 class UsuarioView(ModelViewSet):
+    """
+    Disponibiliza operações de consulta e gerenciamento
+    dos usuários cadastrados no PKZ Lab.
+
+    Operações de escrita são restritas a administradores.
+
+    A criação de usuários deve utilizar preferencialmente
+    o endpoint administrativo, que executa o método
+    Administrador.cadastrarUsuario().
+    """
+
     queryset = Usuario.objects.all()
+
     serializer_class = UsuarioSerializer
-    
-    # Permite acesso a qualquer usuário, para fins de teste. Em produção, deve-se restringir o acesso a usuários autenticados.
-    permission_classes = [permissions.AllowAny]
+
+    def get_permissions(self):
+        """
+        Define as permissões conforme a operação solicitada.
+
+        Consultas exigem autenticação.
+        Operações de escrita exigem autorização administrativa.
+        """
+
+        # Operações de consulta.
+        if self.action in ["list", "retrieve"]:
+            return [IsAuthenticated()]
+
+        # Cadastro, atualização e exclusão.
+        return [IsAdministrador()]
