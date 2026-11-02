@@ -10,6 +10,7 @@ from django.utils import timezone
 
 from app.Enums import StatusSessao
 from app.models import Sessao
+from app.serializers import AdministradorSerializer
 
 
 class AdministradorTests(TestCase):
@@ -336,3 +337,64 @@ class AdministradorTests(TestCase):
             sessao.status,
             StatusSessao.REALIZADA
         )
+
+    def test_serializar_administrador(self):
+        """
+        Verifica se o serializer representa corretamente
+        os dados de um administrador cadastrado.
+
+        Confirma a presença dos atributos herdados
+        de Usuario e do atributo tipoContrato.
+        """
+
+        # Serializa o administrador criado no setUp.
+        serializer = AdministradorSerializer(self.administrador)
+
+        # Obtém os dados serializados.
+        dados = serializer.data
+
+        # Verifica os atributos do administrador.
+        self.assertEqual(dados["username"], "admin")
+        self.assertEqual(dados["tipoContrato"], "CLT")
+
+        # Confirma que os atributos herdados estão disponíveis.
+        self.assertIn("email", dados)
+        self.assertIn("telefone", dados)
+
+
+    def test_serializer_nao_expoe_senha(self):
+        """
+        Verifica se o serializer não expõe informações
+        sensíveis de autenticação.
+
+        A senha do administrador não deve aparecer
+        nos dados retornados pela API.
+        """
+
+        # Obtém a representação serializada.
+        serializer = AdministradorSerializer(self.administrador)
+
+        # Confirma que a senha não está presente.
+        self.assertNotIn("password", serializer.data)
+
+
+    def test_serializer_tipo_contrato_obrigatorio(self):
+        """
+        Verifica se o serializer exige o preenchimento
+        do atributo tipoContrato ao cadastrar um administrador.
+        """
+
+        # Dados sem o atributo obrigatório tipoContrato.
+        dados = {
+            "username": "novo_admin",
+            "email": "admin@pkzlab.com"
+        }
+
+        # Valida os dados recebidos.
+        serializer = AdministradorSerializer(data=dados)
+
+        # Confirma que os dados são inválidos.
+        self.assertFalse(serializer.is_valid())
+
+        # Verifica se o erro está relacionado ao contrato.
+        self.assertIn("tipoContrato", serializer.errors)
