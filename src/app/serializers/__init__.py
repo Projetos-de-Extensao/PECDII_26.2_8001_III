@@ -1,2 +1,3 @@
 from .usuarioSerializer import UsuarioSerializer
 from .salaSerializer import SalaSerializer
+from .administradorSerializer import AdministradorSerializer

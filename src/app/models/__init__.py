@@ -8,3 +8,4 @@ from .treinadorModel import Treinador
 from .nutricionistaModel import Nutricionista
 from .psicologoModel import Psicologo
 from .fisioterapeutaModel import Fisioterapeuta
+from .administradorModel import Administrador
