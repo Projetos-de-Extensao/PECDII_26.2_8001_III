@@ -27,27 +27,38 @@ enum StatusSessao {
     CONFIRMADA
     REALIZADA
     CANCELADA
+    REJEITADA
+}
+
+enum TipoResponsavel {
+    PAI
+    MAE
+    TUTOR
+    OUTRO
+    NENHUM
+    PROPRIO
+}
+
+enum StatusPresenca {
+    PRESENTE
+    AUSENTE
+    JUSTIFICADO
+    DESISTENTE
 }
 
 ' ==========================================
 ' AGREGADOR RAIZ / SISTEMA (PKZLab)
 ' ==========================================
 class PKZLab {
-    - id: int
-    - nome: String
-    - cnpj: String
-    + adicionarUsuario(usuario: Usuario): void
-    + removerUsuario(usuario: Usuario): void
-    + cadastrarSala(sala: Sala): void
-    + removerSala(sala: Sala): void
-    + registrarSessao(sessao: Sessao): void
+    "Agregador Raiz do sistema, responsável por gerenciar usuários, salas e sessões.
+    No caso desse projeto é o sistema Django, que gerencia o banco de dados e as regras de negócio."
 }
 
 ' ==========================================
 ' HIERARQUIA DE USUÁRIOS
 ' ==========================================
 
-abstract class django_auth_user {
+abstract class AbstractUser {
     - id: integer
     - password: string
     - last_login: datetime
@@ -59,15 +70,25 @@ abstract class django_auth_user {
     - is_staff: boolean
     - is_active: boolean
     - date_joined: datetime
+    + get_full_name()
+    + get_short_name()
+    + email_user(subject, message)
+    + set_password(raw_password)
+    + check_password(raw_password)
+    + has_usable_password()
+    + get_username()
+    + get_all_permissions()
+    + get_user_permissions()
+    + get_group_permissions()
+    + has_perm(perm)
+    + has_perms(perm_list)
+    + has_module_perms(app_label)
 }
 
 abstract class Usuario {
     - telefone: String
     - dataNascimento: Date
     - endereco: String
-    + realizarLogin(nomeUsuario: String, senha: String): boolean
-    + realizarLogout(): void
-    + atualizarSenha(senhaAntiga: String, senhaNova: String): boolean
 }
 
 class Administrador {
@@ -80,29 +101,19 @@ class Administrador {
 }
 
 class Responsavel {
-    - parentesco: String
     + adicionarDependente(aluno: Aluno): void
     + removerDependente(aluno: Aluno): void
-    + transferirResponsabilidade(aluno: Aluno, EmailNovoResponsavel: Responsavel): void
-    + agendarSessao(sala: Sala, dataHora: DateTime, duracao: TimeSpan): Sessao
-    + cancelarSessao(sessao: Sessao, motivo: String): void
-}
-
-enum TipoResponsavel {
-    PAI
-    MAE
-    TUTOR
-    OUTRO
-    NENHUM
-    PROPRIO
+    + transferirResponsabilidade(aluno: Aluno, novoResponsavel: Responsavel): void
+    + inscreverEmSessao(aluno: Aluno, sessao: Sessao): Sessao
+    + cancelarInscricaoEmSessao(aluno: Aluno, sessao: Sessao, motivo: String): void
 }
 
 class Aluno {
-    - matricula: String
+    - matricula: String Unique
     - responsavel: TipoResponsavel
     - creditos: int
-    + agendarSessao(sala: Sala, dataHora: DateTime, duracao: TimeSpan): Sessao
-    + cancelarSessao(sessao: Sessao, motivo: String): void
+    + inscreverEmSessao(sessao: Sessao): void
+    + cancelarInscricao(sessao: Sessao, motivo: String): void
     + assumirTutoria(): void
 }
 
@@ -119,18 +130,18 @@ class Treinador {
 }
 
 class Nutricionista {
-    - CRN: String
+    - CRN: String Unique
 }
 
 class Psicologo {
-    - CRP: String
+    - CRP: String Unique
 }
 
-class Fisioterapeuta {
-    - CREFITO: String
+class Fisioterapeuta{
+    - CREFITO: String Unique
 }
 
-django_auth_user <|-- Usuario
+AbstractUser <|-- Usuario
 
 Usuario <|-- Administrador
 Usuario <|-- Responsavel
@@ -153,6 +164,10 @@ class Sala {
     - id: int
     - numero: int
     - capacidade: int
+    - interditada: boolean
+    + interditar(): void
+    + desinterditar(): void
+    + verificarDisponibilidade(dataHora: DateTime, duracao: TimeSpan): boolean
 }
 
 class Sessao {
@@ -162,16 +177,24 @@ class Sessao {
     - status: StatusSessao
     - creditosNecessarios: int
     - motivoCancelamento: String
-    + registrarPresenca(aluno: Aluno, presente: boolean): void
+    + solicitar(cls, profissional, sala, dataHora, duracao, creditosNecessarios): Sessao
+    + confirmar(): void
+    + rejeitar(motivo: String): void
+    + cancelar(motivo: String): void
+    + inscreverAluno(aluno: Aluno): void
+    + removerAluno(aluno: Aluno): void
+    + registrarPresenca(aluno: Aluno, presente: StatusPresenca, justificativa: String): void
 }
 
 class Presenca {
     - id: int
-    - status: boolean
+    - status: StatusPresenca
     - justificativa: String
+    + registrarPresenca(status: StatusPresenca, justificativa: String): void
 }
 
 class Laudo {
+    "Ainda está sendo definido como será implementado o laudo"
     - id: int
     - dataGeracao: Date
     - linkArquivo: String
@@ -195,10 +218,12 @@ Sala "1" <-- "0..*" Sessao
 Sessao "1" *-- "0..*" Presenca
 Presenca "0..*" --> "1" Aluno
 
+StatusPresenca -[hidden]right-> Sessao
+
 Sessao "1" <-- "0..*" Laudo
 Laudo "0..*" --> "1" Aluno
 
-StatusSessao -[hidden]right-> Sessao
+StatusSessao -[hidden]left-> Sessao
 
 @enduml
 
