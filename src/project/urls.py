@@ -7,6 +7,7 @@ from rest_framework.routers import DefaultRouter
 from app.views.usuarioView import UsuarioView
 from app.views.salaView import SalaView
 from app.views.administradorView import AdministradorView
+from app.views.responsavelView import ResponsavelView
 
 
 router = DefaultRouter()
@@ -19,6 +20,12 @@ router.register(
     r'administradores',
     AdministradorView,
     basename='administrador'
+)
+
+router.register(
+    r'responsaveis',
+    ResponsavelView,
+    basename='responsavel'
 )
 
 urlpatterns = [
