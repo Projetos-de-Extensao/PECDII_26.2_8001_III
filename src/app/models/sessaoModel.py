@@ -5,11 +5,14 @@ from django.core.validators import MinValueValidator
 from django.db import models
 
 from app.Enums import StatusSessao
+from app.decorators import *
 
 from .salaModel import Sala
+from .profissionalModel import Profissional
 
 
 class Sessao(models.Model):
+    
     sala = models.ForeignKey(
         Sala,
         on_delete=models.PROTECT,
@@ -28,11 +31,6 @@ class Sessao(models.Model):
         validators=[MinValueValidator(0)],
     )
     motivoCancelamento = models.TextField(blank=True, default='')
-    alunos = models.ManyToManyField(
-        'Aluno',
-        related_name='sessoes',
-        blank=True,
-    )
     profissional = models.ForeignKey(
         'Profissional',
         on_delete=models.PROTECT,
@@ -53,49 +51,20 @@ class Sessao(models.Model):
             ),
         ]
 
-    def cancelar(self, motivo):
-        if self._state.adding:
-            raise ValidationError('A sessão precisa estar cadastrada para ser cancelada.')
-        if self.status not in (StatusSessao.CONFIRMADA):
-            raise ValidationError('A sessão não pode ser cancelada no estado atual.')
-
-        if not isinstance(motivo, str) or not motivo.strip():
-            raise ValidationError('O motivo do cancelamento é obrigatório.')
-
-        motivo = motivo.strip()
-        self.status = StatusSessao.CANCELADA
-        self.motivoCancelamento = motivo
-        self.save(update_fields=['status', 'motivoCancelamento'])
-
-    def rejeitar(self, motivo):
-        if self._state.adding:
-            raise ValidationError('A sessão precisa estar cadastrada para ser rejeitada.')
-        if self.status != StatusSessao.SOLICITADA:
-            raise ValidationError('Apenas sessões solicitadas podem ser rejeitadas.')
-
-        if not isinstance(motivo, str) or not motivo.strip():
-            raise ValidationError('O motivo da rejeição é obrigatório.')
-
-        motivo = motivo.strip()
-        self.status = StatusSessao.REJEITADA
-        self.motivoCancelamento = motivo
-        self.save(update_fields=['status', 'motivoCancelamento'])
-
-    def confirmar(self):
-        if self._state.adding:
-            raise ValidationError('A sessão precisa estar cadastrada para ser confirmada.')
-        if self.status != StatusSessao.SOLICITADA:
-            raise ValidationError('Apenas sessões solicitadas podem ser confirmadas.')
-
-        self.status = StatusSessao.CONFIRMADA
-        self.save(update_fields=['status'])
 
     @classmethod
     def solicitar(cls, profissional, sala, dataHora, duracao, creditosNecessarios):
+        """
+        Cria uma nova sessão com status SOLICITADA.
+        Esse método deve sempre ser utilizado ao solicitar uma nova sessão, 
+        pois ele garante que a sessão será criada com o status correto 
+        e que os dados serão validados antes de salvar no banco de dados.
+        """
         if not isinstance(sala, Sala) or sala.pk is None:
-            raise ValidationError(
-                "A sala deve estar cadastrada."
-            )
+            raise ValidationError("A sala deve estar cadastrada.")
+
+        if not isinstance(profissional, Profissional) or profissional.pk is None:
+            raise ValidationError("O profissional deve estar cadastrado.")
 
         sessao = cls(
             sala=sala,
@@ -110,3 +79,31 @@ class Sessao(models.Model):
         sessao.save()
 
         return sessao
+
+
+    @exigir_sessao_valida('A sessão precisa estar cadastrada para ser confirmada.')
+    @exigir_status_solicitada('Apenas sessões solicitadas podem ser confirmadas.')
+    def confirmar(self):
+        self.status = StatusSessao.CONFIRMADA
+        self.save(update_fields=['status'])
+
+
+    @exigir_sessao_valida('A sessão precisa estar cadastrada para ser rejeitada.')
+    @exigir_status_solicitada('A sessão não pode ser rejeitada no estado atual.')
+    @exigir_motivo()
+    def rejeitar(self, motivo):
+        motivo = motivo.strip()
+        self.status = StatusSessao.REJEITADA
+        self.motivoCancelamento = motivo
+        self.save(update_fields=['status', 'motivoCancelamento'])
+
+
+
+    @exigir_sessao_valida('A sessão precisa estar cadastrada para ser cancelada.')
+    @exigir_status_confirmada('A sessão não pode ser cancelada no estado atual.')
+    @exigir_motivo()
+    def cancelar(self, motivo):
+        motivo = motivo.strip()
+        self.status = StatusSessao.CANCELADA
+        self.motivoCancelamento = motivo
+        self.save(update_fields=['status', 'motivoCancelamento'])
