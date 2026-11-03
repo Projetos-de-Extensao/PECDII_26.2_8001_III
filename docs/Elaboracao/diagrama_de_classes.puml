@@ -11,6 +11,16 @@ enum StatusSessao {
     CONFIRMADA
     REALIZADA
     CANCELADA
+    REJEITADA
+}
+
+enum TipoResponsavel {
+    PAI
+    MAE
+    TUTOR
+    OUTRO
+    NENHUM
+    PROPRIO
 }
 
 ' ==========================================
@@ -70,15 +80,6 @@ class Responsavel {
     + agendarSessao(sala: Sala, dataHora: DateTime, duracao: TimeSpan): Sessao
     + cancelarSessao(sessao: Sessao, motivo: String): void
 
-}
-
-enum TipoResponsavel {
-    PAI
-    MAE
-    TUTOR
-    OUTRO
-    NENHUM
-    PROPRIO
 }
 
 class Aluno {
