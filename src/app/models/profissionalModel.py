@@ -20,7 +20,7 @@ class Profissional(Usuario):
                 "A sala deve estar cadastrada."
             )
 
-        sessao = Sessao.solicitar(sala, dataHora, duracao, creditosNecessarios)
+        sessao = Sessao.solicitar(self, sala, dataHora, duracao, creditosNecessarios)
 
         return sessao
 

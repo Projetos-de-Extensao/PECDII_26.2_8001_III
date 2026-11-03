@@ -28,6 +28,18 @@ class Sessao(models.Model):
         validators=[MinValueValidator(0)],
     )
     motivoCancelamento = models.TextField(blank=True, default='')
+    alunos = models.ManyToManyField(
+        'Aluno',
+        related_name='sessoes',
+        blank=True,
+    )
+    profissional = models.ForeignKey(
+        'Profissional',
+        on_delete=models.PROTECT,
+        related_name='sessoes',
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         constraints = [
@@ -65,7 +77,7 @@ class Sessao(models.Model):
             raise ValidationError('O motivo da rejeição é obrigatório.')
 
         motivo = motivo.strip()
-        self.status = StatusSessao.REJETADA
+        self.status = StatusSessao.REJEITADA
         self.motivoCancelamento = motivo
         self.save(update_fields=['status', 'motivoCancelamento'])
 
@@ -79,7 +91,7 @@ class Sessao(models.Model):
         self.save(update_fields=['status'])
 
     @classmethod
-    def solicitar(cls, sala, dataHora, duracao, creditosNecessarios):
+    def solicitar(cls, profissional, sala, dataHora, duracao, creditosNecessarios):
         if not isinstance(sala, Sala) or sala.pk is None:
             raise ValidationError(
                 "A sala deve estar cadastrada."
@@ -91,6 +103,7 @@ class Sessao(models.Model):
             duracao=duracao,
             creditosNecessarios=creditosNecessarios,
             status=StatusSessao.SOLICITADA,
+            profissional=profissional,
         )
 
         sessao.full_clean()
