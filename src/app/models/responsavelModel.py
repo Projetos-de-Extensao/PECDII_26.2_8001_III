@@ -59,6 +59,12 @@ class Responsavel(Usuario):
         vinculo.responsavel = novoResponsavel
         vinculo.save(update_fields=["responsavel"])
 
+    # def inscreverEmSessao(self, aluno, sessao):
+    #     return sessao.inscreverAluno(aluno)
+
+    # def cancelarInscricaoEmSessao(self, aluno, sessao, motivo):
+    #     return sessao.removerAluno(aluno)
+
 
 class VinculoResponsavel(models.Model):
     """Associa cada aluno a, no máximo, um responsável."""
@@ -73,3 +79,5 @@ class VinculoResponsavel(models.Model):
         on_delete=models.CASCADE,
         related_name="vinculo_responsavel",
     )
+
+
