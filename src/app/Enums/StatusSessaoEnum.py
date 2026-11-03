@@ -5,4 +5,4 @@ class StatusSessao(TextChoices):
     CONFIRMADA = "CONFIRMADA", "Confirmada"
     REALIZADA = "REALIZADA", "Realizada"
     CANCELADA = "CANCELADA", "Cancelada"
-    REJETADA = "REJEITADA", "Rejeitada"
+    REJEITADA = "REJEITADA", "Rejeitada"
