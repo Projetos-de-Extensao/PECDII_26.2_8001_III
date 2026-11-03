@@ -14,27 +14,44 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
+            name="Profissional",
+            fields=[
+                ("usuario_ptr", models.OneToOneField(
+                    auto_created=True,
+                    on_delete=django.db.models.deletion.CASCADE,
+                    parent_link=True,
+                    primary_key=True,
+                    serialize=False,
+                    to=settings.AUTH_USER_MODEL,
+                )),
+                ("tipoContrato", models.CharField(max_length=100)),
+                ("formacao", models.CharField(max_length=255)),
+            ],
+            bases=("app.usuario",),
+            managers=[
+                ("objects", django.contrib.auth.models.UserManager()),
+            ],
+        ),
+        migrations.CreateModel(
             name="Fisioterapeuta",
             fields=[
                 (
-                    "usuario_ptr",
+                    "profissional_ptr",
                     models.OneToOneField(
                         auto_created=True,
                         on_delete=django.db.models.deletion.CASCADE,
                         parent_link=True,
                         primary_key=True,
                         serialize=False,
-                        to=settings.AUTH_USER_MODEL,
+                        to="app.profissional",
                     ),
                 ),
-                ("tipoContrato", models.CharField(max_length=100)),
-                ("formacao", models.CharField(max_length=255)),
                 ("CREFITO", models.CharField(max_length=50, unique=True)),
             ],
             options={
                 "abstract": False,
             },
-            bases=("app.usuario",),
+            bases=("app.profissional",),
             managers=[
                 ("objects", django.contrib.auth.models.UserManager()),
             ],
@@ -43,24 +60,22 @@ class Migration(migrations.Migration):
             name="Nutricionista",
             fields=[
                 (
-                    "usuario_ptr",
+                    "profissional_ptr",
                     models.OneToOneField(
                         auto_created=True,
                         on_delete=django.db.models.deletion.CASCADE,
                         parent_link=True,
                         primary_key=True,
                         serialize=False,
-                        to=settings.AUTH_USER_MODEL,
+                        to="app.profissional",
                     ),
                 ),
-                ("tipoContrato", models.CharField(max_length=100)),
-                ("formacao", models.CharField(max_length=255)),
                 ("CRN", models.CharField(max_length=50, unique=True)),
             ],
             options={
                 "abstract": False,
             },
-            bases=("app.usuario",),
+            bases=("app.profissional",),
             managers=[
                 ("objects", django.contrib.auth.models.UserManager()),
             ],
@@ -69,24 +84,22 @@ class Migration(migrations.Migration):
             name="Psicologo",
             fields=[
                 (
-                    "usuario_ptr",
+                    "profissional_ptr",
                     models.OneToOneField(
                         auto_created=True,
                         on_delete=django.db.models.deletion.CASCADE,
                         parent_link=True,
                         primary_key=True,
                         serialize=False,
-                        to=settings.AUTH_USER_MODEL,
+                        to="app.profissional",
                     ),
                 ),
-                ("tipoContrato", models.CharField(max_length=100)),
-                ("formacao", models.CharField(max_length=255)),
                 ("CRP", models.CharField(max_length=50, unique=True)),
             ],
             options={
                 "abstract": False,
             },
-            bases=("app.usuario",),
+            bases=("app.profissional",),
             managers=[
                 ("objects", django.contrib.auth.models.UserManager()),
             ],
@@ -95,24 +108,22 @@ class Migration(migrations.Migration):
             name="Treinador",
             fields=[
                 (
-                    "usuario_ptr",
+                    "profissional_ptr",
                     models.OneToOneField(
                         auto_created=True,
                         on_delete=django.db.models.deletion.CASCADE,
                         parent_link=True,
                         primary_key=True,
                         serialize=False,
-                        to=settings.AUTH_USER_MODEL,
+                        to="app.profissional",
                     ),
                 ),
-                ("tipoContrato", models.CharField(max_length=100)),
-                ("formacao", models.CharField(max_length=255)),
                 ("especialidade", models.CharField(max_length=100)),
             ],
             options={
                 "abstract": False,
             },
-            bases=("app.usuario",),
+            bases=("app.profissional",),
             managers=[
                 ("objects", django.contrib.auth.models.UserManager()),
             ],

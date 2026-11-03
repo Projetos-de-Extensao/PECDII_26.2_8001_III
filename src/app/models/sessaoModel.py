@@ -32,7 +32,7 @@ class Sessao(models.Model):
     )
     motivoCancelamento = models.TextField(blank=True, default='')
     profissional = models.ForeignKey(
-        'Profissional',
+        'app.Profissional',
         on_delete=models.PROTECT,
         related_name='sessoes',
         null=True,
@@ -100,10 +100,16 @@ class Sessao(models.Model):
 
 
     @exigir_sessao_valida('A sessão precisa estar cadastrada para ser cancelada.')
-    @exigir_status_confirmada('A sessão não pode ser cancelada no estado atual.')
     @exigir_motivo()
     def cancelar(self, motivo):
-        motivo = motivo.strip()
+        if self.status not in (
+            StatusSessao.SOLICITADA,
+            StatusSessao.CONFIRMADA,
+        ):
+            raise ValidationError(
+                'A sessão não pode ser cancelada no estado atual.'
+            )
+
         self.status = StatusSessao.CANCELADA
-        self.motivoCancelamento = motivo
+        self.motivoCancelamento = motivo.strip()
         self.save(update_fields=['status', 'motivoCancelamento'])

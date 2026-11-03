@@ -4,17 +4,18 @@ from django.core.exceptions import ValidationError
 
 from .usuarioModel import Usuario
 from .salaModel import Sala
-from .sessaoModel import Sessao
+#from .sessaoModel import Sessao
 
 
 class Profissional(Usuario):
     tipoContrato = models.CharField(max_length=100)
     formacao = models.CharField(max_length=255)
 
-    class Meta:
-        abstract = True
+    #class Meta:
+        #abstract = True
 
     def solicitarSessao(self, sala, dataHora, duracao, creditosNecessarios):
+        from .sessaoModel import Sessao
         if not isinstance(sala, Sala) or sala.pk is None:
             raise ValidationError(
                 "A sala deve estar cadastrada."
@@ -25,6 +26,7 @@ class Profissional(Usuario):
         return sessao
 
     def cancelarSessao(self, sessao, motivo):
+        from .sessaoModel import Sessao
         if not isinstance(sessao, Sessao):
             raise ValidationError(
                 "A sessão informada é inválida."

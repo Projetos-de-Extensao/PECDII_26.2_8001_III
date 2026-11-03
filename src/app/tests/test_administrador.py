@@ -260,7 +260,7 @@ class AdministradorTests(TestCase):
         Verifica se o administrador consegue desaprovar
         uma sessão solicitada, registrando o motivo.
 
-        A desaprovação utiliza o cancelamento existente
+        A desaprovação utiliza o rejeição existente
         no modelo Sessao.
         """
 
@@ -279,7 +279,7 @@ class AdministradorTests(TestCase):
         # Verifica o status após a desaprovação.
         self.assertEqual(
             sessao.status,
-            StatusSessao.CANCELADA
+            StatusSessao.REJEITADA
         )
 
         # Confirma que a justificativa foi armazenada.
