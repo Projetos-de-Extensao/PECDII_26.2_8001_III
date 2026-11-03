@@ -9,3 +9,5 @@ from .nutricionistaModel import Nutricionista
 from .psicologoModel import Psicologo
 from .fisioterapeutaModel import Fisioterapeuta
 from .administradorModel import Administrador
+from .responsavelModel import Responsavel
+
