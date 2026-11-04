@@ -77,6 +77,16 @@ class Presenca(models.Model):
 
         if errors:
             raise ValidationError(errors)
+    
+
+    @classmethod
+    def novaPresenca(cls, sessao, aluno, status):
+        return Presenca.objects.create(
+            sessao=sessao,
+            aluno=aluno,
+            status=StatusPresenca.AUSENTE,
+        )
+
 
     def registrarPresenca(self, status, justificativa):
         if self._state.adding:

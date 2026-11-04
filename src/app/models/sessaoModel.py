@@ -7,8 +7,13 @@ from django.db import models
 from app.Enums import StatusSessao
 from app.decorators import *
 
+from app.decorators.sessaoDecorators import *
+from app.decorators.alunoDecorators import *
+
 from .salaModel import Sala
 from .profissionalModel import Profissional
+from .presencaModel import Presenca
+from .alunoModel import Aluno
 
 
 class Sessao(models.Model):
@@ -32,11 +37,16 @@ class Sessao(models.Model):
     )
     motivoCancelamento = models.TextField(blank=True, default='')
     profissional = models.ForeignKey(
-        'app.Profissional',
+        Profissional,
         on_delete=models.PROTECT,
         related_name='sessoes',
         null=True,
         blank=True,
+    )
+    ListaPresenca = models.ManyToManyField(
+        Aluno,
+        through=Presenca,
+        related_name='sessoes',
     )
 
     class Meta:
@@ -98,7 +108,6 @@ class Sessao(models.Model):
         self.save(update_fields=['status', 'motivoCancelamento'])
 
 
-
     @exigir_sessao_valida('A sessão precisa estar cadastrada para ser cancelada.')
     @exigir_motivo()
     def cancelar(self, motivo):
@@ -113,3 +122,23 @@ class Sessao(models.Model):
         self.status = StatusSessao.CANCELADA
         self.motivoCancelamento = motivo.strip()
         self.save(update_fields=['status', 'motivoCancelamento'])
+
+
+    @exigir_sessao_valida('A sessão precisa estar cadastrada para ser realizada.')
+    @exigir_status_confirmada('Um aluno não pode ser inscrito em uma sessão que não está confirmada.')
+    @exigir_aluno_valido('O aluno precisa estar cadastrado para ser inscrito em uma sessão.')
+    def inscreverAluno(self, aluno):
+        if aluno.creditos < self.creditosNecessarios:
+            raise ValidationError("O aluno não possui créditos suficientes para se inscrever na sessão.")
+        presenca = Presenca.novaPresenca(self, aluno)
+        return presenca
+
+    @exigir_sessao_valida('A sessão precisa estar cadastrada para que um aluno possa ser removido.')
+    @exigir_aluno_valido('O aluno precisa estar cadastrado para ser removido da sessão.')
+    def removerAluno(self, aluno):
+        presenca = Presenca.objects.filter(sessao=self, aluno=aluno).first()
+
+        if presenca is None:
+            raise ValidationError("O aluno não está inscrito na sessão.")
+
+        presenca.delete()
