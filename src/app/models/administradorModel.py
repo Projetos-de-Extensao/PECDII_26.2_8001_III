@@ -1,10 +1,9 @@
 from django.db import models
 
 from .usuarioModel import Usuario
-from django.core.exceptions import ValidationError
 from .salaModel import Sala
 from .sessaoModel import Sessao
-from app.Enums import StatusSessao
+from app.decorators import *
 
 class Administrador(Usuario):
     """
@@ -41,6 +40,7 @@ class Administrador(Usuario):
 
 
 
+    @exigir_usuario_novo()
     def cadastrarUsuario(self, usuario):
         """
         Cadastra um usuário no sistema PKZ Lab.
@@ -56,18 +56,6 @@ class Administrador(Usuario):
                 uma instância de Usuario ou já esteja cadastrado.
         """
 
-        # Verifica se o objeto recebido pertence à classe Usuario.
-        if not isinstance(usuario, Usuario):
-            raise ValidationError(
-                "O objeto informado deve ser um Usuario."
-            )
-
-        # Impede o cadastro duplicado de uma instância já salva.
-        if not usuario._state.adding:
-            raise ValidationError(
-                "O usuário já está cadastrado."
-            )
-
         # Executa as validações definidas no modelo.
         usuario.full_clean()
 
@@ -75,6 +63,8 @@ class Administrador(Usuario):
         usuario.save()
 
 
+    @exigir_usuario_cadastrado()
+    @exigir_usuario_ativo()
     def desativarUsuario(self, usuario):
         """
         Desativa um usuário cadastrado no sistema PKZ Lab.
@@ -92,24 +82,6 @@ class Administrador(Usuario):
                 inválido ou ainda não esteja cadastrado.
         """
 
-        # Verifica se o objeto informado é um usuário.
-        if not isinstance(usuario, Usuario):
-            raise ValidationError(
-                "O objeto informado deve ser um Usuario."
-            )
-
-        # Impede a desativação de usuários ainda não cadastrados.
-        if usuario._state.adding:
-            raise ValidationError(
-                "O usuário precisa estar cadastrado."
-            )
-
-        # Impede operações desnecessárias.
-        if not usuario.is_active:
-            raise ValidationError(
-                "O usuário já está desativado."
-            )
-
         # Desativa a conta sem excluir seus dados.
         usuario.is_active = False
 
@@ -117,6 +89,7 @@ class Administrador(Usuario):
         usuario.save(update_fields=["is_active"])
 
 
+    @exigir_sala_nova()
     def cadastrarSala(self, sala):
         """
         Cadastra uma nova sala no sistema PKZ Lab.
@@ -133,18 +106,6 @@ class Administrador(Usuario):
                 regras de validação do modelo.
         """
 
-        # Verifica se o objeto recebido pertence à classe Sala.
-        if not isinstance(sala, Sala):
-            raise ValidationError(
-                "O objeto informado deve ser uma Sala."
-            )
-
-        # Impede o cadastro de uma sala já registrada.
-        if not sala._state.adding:
-            raise ValidationError(
-                "A sala já está cadastrada."
-            )
-
         # Executa as validações existentes no modelo Sala.
         sala.full_clean()
 
@@ -152,6 +113,7 @@ class Administrador(Usuario):
         sala.save()
 
 
+    @exigir_sessao_valida()
     def aprovarSessao(self, sessao):
         """
         Aprova uma sessão solicitada no sistema PKZ Lab.
@@ -169,16 +131,11 @@ class Administrador(Usuario):
             ValidationError: Caso o objeto informado não seja uma Sessao
         """
 
-        # Verifica se o objeto recebido é uma sessão.
-        if not isinstance(sessao, Sessao):
-            raise ValidationError(
-                "O objeto informado deve ser uma Sessao."
-            )
-
         # Atualiza o status da sessão para confirmada.
         sessao.confirmar()
 
 
+    @exigir_sessao_valida()
     def desaprovarSessao(self, sessao, motivo):
         """
         Desaprova uma sessão solicitada no sistema PKZ Lab.
@@ -194,12 +151,6 @@ class Administrador(Usuario):
         Raises:
             ValidationError: Caso o objeto informado não seja uma Sessao
         """
-
-        # Verifica se o objeto informado é uma sessão.
-        if not isinstance(sessao, Sessao):
-            raise ValidationError(
-                "O objeto informado deve ser uma Sessao."
-            )
 
         # Reutiliza o método de rejeição já existente.
         # Ele valida o motivo e registra a alteração no banco.
