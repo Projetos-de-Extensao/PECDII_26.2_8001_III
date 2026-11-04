@@ -9,6 +9,7 @@ from app.decorators import *
 
 from app.decorators.sessaoDecorators import *
 from app.decorators.alunoDecorators import *
+from app.decorators.salaDecorators import *
 
 from .salaModel import Sala
 from .profissionalModel import Profissional
@@ -62,6 +63,7 @@ class Sessao(models.Model):
         ]
 
 
+    @exigir_sala_valida('A sala precisa estar cadastrada para solicitar uma sessão.')
     @classmethod
     def solicitar(cls, profissional, sala, dataHora, duracao, creditosNecessarios):
         """
@@ -70,9 +72,6 @@ class Sessao(models.Model):
         pois ele garante que a sessão será criada com o status correto 
         e que os dados serão validados antes de salvar no banco de dados.
         """
-        if not isinstance(sala, Sala) or sala.pk is None:
-            raise ValidationError("A sala deve estar cadastrada.")
-
         if not isinstance(profissional, Profissional) or profissional.pk is None:
             raise ValidationError("O profissional deve estar cadastrado.")
 
