@@ -2,6 +2,7 @@ from .usuarioModel import Usuario
 from .salaModel import Sala
 from .alunoModel import Aluno
 from .sessaoModel import Sessao
+from .presencaModel import Presenca
 from app.Enums import TipoResponsavel
 from .profissionalModel import Profissional
 from .treinadorModel import Treinador
@@ -10,4 +11,3 @@ from .psicologoModel import Psicologo
 from .fisioterapeutaModel import Fisioterapeuta
 from .administradorModel import Administrador
 from .responsavelModel import Responsavel
-
