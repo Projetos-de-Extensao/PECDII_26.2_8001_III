@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from nbformat import ValidationError
+from django.core.exceptions import ValidationError
 
 #Implementa a classe Usuario, que herda da classe de usuario do Django
 class Usuario(AbstractUser):
