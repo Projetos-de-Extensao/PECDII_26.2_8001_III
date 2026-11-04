@@ -80,7 +80,7 @@ class Presenca(models.Model):
     
 
     @classmethod
-    def novaPresenca(cls, sessao, aluno, status):
+    def novaPresenca(cls, sessao, aluno):
         return Presenca.objects.create(
             sessao=sessao,
             aluno=aluno,

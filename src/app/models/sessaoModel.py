@@ -4,16 +4,11 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
 
-from app.Enums import StatusSessao
+from app.Enums import StatusPresenca, StatusSessao
 from app.decorators import *
-
-from app.decorators.sessaoDecorators import *
-from app.decorators.alunoDecorators import *
-from app.decorators.salaDecorators import *
 
 from .salaModel import Sala
 from .profissionalModel import Profissional
-from .presencaModel import Presenca
 from .alunoModel import Aluno
 
 
@@ -46,7 +41,7 @@ class Sessao(models.Model):
     )
     ListaPresenca = models.ManyToManyField(
         Aluno,
-        through=Presenca,
+        through='app.Presenca',
         related_name='sessoes',
     )
 
@@ -127,6 +122,8 @@ class Sessao(models.Model):
     @exigir_status_confirmada('Um aluno não pode ser inscrito em uma sessão que não está confirmada.')
     @exigir_aluno_valido('O aluno precisa estar cadastrado para ser inscrito em uma sessão.')
     def inscreverAluno(self, aluno):
+        from .presencaModel import Presenca
+
         if aluno.creditos < self.creditosNecessarios:
             raise ValidationError("O aluno não possui créditos suficientes para se inscrever na sessão.")
         presenca = Presenca.novaPresenca(self, aluno)
@@ -135,6 +132,8 @@ class Sessao(models.Model):
     @exigir_sessao_valida('A sessão precisa estar cadastrada para que um aluno possa ser removido.')
     @exigir_aluno_valido('O aluno precisa estar cadastrado para ser removido da sessão.')
     def removerAluno(self, aluno):
+        from .presencaModel import Presenca
+
         presenca = Presenca.objects.filter(sessao=self, aluno=aluno).first()
 
         if presenca is None:

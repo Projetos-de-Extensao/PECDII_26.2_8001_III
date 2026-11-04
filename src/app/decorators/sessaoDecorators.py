@@ -1,14 +1,13 @@
 from functools import wraps
 from django.core.exceptions import ValidationError
 from app.Enums import StatusSessao
-from app.models import Sessao
 
 
 def exigir_sessao_valida(msg='A sessão precisa estar cadastrada.'):
     def decorator(func):
         @wraps(func)
         def wrapper(self, sessao, *args, **kwargs):
-
+            from app.models import Sessao
             if not isinstance(sessao, Sessao):
                 raise ValidationError('O objeto informado deve ser uma Sessao.')
 
