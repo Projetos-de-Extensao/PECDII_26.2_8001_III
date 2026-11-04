@@ -83,10 +83,7 @@ class Administrador(Usuario):
         """
 
         # Desativa a conta sem excluir seus dados.
-        usuario.is_active = False
-
-        # Atualiza somente o campo necessário no banco.
-        usuario.save(update_fields=["is_active"])
+        usuario.desativar()
 
 
     @exigir_sala_nova()
