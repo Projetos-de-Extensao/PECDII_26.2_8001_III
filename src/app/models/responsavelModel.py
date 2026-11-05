@@ -59,11 +59,26 @@ class Responsavel(Usuario):
         vinculo.responsavel = novoResponsavel
         vinculo.save(update_fields=["responsavel"])
 
-    # def inscreverEmSessao(self, aluno, sessao):
-    #     return sessao.inscreverAluno(aluno)
+    def inscreverDependenteEmSessao(self, aluno, sessao):
+        """Inscreve um dependente em uma sessão."""
+        if not VinculoResponsavel.objects.filter(
+            responsavel=self, aluno=aluno
+        ).exists():
+            raise ValidationError("Aluno não vinculado a este responsável.")
 
-    # def cancelarInscricaoEmSessao(self, aluno, sessao, motivo):
-    #     return sessao.removerAluno(aluno)
+        return sessao.inscreverAluno(aluno)
+
+    def cancelarInscricaoDependenteEmSessao(self, aluno, sessao, motivo):
+        """Cancela a inscrição de um dependente em uma sessão."""
+        if not VinculoResponsavel.objects.filter(
+            responsavel=self, aluno=aluno
+        ).exists():
+            raise ValidationError("Aluno não vinculado a este responsável.")
+
+        if not motivo or not motivo.strip():
+            raise ValidationError("Informe o motivo do cancelamento.")
+
+        return sessao.removerAluno(aluno)
 
 
 class VinculoResponsavel(models.Model):
