@@ -58,7 +58,7 @@ class Sessao(models.Model):
         ]
 
 
-    @exigir_sala_valida('A sala precisa estar cadastrada para solicitar uma sessão.')
+    #@exigir_sala_valida('A sala precisa estar cadastrada para solicitar uma sessão.')
     @classmethod
     def solicitar(cls, profissional, sala, dataHora, duracao, creditosNecessarios):
         """
@@ -69,6 +69,10 @@ class Sessao(models.Model):
         """
         if not isinstance(profissional, Profissional) or profissional.pk is None:
             raise ValidationError("O profissional deve estar cadastrado.")
+        if not isinstance(sala, Sala) or sala.pk is None:
+            raise ValidationError(
+                "A sala precisa estar cadastrada para solicitar uma sessão."
+            )
 
         sessao = cls(
             sala=sala,

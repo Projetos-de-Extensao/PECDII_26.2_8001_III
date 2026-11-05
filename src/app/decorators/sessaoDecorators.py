@@ -4,17 +4,25 @@ from app.Enums import StatusSessao
 
 
 def exigir_sessao_valida(msg='A sessão precisa estar cadastrada.'):
+    """Valida sessões em métodos de Sessao e de outras classes."""
     def decorator(func):
         @wraps(func)
-        def wrapper(self, sessao, *args, **kwargs):
+        def wrapper(self, *args, **kwargs):
             from app.models import Sessao
+
+            if isinstance(self, Sessao):
+                sessao = self
+            else:
+                sessao = args[0] if args else kwargs.get('sessao')
+
             if not isinstance(sessao, Sessao):
                 raise ValidationError('O objeto informado deve ser uma Sessao.')
 
             if sessao._state.adding:
                 raise ValidationError(msg)
 
-            return func(self, sessao, *args, **kwargs)
+            return func(self, *args, **kwargs)
+
         return wrapper
     return decorator
 
