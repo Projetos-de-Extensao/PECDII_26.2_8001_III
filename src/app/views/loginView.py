@@ -1,5 +1,6 @@
 
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate
+from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -7,13 +8,13 @@ from rest_framework import status
 
 
 class LoginView(APIView):
-    """Autentica usuários utilizando o sistema do Django."""
+    """Autentica usuários e fornece um token de acesso."""
 
     permission_classes = [AllowAny]
     authentication_classes = []
 
     def post(self, request):
-        """Valida credenciais e inicia uma sessão autenticada."""
+        """Valida as credenciais e retorna o token."""
         username = request.data.get("username")
         password = request.data.get("password")
 
@@ -29,19 +30,16 @@ class LoginView(APIView):
             password=password,
         )
 
-        if usuario is None:
+        if usuario is None or not usuario.is_active:
             return Response(
                 {"detail": "Credenciais inválidas."},
                 status=status.HTTP_401_UNAUTHORIZED,
             )
 
-        login(request, usuario)
+        token, _ = Token.objects.get_or_create(user=usuario)
 
-        return Response(
-            {
-                "detail": "Login realizado com sucesso.",
-                "usuario_id": usuario.pk,
-                "username": usuario.username,
-            },
-            status=status.HTTP_200_OK,
-        )
+        return Response({
+            "token": token.key,
+            "usuario_id": usuario.pk,
+            "username": usuario.username,
+        })

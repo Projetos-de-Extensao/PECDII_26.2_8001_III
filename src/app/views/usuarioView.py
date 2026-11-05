@@ -19,8 +19,17 @@ class UsuarioView(ModelViewSet):
     """
 
     queryset = Usuario.objects.all()
-
     serializer_class = UsuarioSerializer
+
+    def get_queryset(self):
+        """Restringe a consulta aos próprios dados ou aos administradores."""
+        usuario = self.request.user
+
+        if IsAdministrador().has_permission(self.request, self):
+            return Usuario.objects.all()
+
+        return Usuario.objects.filter(pk=usuario.pk)
+
 
     def get_permissions(self):
         """
@@ -30,8 +39,8 @@ class UsuarioView(ModelViewSet):
         Operações de escrita exigem autorização administrativa.
         """
 
-        # Operações de consulta.
-        if self.action in ["list", "retrieve"]:
+        # Consulta individual exige autenticação.
+        if self.action == "retrieve":
             return [IsAuthenticated()]
 
         # Cadastro, atualização e exclusão.

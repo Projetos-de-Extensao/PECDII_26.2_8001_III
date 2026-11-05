@@ -24,10 +24,21 @@ class ResponsavelView(ModelViewSet):
 
     queryset = Responsavel.objects.all()
     serializer_class = ResponsavelSerializer
+    
+
+    def get_queryset(self):
+        """Permite consultar todos os responsáveis ou apenas o próprio cadastro."""
+        usuario = self.request.user
+
+        if IsAdministrador().has_permission(self.request, self):
+            return Responsavel.objects.all()
+
+        return Responsavel.objects.filter(pk=usuario.pk)
+
 
     def get_permissions(self):
-        """Restringe alterações a administradores."""
-        if self.action in ["list", "retrieve"]:
+        """Restringe listagens e alterações a administradores."""
+        if self.action == "retrieve":
             return [IsAuthenticated()]
 
         return [IsAdministrador()]
