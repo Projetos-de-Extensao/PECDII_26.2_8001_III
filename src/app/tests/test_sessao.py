@@ -186,3 +186,28 @@ class SessaoTests(TestCase):
         self.assertEqual(sessao.status, StatusSessao.CANCELADA)
         self.assertFalse(Presenca.objects.filter(sessao=sessao).exists())
 
+    def test_cancelamento_altera_status_das_presencas(self):
+        """Cancela as inscrições sem excluir os registros."""
+        sessao = self.criar_sessao(
+            status=StatusSessao.CONFIRMADA,
+            creditosNecessarios=2,
+        )
+        aluno = Aluno.objects.create_user(
+            username="aluno_status_cancelado",
+            password="Senha123!",
+            matricula="CANC-STATUS",
+            creditos=5,
+        )
+
+        presenca = sessao.inscreverAluno(aluno)
+
+        self.assertEqual(presenca.status, "PENDENTE")
+
+        sessao.cancelar("Indisponibilidade da sala")
+
+        presenca.refresh_from_db()
+        aluno.refresh_from_db()
+
+        self.assertEqual(presenca.status, "CANCELADA")
+        self.assertEqual(aluno.creditos, 5)
+        self.assertTrue(Presenca.objects.filter(pk=presenca.pk).exists())

@@ -180,3 +180,10 @@ class PresencaTests(TestCase):
         self.assertFalse(presenca_admin.has_add_permission(request))
         self.assertFalse(presenca_admin.has_change_permission(request))
         self.assertFalse(presenca_admin.has_delete_permission(request))
+
+    def test_nova_inscricao_inicia_pendente(self):
+        """Uma inscrição nova começa com status pendente."""
+        sessao = self.criar_sessao()
+        presenca = Presenca.novaPresenca(sessao, self.aluno)
+
+        self.assertEqual(presenca.status, StatusPresenca.PENDENTE)
