@@ -2,7 +2,8 @@ from datetime import timedelta
 
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
-from django.db import models
+from django.db import models, transaction
+from django.utils import timezone
 
 from app.Enums import StatusPresenca, StatusSessao
 from app.decorators import *
@@ -125,22 +126,50 @@ class Sessao(models.Model):
     @exigir_sessao_valida('A sessão precisa estar cadastrada para ser realizada.')
     @exigir_status_confirmada('Um aluno não pode ser inscrito em uma sessão que não está confirmada.')
     @exigir_aluno_valido('O aluno precisa estar cadastrado para ser inscrito em uma sessão.')
+    @transaction.atomic
     def inscreverAluno(self, aluno):
+        """Inscreve o aluno e desconta os créditos da sessão."""
         from .presencaModel import Presenca
 
+        if self.dataHora <= timezone.now():
+            raise ValidationError("A sessão já começou.")
+
+        aluno = Aluno.objects.select_for_update().get(pk=aluno.pk)
+
+        if Presenca.objects.filter(sessao=self, aluno=aluno).exists():
+            raise ValidationError("Aluno já inscrito nesta sessão.")
+
         if aluno.creditos < self.creditosNecessarios:
-            raise ValidationError("O aluno não possui créditos suficientes para se inscrever na sessão.")
+            raise ValidationError("Créditos insuficientes.")
+
         presenca = Presenca.novaPresenca(self, aluno)
+        aluno.creditos -= self.creditosNecessarios
+        aluno.save(update_fields=["creditos"])
+
         return presenca
 
     @exigir_sessao_valida('A sessão precisa estar cadastrada para que um aluno possa ser removido.')
     @exigir_aluno_valido('O aluno precisa estar cadastrado para ser removido da sessão.')
+    @transaction.atomic
     def removerAluno(self, aluno):
+        """Cancela a inscrição e devolve créditos com 12h de antecedência."""
         from .presencaModel import Presenca
 
-        presenca = Presenca.objects.filter(sessao=self, aluno=aluno).first()
+        agora = timezone.now()
+
+        if self.dataHora <= agora:
+            raise ValidationError("A sessão já começou.")
+
+        aluno = Aluno.objects.select_for_update().get(pk=aluno.pk)
+        presenca = Presenca.objects.filter(
+            sessao=self, aluno=aluno
+        ).first()
 
         if presenca is None:
-            raise ValidationError("O aluno não está inscrito na sessão.")
+            raise ValidationError("O aluno não está inscrito nesta sessão.")
+
+        if self.dataHora - agora >= timedelta(hours=12):
+            aluno.creditos += self.creditosNecessarios
+            aluno.save(update_fields=["creditos"])
 
         presenca.delete()
