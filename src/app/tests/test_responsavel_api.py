@@ -117,3 +117,59 @@ class TestesResponsavelAPI(APITestCase):
         self.assertTrue(Presenca.objects.filter(
             aluno=self.aluno, sessao=self.sessao
         ).exists())
+
+    
+    def test_inscricao_desconta_creditos(self):
+        """Desconta os créditos somente após inscrição válida."""
+        self.client.force_authenticate(user=self.responsavel)
+
+        resposta = self.client.post(self.url_inscricao, self.dados)
+        self.aluno.refresh_from_db()
+
+        self.assertEqual(resposta.status_code, 201)
+        self.assertEqual(self.aluno.creditos, 3)
+
+    def test_cancelamento_antecipado_devolve_creditos(self):
+        """Devolve créditos quando faltam pelo menos 12 horas."""
+        self.client.force_authenticate(user=self.responsavel)
+        self.client.post(self.url_inscricao, self.dados)
+
+        resposta = self.client.delete(
+            self.url_cancelamento,
+            {**self.dados, "motivo": "Desistência"},
+            format="json",
+        )
+        self.aluno.refresh_from_db()
+
+        self.assertEqual(resposta.status_code, 204)
+        self.assertEqual(self.aluno.creditos, 5)
+
+    def test_cancelamento_tardio_nao_devolve_creditos(self):
+        """Não reembolsa cancelamentos com menos de 12 horas."""
+        self.client.force_authenticate(user=self.responsavel)
+        self.client.post(self.url_inscricao, self.dados)
+
+        self.sessao.dataHora = timezone.now() + timedelta(hours=6)
+        self.sessao.save(update_fields=["dataHora"])
+
+        resposta = self.client.delete(
+            self.url_cancelamento,
+            {**self.dados, "motivo": "Desistência"},
+            format="json",
+        )
+        self.aluno.refresh_from_db()
+
+        self.assertEqual(resposta.status_code, 204)
+        self.assertEqual(self.aluno.creditos, 3)
+
+    def test_inscricao_duplicada_nao_desconta_novamente(self):
+        """Rejeita duplicidade sem consumir créditos adicionais."""
+        self.client.force_authenticate(user=self.responsavel)
+
+        self.client.post(self.url_inscricao, self.dados)
+        resposta = self.client.post(self.url_inscricao, self.dados)
+        self.aluno.refresh_from_db()
+
+        self.assertEqual(resposta.status_code, 400)
+        self.assertEqual(self.aluno.creditos, 3)
+
