@@ -211,3 +211,72 @@ class SessaoTests(TestCase):
         self.assertEqual(presenca.status, "CANCELADA")
         self.assertEqual(aluno.creditos, 5)
         self.assertTrue(Presenca.objects.filter(pk=presenca.pk).exists())
+
+    def test_reinscricao_apos_desistencia(self):
+        """Permite reinscrição sem duplicar o registro."""
+        sessao = self.criar_sessao(
+            status=StatusSessao.CONFIRMADA,
+            creditosNecessarios=2,
+        )
+        aluno = Aluno.objects.create_user(
+            username="aluno_reinscricao",
+            password="Senha123!",
+            matricula="REINS-01",
+            creditos=5,
+        )
+
+        sessao.inscreverAluno(aluno)
+        sessao.removerAluno(aluno)
+        sessao.inscreverAluno(aluno)
+
+        aluno.refresh_from_db()
+        presenca = Presenca.objects.get(sessao=sessao, aluno=aluno)
+
+        self.assertEqual(aluno.creditos, 3)
+        self.assertEqual(presenca.status, "PENDENTE")
+        self.assertEqual(Presenca.objects.filter(sessao=sessao, aluno=aluno).count(), 1)    
+
+    def test_desistencia_duplicada_nao_reembolsa(self):
+        """Uma inscrição não pode ser cancelada duas vezes."""
+        sessao = self.criar_sessao(
+            status=StatusSessao.CONFIRMADA,
+            creditosNecessarios=2,
+        )
+        aluno = Aluno.objects.create_user(
+            username="aluno_dupla_desistencia",
+            password="Senha123!",
+            matricula="DESIST-01",
+            creditos=5,
+        )
+
+        sessao.inscreverAluno(aluno)
+        sessao.removerAluno(aluno)
+
+        with self.assertRaises(ValidationError):
+            sessao.removerAluno(aluno)
+
+        aluno.refresh_from_db()
+        self.assertEqual(aluno.creditos, 5)
+
+    def test_cancelamento_nao_reembolsa_desistente(self):
+        """Reembolsa somente alunos com inscrição ativa."""
+        sessao = self.criar_sessao(
+            status=StatusSessao.CONFIRMADA,
+            creditosNecessarios=2,
+        )
+        aluno = Aluno.objects.create_user(
+            username="aluno_desistente_cancelamento",
+            password="Senha123!",
+            matricula="DESIST-02",
+            creditos=5,
+        )
+
+        sessao.inscreverAluno(aluno)
+        sessao.removerAluno(aluno)
+        sessao.cancelar("Indisponibilidade da sala")
+
+        aluno.refresh_from_db()
+        presenca = Presenca.objects.get(sessao=sessao, aluno=aluno)
+
+        self.assertEqual(aluno.creditos, 5)
+        self.assertEqual(presenca.status, "DESISTENTE")

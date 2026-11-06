@@ -7,6 +7,7 @@ from django.test import TestCase
 from django.utils import timezone
 
 from app.Enums import StatusSessao
+from app.Enums.StatusPresencaEnum import StatusPresenca
 from app.models import Aluno, Presenca, Profissional, Responsavel, Sala, Sessao
 from app.models.responsavelModel import VinculoResponsavel
 
@@ -58,7 +59,8 @@ class TestesInscricaoResponsavel(TestCase):
         self.responsavel.cancelarInscricaoDependenteEmSessao(
             self.aluno, self.sessao, "Solicitação do responsável"
         )
-        self.assertFalse(Presenca.objects.filter(sessao=self.sessao, aluno=self.aluno).exists())
+        presenca = Presenca.objects.get(sessao=self.sessao, aluno=self.aluno)
+        self.assertEqual(presenca.status, StatusPresenca.DESISTENTE)
         self.sessao.refresh_from_db()
         self.assertEqual(self.sessao.status, StatusSessao.CONFIRMADA)
 

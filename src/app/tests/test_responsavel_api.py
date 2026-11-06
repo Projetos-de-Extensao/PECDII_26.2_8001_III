@@ -9,6 +9,7 @@ from rest_framework.test import APITestCase
 from app.Enums import StatusSessao
 from app.models import Aluno, Presenca, Profissional, Responsavel, Sala, Sessao
 from app.models.responsavelModel import VinculoResponsavel
+from app.Enums.StatusPresencaEnum import StatusPresenca
 
 
 class TestesResponsavelAPI(APITestCase):
@@ -100,9 +101,8 @@ class TestesResponsavelAPI(APITestCase):
         )
 
         self.assertEqual(resposta.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertFalse(Presenca.objects.filter(
-            aluno=self.aluno, sessao=self.sessao
-        ).exists())
+        presenca = Presenca.objects.get(aluno=self.aluno, sessao=self.sessao)
+        self.assertEqual(presenca.status, StatusPresenca.DESISTENTE)
 
     def test_cancelamento_sem_motivo(self):
         """Cancelamento sem justificativa deve ser recusado."""
