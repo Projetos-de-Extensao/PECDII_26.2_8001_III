@@ -104,3 +104,78 @@ class TestesAlunoAPI(APITestCase):
 
         self.assertEqual(resposta.status_code, status.HTTP_403_FORBIDDEN)
         self.assertFalse(Aluno.objects.filter(matricula="MAT-004").exists())
+
+
+    def test_administrador_edita_aluno(self):
+        """Administrador pode atualizar dados do aluno."""
+        self.client.force_authenticate(user=self.admin)
+
+        resposta = self.client.patch(
+            reverse("aluno-detail", args=[self.aluno.pk]),
+            {"first_name": "Carlos", "matricula": "MAT-100"},
+        )
+
+        self.assertEqual(resposta.status_code, status.HTTP_200_OK)
+        self.aluno.refresh_from_db()
+        self.assertEqual(self.aluno.first_name, "Carlos")
+        self.assertEqual(self.aluno.matricula, "MAT-100")
+
+
+    def test_responsavel_edita_dependente(self):
+        """Responsável pode atualizar dados cadastrais do dependente."""
+        self.client.force_authenticate(user=self.responsavel)
+
+        resposta = self.client.patch(
+            reverse("aluno-detail", args=[self.aluno.pk]),
+            {"first_name": "Pedro", "telefone": "21999999999"},
+        )
+
+        self.assertEqual(resposta.status_code, status.HTTP_200_OK)
+        self.aluno.refresh_from_db()
+        self.assertEqual(self.aluno.first_name, "Pedro")
+        self.assertEqual(self.aluno.telefone, "21999999999")
+
+
+    def test_responsavel_nao_edita_outro_aluno(self):
+        """Responsável não pode editar aluno sem vínculo."""
+        self.client.force_authenticate(user=self.responsavel)
+
+        resposta = self.client.patch(
+            reverse("aluno-detail", args=[self.outro_aluno.pk]),
+            {"first_name": "Alterado"},
+        )
+
+        self.assertEqual(resposta.status_code, status.HTTP_404_NOT_FOUND)
+
+
+    def test_aluno_nao_edita_proprio_cadastro(self):
+        """Aluno possui acesso somente de leitura."""
+        self.client.force_authenticate(user=self.aluno)
+
+        resposta = self.client.patch(
+            reverse("aluno-detail", args=[self.aluno.pk]),
+            {"first_name": "Alterado"},
+        )
+
+        self.assertEqual(resposta.status_code, status.HTTP_404_NOT_FOUND)
+
+
+    def test_responsavel_nao_altera_campos_restritos(self):
+        """Responsável não pode alterar matrícula, créditos ou senha."""
+        self.client.force_authenticate(user=self.responsavel)
+
+        resposta = self.client.patch(
+            reverse("aluno-detail", args=[self.aluno.pk]),
+            {
+                "matricula": "MAT-999",
+                "creditos": 999,
+                "password": "NovaSenha123!",
+            },
+        )
+
+        self.assertEqual(resposta.status_code, status.HTTP_200_OK)
+
+        self.aluno.refresh_from_db()
+        self.assertEqual(self.aluno.matricula, "MAT-001")
+        self.assertNotEqual(self.aluno.creditos, 999)
+        self.assertTrue(self.aluno.check_password("Senha123!"))
