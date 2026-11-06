@@ -1,17 +1,19 @@
-from rest_framework import serializers
-
 from app.models import Aluno
+from .usuarioSerializer import UsuarioSerializer
 
 
-class AlunoSerializer(serializers.ModelSerializer):
-    """Converte os dados do aluno para a API."""
+class AlunoSerializer(UsuarioSerializer):
+    """Serializa alunos reutilizando as validações de usuário."""
 
-    class Meta:
+    class Meta(UsuarioSerializer.Meta):
         model = Aluno
-        fields = [
-            "id",
+        fields = UsuarioSerializer.Meta.fields + [
             "matricula",
             "responsavel",
             "creditos",
         ]
-        read_only_fields = ["creditos"]
+        read_only_fields = ["id", "creditos"]
+
+    def create(self, validated_data):
+        """Cria um aluno com senha protegida pelo Django."""
+        return Aluno.objects.create_user(**validated_data)
