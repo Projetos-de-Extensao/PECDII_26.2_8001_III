@@ -12,6 +12,7 @@ class AlunoView(
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
     GenericViewSet,
 ):
     """Permite cadastrar e consultar alunos conforme as permissões."""
@@ -31,7 +32,20 @@ class AlunoView(
         if IsAdministrador().has_permission(self.request, self):
             return Aluno.objects.all()
 
+        if self.action == "partial_update":
+            return Aluno.objects.filter(
+                vinculo_responsavel__responsavel_id=usuario.pk
+            )
+
         return Aluno.objects.filter(
             Q(pk=usuario.pk) |
             Q(vinculo_responsavel__responsavel_id=usuario.pk)
         )
+
+    def update(self, request, *args, **kwargs):
+        """Permite somente atualização parcial."""
+        if not kwargs.get("partial", False):
+            from rest_framework.exceptions import MethodNotAllowed
+            raise MethodNotAllowed("PUT")
+
+        return super().update(request, *args, **kwargs)
