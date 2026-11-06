@@ -111,7 +111,7 @@ class ProfissionalModelTests(TestCase):
     def test_cancelar_sessao(self):
         sessao = self.treinador.solicitarSessao(
             sala=self.sala,
-            dataHora=timezone.now(),
+            dataHora=timezone.now() + timedelta(days=1),
             duracao=timedelta(hours=1),
             creditosNecessarios=2,
         )

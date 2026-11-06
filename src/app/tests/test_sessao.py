@@ -7,6 +7,7 @@ from django.utils import timezone
 
 from app.Enums import StatusSessao
 from app.models import Sala, Sessao
+from app.models import Aluno, Presenca, Sala, Sessao
 
 
 class SessaoTests(TestCase):
@@ -14,7 +15,7 @@ class SessaoTests(TestCase):
         sala = Sala.objects.create(numero=101, capacidade=20)
         dados = {
             'sala': sala,
-            'dataHora': timezone.now(),
+            'dataHora': timezone.now() + timedelta(days=1),
             'duracao': timedelta(minutes=60),
             'creditosNecessarios': 1,
         }
@@ -107,3 +108,81 @@ class SessaoTests(TestCase):
 
                 with self.assertRaises(ValidationError):
                     sessao.cancelar('Motivo')
+
+
+    
+    def test_cancelamento_reembolsa_todos(self):
+        """Devolve integralmente os créditos de todos os inscritos."""
+        sessao = self.criar_sessao(
+            status=StatusSessao.CONFIRMADA,
+            creditosNecessarios=2,
+        )
+        alunos = [
+            Aluno.objects.create_user(
+                username=f"aluno_reembolso_{i}",
+                password="Senha123!",
+                matricula=f"REEMB-{i}",
+                creditos=5,
+            )
+            for i in range(2)
+        ]
+
+        for aluno in alunos:
+            sessao.inscreverAluno(aluno)
+
+        sessao.cancelar("Indisponibilidade do estabelecimento")
+
+        for aluno in alunos:
+            aluno.refresh_from_db()
+            self.assertEqual(aluno.creditos, 5)
+
+    def test_cancelamento_repetido_nao_reembolsa(self):
+        """Impede que a mesma sessão seja reembolsada duas vezes."""
+        sessao = self.criar_sessao(
+            status=StatusSessao.CONFIRMADA,
+            creditosNecessarios=2,
+        )
+        aluno = Aluno.objects.create_user(
+            username="aluno_repetido",
+            password="Senha123!",
+            matricula="REEMB-REP",
+            creditos=5,
+        )
+        sessao.inscreverAluno(aluno)
+        sessao.cancelar("Cancelamento")
+
+        with self.assertRaises(ValidationError):
+            sessao.cancelar("Novo cancelamento")
+
+        aluno.refresh_from_db()
+        self.assertEqual(aluno.creditos, 5)
+
+    def test_cancelamento_preserva_presencas(self):
+        """Mantém os registros dos inscritos após o cancelamento."""
+        sessao = self.criar_sessao(
+            status=StatusSessao.CONFIRMADA,
+            creditosNecessarios=2,
+        )
+        aluno = Aluno.objects.create_user(
+            username="aluno_historico",
+            password="Senha123!",
+            matricula="REEMB-HIST",
+            creditos=5,
+        )
+        sessao.inscreverAluno(aluno)
+        sessao.cancelar("Cancelamento")
+
+        self.assertTrue(
+            Presenca.objects.filter(sessao=sessao, aluno=aluno).exists()
+        )
+
+    def test_cancelamento_sem_inscritos_nao_gera_creditos(self):
+        """Cancela uma sessão solicitada sem gerar reembolsos."""
+        sessao = self.criar_sessao()
+
+        sessao.cancelar("Sessão indisponível")
+        sessao.refresh_from_db()
+
+        self.assertEqual(sessao.status, StatusSessao.CANCELADA)
+        self.assertFalse(Presenca.objects.filter(sessao=sessao).exists())
+
