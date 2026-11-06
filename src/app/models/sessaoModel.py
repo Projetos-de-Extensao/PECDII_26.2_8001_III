@@ -126,14 +126,15 @@ class Sessao(models.Model):
             raise ValidationError("Não é possível cancelar uma sessão iniciada.")
 
         alunos_ids = Presenca.objects.filter(
-            sessao=sessao
+            sessao=sessao,
+            status=StatusPresenca.PENDENTE,
         ).values_list("aluno_id", flat=True)
 
         Aluno.objects.filter(pk__in=alunos_ids).update(
             creditos=F("creditos") + sessao.creditosNecessarios
         )
 
-        Presenca.objects.filter(sessao=sessao).update(
+        Presenca.objects.filter(sessao=sessao, status=StatusPresenca.PENDENTE).update(
             status=StatusPresenca.CANCELADA
         )
 
@@ -171,13 +172,18 @@ class Sessao(models.Model):
 
         aluno = Aluno.objects.select_for_update().get(pk=aluno.pk)
 
-        if Presenca.objects.filter(sessao=self, aluno=aluno).exists():
+        presenca = Presenca.objects.filter(sessao=self, aluno=aluno).first()
+        if presenca and presenca.status != StatusPresenca.DESISTENTE:
             raise ValidationError("Aluno já inscrito nesta sessão.")
 
         if aluno.creditos < self.creditosNecessarios:
             raise ValidationError("Créditos insuficientes.")
 
-        presenca = Presenca.novaPresenca(self, aluno)
+        if presenca:
+            presenca.status = StatusPresenca.PENDENTE
+            presenca.save(update_fields=["status"])
+        else:
+            presenca = Presenca.novaPresenca(self, aluno)
         aluno.creditos -= self.creditosNecessarios
         aluno.save(update_fields=["creditos"])
 
@@ -200,11 +206,12 @@ class Sessao(models.Model):
             sessao=self, aluno=aluno
         ).first()
 
-        if presenca is None:
+        if presenca is None or presenca.status != StatusPresenca.PENDENTE:
             raise ValidationError("O aluno não está inscrito nesta sessão.")
 
         if self.dataHora - agora >= timedelta(hours=12):
             aluno.creditos += self.creditosNecessarios
             aluno.save(update_fields=["creditos"])
 
-        presenca.delete()
+        presenca.status = StatusPresenca.DESISTENTE
+        presenca.save(update_fields=["status"])
