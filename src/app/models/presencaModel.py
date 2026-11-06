@@ -81,12 +81,15 @@ class Presenca(models.Model):
 
     @classmethod
     def novaPresenca(cls, sessao, aluno):
-        return Presenca.objects.create(
+        """Cria uma inscrição, impedindo duplicidade."""
+        if cls.objects.filter(sessao=sessao, aluno=aluno).exists():
+            raise ValidationError("Aluno já inscrito nesta sessão.")
+
+        return cls.objects.create(
             sessao=sessao,
             aluno=aluno,
             status=StatusPresenca.AUSENTE,
         )
-
 
     def registrarPresenca(self, status, justificativa):
         if self._state.adding:

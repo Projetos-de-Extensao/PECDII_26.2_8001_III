@@ -1,22 +1,18 @@
-
-from rest_framework.viewsets import ModelViewSet
-from rest_framework.permissions import IsAuthenticated
-
-from app.models import Responsavel
-from app.serializers import ResponsavelSerializer
-from app.permissions.administradorPermission import IsAdministrador
-
-
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
-from rest_framework.decorators import action
-from rest_framework.response import Response
+
 from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet
 
-from app.models import Aluno
-
+from app.models import Aluno, Responsavel, Sessao
+from app.serializers import ResponsavelSerializer
+from app.permissions.administradorPermission import IsAdministrador
+from app.permissions.responsavelPermission import IsResponsavel
 
 
 class ResponsavelView(ModelViewSet):
@@ -37,9 +33,12 @@ class ResponsavelView(ModelViewSet):
 
 
     def get_permissions(self):
-        """Restringe listagens e alterações a administradores."""
+        """Define o acesso conforme a operação solicitada."""
         if self.action == "retrieve":
             return [IsAuthenticated()]
+
+        if self.action in ["inscrever_dependente", "cancelar_inscricao"]:
+            return [IsResponsavel()]
 
         return [IsAdministrador()]
 
@@ -94,4 +93,38 @@ class ResponsavelView(ModelViewSet):
             raise ValidationError(erro.messages)
 
         return Response({"detail": "Responsabilidade transferida."})
+
+    @action(detail=True, methods=["post"], url_path="inscricoes")
+    def inscrever_dependente(self, request, pk=None):
+        """Inscreve um dependente em uma sessão."""
+        responsavel = self.get_object()
+        aluno = get_object_or_404(Aluno, pk=request.data.get("aluno_id"))
+        sessao = get_object_or_404(Sessao, pk=request.data.get("sessao_id"))
+
+        try:
+            responsavel.inscreverDependenteEmSessao(aluno, sessao)
+        except DjangoValidationError as erro:
+            raise ValidationError(erro.messages)
+
+        return Response(
+            {"detail": "Dependente inscrito."},
+            status=status.HTTP_201_CREATED,
+        )
+
+
+    @action(detail=True, methods=["delete"], url_path="inscricoes/cancelar")
+    def cancelar_inscricao(self, request, pk=None):
+        """Cancela a inscrição de um dependente em uma sessão."""
+        responsavel = self.get_object()
+        aluno = get_object_or_404(Aluno, pk=request.data.get("aluno_id"))
+        sessao = get_object_or_404(Sessao, pk=request.data.get("sessao_id"))
+
+        try:
+            responsavel.cancelarInscricaoDependenteEmSessao(
+                aluno, sessao, request.data.get("motivo")
+            )
+        except DjangoValidationError as erro:
+            raise ValidationError(erro.messages)
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
 

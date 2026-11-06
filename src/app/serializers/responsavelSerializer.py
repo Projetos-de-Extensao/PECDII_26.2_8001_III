@@ -1,10 +1,17 @@
 
 from app.models import Responsavel
 from .usuarioSerializer import UsuarioSerializer
+from rest_framework import serializers
 
 
 class ResponsavelSerializer(UsuarioSerializer):
     """Serializa os dados do responsável e seus dependentes."""
+
+    dependentes = serializers.SerializerMethodField()
+
+    def get_dependentes(self, obj):
+        """Retorna os IDs dos alunos vinculados ao responsável."""
+        return list(obj.dependentes.values_list("aluno_id", flat=True))
 
     class Meta(UsuarioSerializer.Meta):
         model = Responsavel
