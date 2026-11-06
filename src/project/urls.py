@@ -10,6 +10,7 @@ from app.views.administradorView import AdministradorView
 from app.views.responsavelView import ResponsavelView
 from app.views.loginView import LoginView
 from app.views.logoutView import LogoutView
+from app.views.alunoView import AlunoView
 
 
 router = DefaultRouter()
@@ -28,6 +29,12 @@ router.register(
     r'responsaveis',
     ResponsavelView,
     basename='responsavel'
+)
+
+router.register(
+    r'alunos',
+    AlunoView,
+    basename='aluno'
 )
 
 urlpatterns = [

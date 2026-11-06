@@ -2,3 +2,4 @@ from .usuarioSerializer import UsuarioSerializer
 from .salaSerializer import SalaSerializer
 from .administradorSerializer import AdministradorSerializer
 from .responsavelSerializer import ResponsavelSerializer
+from .alunoSerializer import AlunoSerializer
