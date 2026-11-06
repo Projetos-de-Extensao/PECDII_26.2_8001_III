@@ -133,6 +133,10 @@ class Sessao(models.Model):
             creditos=F("creditos") + sessao.creditosNecessarios
         )
 
+        Presenca.objects.filter(sessao=sessao).update(
+            status=StatusPresenca.CANCELADA
+        )
+
         sessao.status = StatusSessao.CANCELADA
         sessao.motivoCancelamento = motivo.strip()
         sessao.save(update_fields=["status", "motivoCancelamento"])

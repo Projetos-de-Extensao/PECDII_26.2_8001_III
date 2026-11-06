@@ -55,9 +55,12 @@ class Presenca(models.Model):
                 'status',
                 flat=True,
             ).first()
-            if status_sessao and status_sessao not in (
+            if status_sessao and (
+                status_sessao == StatusSessao.CANCELADA and self.status != StatusPresenca.CANCELADA or status_sessao not in (
                 StatusSessao.CONFIRMADA,
                 StatusSessao.REALIZADA,
+                StatusSessao.CANCELADA,
+                )
             ):
                 errors['sessao'] = (
                     'A presença só pode ser registrada em sessões confirmadas '
@@ -88,7 +91,7 @@ class Presenca(models.Model):
         return cls.objects.create(
             sessao=sessao,
             aluno=aluno,
-            status=StatusPresenca.AUSENTE,
+            status=StatusPresenca.PENDENTE,
         )
 
     def registrarPresenca(self, status, justificativa):
