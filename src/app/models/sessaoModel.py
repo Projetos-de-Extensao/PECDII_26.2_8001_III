@@ -1,5 +1,5 @@
 from datetime import timedelta
-
+from django.db.models import F
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models, transaction
@@ -109,18 +109,49 @@ class Sessao(models.Model):
 
     @exigir_sessao_valida('A sessão precisa estar cadastrada para ser cancelada.')
     @exigir_motivo()
+    @transaction.atomic
     def cancelar(self, motivo):
-        if self.status not in (
+        """Cancela a sessão e reembolsa integralmente os alunos inscritos."""
+        from .presencaModel import Presenca
+
+        sessao = Sessao.objects.select_for_update().get(pk=self.pk)
+
+        if sessao.status not in (
             StatusSessao.SOLICITADA,
             StatusSessao.CONFIRMADA,
         ):
-            raise ValidationError(
-                'A sessão não pode ser cancelada no estado atual.'
-            )
+            raise ValidationError("A sessão não pode ser cancelada neste estado.")
 
-        self.status = StatusSessao.CANCELADA
-        self.motivoCancelamento = motivo.strip()
-        self.save(update_fields=['status', 'motivoCancelamento'])
+        if sessao.dataHora <= timezone.now():
+            raise ValidationError("Não é possível cancelar uma sessão iniciada.")
+
+        alunos_ids = Presenca.objects.filter(
+            sessao=sessao
+        ).values_list("aluno_id", flat=True)
+
+        Aluno.objects.filter(pk__in=alunos_ids).update(
+            creditos=F("creditos") + sessao.creditosNecessarios
+        )
+
+        sessao.status = StatusSessao.CANCELADA
+        sessao.motivoCancelamento = motivo.strip()
+        sessao.save(update_fields=["status", "motivoCancelamento"])
+
+        self.status = sessao.status
+        self.motivoCancelamento = sessao.motivoCancelamento
+
+    #def cancelar(self, motivo):
+        #if self.status not in (
+           # StatusSessao.SOLICITADA,
+            #StatusSessao.CONFIRMADA,
+        #):
+            #raise ValidationError(
+                #'A sessão não pode ser cancelada no estado atual.'
+            #)
+
+        #self.status = StatusSessao.CANCELADA
+        #self.motivoCancelamento = motivo.strip()
+       # self.save(update_fields=['status', 'motivoCancelamento'])
 
 
     @exigir_sessao_valida('A sessão precisa estar cadastrada para ser realizada.')
