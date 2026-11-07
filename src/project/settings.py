@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     # Third-party apps
     'rest_framework',
     "rest_framework.authtoken",
+    "drf_spectacular",
 
     # Local apps
     'app'
@@ -140,12 +141,28 @@ MAILERS = {
 AUTH_USER_MODEL = 'app.Usuario'
 
 # Django REST Framework settings
-# Autenticação por token e acesso restrito a usuários autenticados.
 REST_FRAMEWORK = {
+    # Autenticação por token e acesso restrito a usuários autenticados.
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.TokenAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
+    ],
+    # Configuração do schema para documentação da API.
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.TokenAuthentication",
+    ],
+}
+
+# Django Spectacular settings for API documentation
+SPECTACULAR_SETTINGS = {
+    "TITLE": "API PKZ Lab",
+    "DESCRIPTION": "API de gerenciamento de usuários, salas e sessões.",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "AUTHENTICATION_WHITELIST": [
+        "rest_framework.authentication.TokenAuthentication",
     ],
 }
