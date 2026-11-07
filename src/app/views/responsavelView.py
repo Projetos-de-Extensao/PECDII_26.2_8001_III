@@ -9,10 +9,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from app.models import Aluno, Responsavel, Sessao
+from app.models import Aluno, Responsavel, Sessao, Presenca
 from app.serializers import ResponsavelSerializer
 from app.permissions.administradorPermission import IsAdministrador
 from app.permissions.responsavelPermission import IsResponsavel
+
 
 
 class ResponsavelView(ModelViewSet):
@@ -37,7 +38,7 @@ class ResponsavelView(ModelViewSet):
         if self.action == "retrieve":
             return [IsAuthenticated()]
 
-        if self.action in ["inscrever_dependente", "cancelar_inscricao"]:
+        if self.action in ["inscrever_dependente", "cancelar_inscricao", "agendamentos"]:
             return [IsResponsavel()]
 
         return [IsAdministrador()]
@@ -127,4 +128,33 @@ class ResponsavelView(ModelViewSet):
             raise ValidationError(erro.messages)
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=["get"], url_path="agendamentos")
+    def agendamentos(self, request, pk=None):
+        """Consulta as inscrições dos dependentes vinculados."""
+        responsavel = self.get_object()
+
+        aluno_ids = responsavel.dependentes.values_list(
+            "aluno_id", flat=True
+        )
+
+        inscricoes = Presenca.objects.filter(
+            aluno_id__in=aluno_ids
+        ).select_related("sessao", "aluno").order_by(
+            "sessao__dataHora"
+        )
+
+        dados = [
+            {
+                "aluno_id": inscricao.aluno_id,
+                "aluno": str(inscricao.aluno),
+                "sessao_id": inscricao.sessao_id,
+                "dataHora": inscricao.sessao.dataHora,
+                "status_sessao": inscricao.sessao.status,
+                "status_inscricao": inscricao.status,
+            }
+            for inscricao in inscricoes
+        ]
+
+        return Response(dados)
 
