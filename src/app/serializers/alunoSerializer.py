@@ -1,9 +1,25 @@
-from app.models import Aluno
+from rest_framework import serializers
+
 from .usuarioSerializer import UsuarioSerializer
+from .responsavelSerializer import ResponsavelSerializer
+
+from app.models import Aluno
+from app.models import Responsavel
 
 
 class AlunoSerializer(UsuarioSerializer):
     """Serializa alunos reutilizando as validações de usuário."""
+
+    responsavel_id = serializers.PrimaryKeyRelatedField(
+        queryset=Responsavel.objects.all(),
+        required=False,
+        write_only=True,
+    )
+
+    novo_responsavel = ResponsavelSerializer(
+        required=False,
+        write_only=True,
+    )
 
     class Meta(UsuarioSerializer.Meta):
         model = Aluno
@@ -11,6 +27,8 @@ class AlunoSerializer(UsuarioSerializer):
             "matricula",
             "responsavel",
             "creditos",
+            "responsavel_id",
+            "novo_responsavel",
         ]
         read_only_fields = ["id", "creditos", "matricula"]
 
@@ -41,18 +59,42 @@ class AlunoSerializer(UsuarioSerializer):
        # """Cria um aluno com senha protegida pelo Django."""
        # return Aluno.objects.create_user(**validated_data)
 
+    def validate(self, attrs):
+        """Impede informar dois responsáveis no mesmo cadastro."""
+        attrs = super().validate(attrs)
+
+        if "responsavel_id" in attrs and "novo_responsavel" in attrs:
+            raise serializers.ValidationError(
+                "Informe um responsável existente ou um novo, não ambos."
+            )
+
+        return attrs
+
     def create(self, validated_data):
-        """Cria o aluno e gera uma matrícula única automaticamente."""
+        """Cria aluno, matrícula e vínculo com responsável em uma transação."""
+        from uuid import uuid4
         from django.db import transaction
 
+        responsavel = validated_data.pop("responsavel_id", None)
+        dados_responsavel = validated_data.pop("novo_responsavel", None)
         validated_data.pop("matricula", None)
 
         with transaction.atomic():
+            # Cadastra o responsável novo, quando informado.
+            if dados_responsavel is not None:
+                serializer = ResponsavelSerializer()
+                responsavel = serializer.create(dados_responsavel)
+
+            # Cadastra o aluno com matrícula automática.
             aluno = Aluno.objects.create_user(
                 **validated_data,
-                matricula=f"TEMP-{__import__('uuid').uuid4().hex}",
+                matricula=f"TEMP-{uuid4().hex}",
             )
             aluno.matricula = f"MAT-{aluno.pk:06d}"
             aluno.save(update_fields=["matricula"])
+
+            # Vincula o aluno ao responsável.
+            if responsavel is not None:
+                responsavel.adicionarDependente(aluno)
 
         return aluno
