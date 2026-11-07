@@ -181,3 +181,89 @@ class TestesAlunoAPI(APITestCase):
         self.assertEqual(self.aluno.matricula, "MAT-001")
         self.assertNotEqual(self.aluno.creditos, 999)
         self.assertTrue(self.aluno.check_password("Senha123!"))
+
+    def test_cadastro_aluno_com_responsavel_existente(self):
+        """Administrador cadastra aluno e cria vínculo com responsável."""
+        self.client.force_authenticate(user=self.admin)
+
+        responsavel = Responsavel.objects.create_user(
+            username="responsavel_vinculo",
+            password="SenhaTeste123!",
+        )
+
+        resposta = self.client.post(
+            reverse("aluno-list"),
+            {
+                "username": "aluno_vinculado",
+                "password": "SenhaTeste123!",
+                "responsavel_id": responsavel.pk,
+            },
+        )
+
+        self.assertEqual(resposta.status_code, status.HTTP_201_CREATED)
+
+        aluno = Aluno.objects.get(username="aluno_vinculado")
+
+        self.assertTrue(
+            VinculoResponsavel.objects.filter(
+                aluno=aluno,
+                responsavel=responsavel,
+            ).exists()
+        )
+
+    def test_cadastro_aluno_com_responsavel_novo(self):
+        """Cadastra aluno e responsável juntos, criando o vínculo."""
+        self.client.force_authenticate(user=self.admin)
+
+        resposta = self.client.post(
+            reverse("aluno-list"),
+            {
+                "username": "aluno_novo",
+                "password": "SenhaTeste123!",
+                "novo_responsavel": {
+                    "username": "responsavel_novo",
+                    "password": "SenhaTeste123!",
+                },
+            },
+            format="json",
+        )
+
+        self.assertEqual(resposta.status_code, status.HTTP_201_CREATED)
+
+        aluno = Aluno.objects.get(username="aluno_novo")
+        responsavel = Responsavel.objects.get(username="responsavel_novo")
+
+        self.assertEqual(aluno.matricula, f"MAT-{aluno.pk:06d}")
+        self.assertTrue(responsavel.check_password("SenhaTeste123!"))
+        self.assertTrue(
+            VinculoResponsavel.objects.filter(
+                aluno=aluno,
+                responsavel=responsavel,
+            ).exists()
+        )
+
+    def test_cadastro_rejeita_dois_responsaveis(self):
+        """Impede informar responsável existente e novo simultaneamente."""
+        self.client.force_authenticate(user=self.admin)
+
+        resposta = self.client.post(
+            reverse("aluno-list"),
+            {
+                "username": "aluno_invalido",
+                "password": "SenhaTeste123!",
+                "responsavel_id": self.responsavel.pk,
+                "novo_responsavel": {
+                    "username": "outro_responsavel",
+                    "password": "SenhaTeste123!",
+                },
+            },
+            format="json",
+        )
+
+        self.assertEqual(resposta.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertFalse(
+            Aluno.objects.filter(username="aluno_invalido").exists()
+        )
+        self.assertFalse(
+            Responsavel.objects.filter(username="outro_responsavel").exists()
+        )
