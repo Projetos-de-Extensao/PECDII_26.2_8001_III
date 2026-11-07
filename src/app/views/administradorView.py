@@ -13,7 +13,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 
-from app.models import Administrador, Sessao, Usuario, Sala
+from app.models import Administrador, Sessao, Usuario, Sala, Aluno
 from app.serializers import UsuarioSerializer, SalaSerializer
 from app.permissions.administradorPermission import IsAdministrador
 from app.serializers.profissionalSerializer import CadastroProfissionalSerializer
@@ -376,3 +376,38 @@ class AdministradorView(ViewSet):
             },
             status=status.HTTP_201_CREATED,
         )
+
+
+    @action(
+        detail=False,
+        methods=["patch"],
+        url_path=r"alunos/(?P<aluno_id>[0-9]+)/creditos"
+    )
+    def gerenciar_creditos(self, request, aluno_id=None):
+        """Adiciona ou remove créditos de um aluno."""
+        aluno = get_object_or_404(Aluno, pk=aluno_id)
+
+        quantidade = request.data.get("quantidade")
+
+        if type(quantidade) is not int or quantidade == 0:
+            return Response(
+                {"erro": "Informe uma quantidade inteira diferente de zero."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        novo_saldo = aluno.creditos + quantidade
+
+        if novo_saldo < 0:
+            return Response(
+                {"erro": "O aluno não possui créditos suficientes."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        aluno.creditos = novo_saldo
+        aluno.save(update_fields=["creditos"])
+
+        return Response({
+            "mensagem": "Créditos atualizados com sucesso.",
+            "aluno_id": aluno.pk,
+            "creditos": aluno.creditos
+        })

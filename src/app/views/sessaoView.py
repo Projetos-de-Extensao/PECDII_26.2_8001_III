@@ -12,6 +12,8 @@ from app.models import Sessao
 from app.serializers import SessaoSerializer
 from app.models import Administrador, Profissional
 from app.serializers.sessaoSerializer import SolicitacaoSessaoSerializer
+from app.models import Presenca
+from app.Enums import StatusPresenca
 
 
 class SessaoView(ModelViewSet):
@@ -65,7 +67,7 @@ class SessaoView(ModelViewSet):
 
     serializer_class = SessaoSerializer
     permission_classes = [IsAuthenticated]
-    http_method_names = ["get", "post", "head", "options"]
+    http_method_names = ["get", "post", "patch", "head", "options"]
 
     def create(self, request, *args, **kwargs):
         """Solicita uma sessão conforme o perfil autenticado."""
@@ -186,3 +188,97 @@ class SessaoView(ModelViewSet):
             raise serializers.ValidationError({"erro": erro.messages})
 
         return Response(SessaoSerializer(sessao).data)
+
+    @action(detail=True, methods=["patch"], url_path=r"presencas/(?P<aluno_id>[0-9]+)")
+    def registrar_presenca(self, request, pk=None, aluno_id=None):
+        """Registra presença, ausência ou justificativa de um aluno."""
+        sessao = self.get_object()
+        usuario = request.user
+
+        administrador = Administrador.objects.filter(pk=usuario.pk).exists()
+        profissional_responsavel = (
+            Profissional.objects.filter(pk=usuario.pk).exists()
+            and sessao.profissional_id == usuario.pk
+        )
+
+        if not administrador and not profissional_responsavel:
+            raise PermissionDenied(
+                "Apenas o profissional responsável ou um administrador "
+                "pode registrar presenças nesta sessão."
+            )
+
+        presenca = Presenca.objects.filter(
+            sessao=sessao,
+            aluno_id=aluno_id,
+        ).first()
+
+        if presenca is None:
+            raise serializers.ValidationError({
+                "aluno": "Este aluno não está inscrito na sessão."
+            })
+
+        novo_status = request.data.get("status")
+        justificativa = request.data.get("justificativa", "")
+
+        if novo_status not in (
+            StatusPresenca.PRESENTE,
+            StatusPresenca.AUSENTE,
+            StatusPresenca.JUSTIFICADO,
+        ):
+            raise serializers.ValidationError({
+                "status": "Informe PRESENTE, AUSENTE ou JUSTIFICADO."
+            })
+
+        if not isinstance(justificativa, str):
+            raise serializers.ValidationError({
+                "justificativa": "A justificativa deve ser um texto."
+            })
+
+        try:
+            presenca.registrarPresenca(novo_status, justificativa)
+        except DjangoValidationError as erro:
+            raise serializers.ValidationError({
+                "erro": erro.message_dict
+                if hasattr(erro, "message_dict")
+                else erro.messages
+            })
+
+        return Response({
+            "mensagem": "Presença registrada com sucesso.",
+            "sessao": sessao.pk,
+            "aluno": presenca.aluno_id,
+            "status": presenca.status,
+            "justificativa": presenca.justificativa,
+        })
+
+    @action(detail=True, methods=["get"], url_path="presencas")
+    def listar_presencas(self, request, pk=None):
+        """Lista os alunos inscritos e suas presenças na sessão."""
+        sessao = self.get_object()
+        usuario = request.user
+
+        administrador = Administrador.objects.filter(pk=usuario.pk).exists()
+        treinador = (
+            Profissional.objects.filter(pk=usuario.pk).exists()
+            and sessao.profissional_id == usuario.pk
+        )
+
+        if not administrador and not treinador:
+            raise PermissionDenied(
+                "Apenas o profissional responsável ou um administrador "
+                "pode consultar a lista de presença."
+            )
+
+        presencas = Presenca.objects.filter(
+            sessao=sessao
+        ).select_related("aluno").order_by("aluno__first_name")
+
+        return Response([
+            {
+                "aluno_id": p.aluno_id,
+                "nome": f"{p.aluno.first_name} {p.aluno.last_name}".strip(),
+                "status": p.status,
+                "justificativa": p.justificativa,
+            }
+            for p in presencas
+        ])
