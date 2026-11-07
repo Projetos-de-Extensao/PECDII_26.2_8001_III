@@ -173,3 +173,34 @@ class TestesResponsavelAPI(APITestCase):
         self.assertEqual(resposta.status_code, 400)
         self.assertEqual(self.aluno.creditos, 3)
 
+    def test_consultar_agendamentos(self):
+        """Responsável consulta as inscrições de seus dependentes."""
+        self.client.force_authenticate(user=self.responsavel)
+        self.client.post(self.url_inscricao, self.dados)
+
+        resposta = self.client.get(
+            reverse("responsavel-agendamentos", args=[self.responsavel.pk])
+        )
+
+        self.assertEqual(resposta.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(resposta.data), 1)
+        self.assertEqual(resposta.data[0]["aluno_id"], self.aluno.pk)
+        self.assertEqual(resposta.data[0]["sessao_id"], self.sessao.pk)
+
+    def test_nao_consultar_agendamentos_outra_familia(self):
+        """Impede acesso aos agendamentos de outro responsável."""
+        self.client.force_authenticate(user=self.outro)
+
+        resposta = self.client.get(
+            reverse("responsavel-agendamentos", args=[self.responsavel.pk])
+        )
+
+        self.assertEqual(resposta.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_agendamentos_sem_autenticacao(self):
+        """Bloqueia consultas sem autenticação."""
+        resposta = self.client.get(
+            reverse("responsavel-agendamentos", args=[self.responsavel.pk])
+        )
+
+        self.assertIn(resposta.status_code, [401, 403])
