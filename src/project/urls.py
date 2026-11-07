@@ -17,8 +17,17 @@ from app.views.sessaoView import SessaoView
 
 router = DefaultRouter()
 
-router.register(r'usuarios', UsuarioView, basename='usuario')
-router.register(r'salas', SalaView, basename='sala')
+router.register(
+    r'usuarios', 
+    UsuarioView, 
+    basename='usuario'
+)
+
+router.register(
+    r'salas',
+    SalaView,
+    basename='sala'
+)
 
 
 router.register(
