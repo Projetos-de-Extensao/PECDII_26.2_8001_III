@@ -78,13 +78,14 @@ class TestesAlunoAPI(APITestCase):
             {
                 "username": "novo_aluno",
                 "password": "SenhaForte123!",
-                "matricula": "MAT-003",
             },
         )
 
         self.assertEqual(resposta.status_code, status.HTTP_201_CREATED)
 
-        aluno = Aluno.objects.get(matricula="MAT-003")
+        aluno = Aluno.objects.get(username="novo_aluno")
+        self.assertEqual(aluno.matricula, f"MAT-{aluno.pk:06d}")
+        self.assertEqual(resposta.data["matricula"], aluno.matricula)
         self.assertTrue(aluno.check_password("SenhaForte123!"))
         self.assertNotIn("password", resposta.data)
 
@@ -107,8 +108,9 @@ class TestesAlunoAPI(APITestCase):
 
 
     def test_administrador_edita_aluno(self):
-        """Administrador pode atualizar dados do aluno."""
+        """Administrador edita dados sem alterar a matrícula."""
         self.client.force_authenticate(user=self.admin)
+        matricula_original = self.aluno.matricula
 
         resposta = self.client.patch(
             reverse("aluno-detail", args=[self.aluno.pk]),
@@ -118,7 +120,7 @@ class TestesAlunoAPI(APITestCase):
         self.assertEqual(resposta.status_code, status.HTTP_200_OK)
         self.aluno.refresh_from_db()
         self.assertEqual(self.aluno.first_name, "Carlos")
-        self.assertEqual(self.aluno.matricula, "MAT-100")
+        self.assertEqual(self.aluno.matricula, matricula_original)
 
 
     def test_responsavel_edita_dependente(self):
