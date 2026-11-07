@@ -314,9 +314,11 @@ class AdministradorView(ViewSet):
             uid = urlsafe_base64_encode(force_bytes(responsavel.pk))
             token = default_token_generator.make_token(responsavel)
             link = (
-                "http://127.0.0.1:8000/api/usuarios/ativar-conta/"
+                "http://127.0.0.1:8000/portal/"
                 f"?uid={uid}&token={token}"
             )
+            if settings.DEBUG:
+                print(f"\nLINK DE ATIVAÇÃO: {link}\n")
 
             send_mail(
                 subject="PKZ Lab - Ativação de conta",
