@@ -1,8 +1,11 @@
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_decode
+from django.utils.encoding import force_str
 
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
@@ -44,6 +47,10 @@ class UsuarioView(ModelViewSet):
         Consultas exigem autenticação.
         Operações de escrita exigem autorização administrativa.
         """
+
+        if self.action == "ativar_conta":
+            return [AllowAny()]
+        
         if self.action == "alterar_senha":
             return [IsAuthenticated()]
 
@@ -86,5 +93,55 @@ class UsuarioView(ModelViewSet):
 
         return Response(
             {"mensagem": "Senha alterada com sucesso."},
+            status=status.HTTP_200_OK,
+        )
+
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="ativar-conta",
+        permission_classes=[AllowAny],
+        authentication_classes=[],
+    )
+    def ativar_conta(self, request):
+        """Permite definir a senha usando um convite válido."""
+        uid = request.data.get("uid")
+        token = request.data.get("token")
+        nova_senha = request.data.get("nova_senha")
+
+        if not all([uid, token, nova_senha]):
+            return Response(
+                {"erro": "Informe uid, token e nova senha."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            usuario_id = force_str(urlsafe_base64_decode(uid))
+            usuario = Usuario.objects.get(pk=usuario_id)
+        except (ValueError, TypeError, OverflowError, Usuario.DoesNotExist):
+            return Response(
+                {"erro": "Convite inválido."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if usuario.has_usable_password() or not default_token_generator.check_token(usuario, token):
+            return Response(
+                {"erro": "Convite inválido ou expirado."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            validate_password(nova_senha, user=usuario)
+        except ValidationError as erro:
+            return Response(
+                {"erro": erro.messages},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        usuario.set_password(nova_senha)
+        usuario.save(update_fields=["password"])
+
+        return Response(
+            {"mensagem": "Conta ativada com sucesso."},
             status=status.HTTP_200_OK,
         )

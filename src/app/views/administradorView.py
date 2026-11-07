@@ -1,5 +1,11 @@
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
+from django.conf import settings
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
+from django.utils.encoding import force_str
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
 
 from rest_framework import status
 from rest_framework.decorators import action
@@ -10,6 +16,8 @@ from app.models import Administrador, Sessao, Usuario, Sala
 from app.serializers import UsuarioSerializer, SalaSerializer
 from app.permissions.administradorPermission import IsAdministrador
 from app.serializers.profissionalSerializer import CadastroProfissionalSerializer
+from app.models import Responsavel
+from app.serializers.responsavelSerializer import ResponsavelSerializer
 
 class AdministradorView(ViewSet):
     """
@@ -271,12 +279,69 @@ class AdministradorView(ViewSet):
             "fisioterapeuta",
             "psicologo",
             "nutricionista",
+            "responsavel",
         )
 
         if tipo is not None and tipo not in tipos_validos:
             return Response(
                 {"tipo": "Especialização inválida."},
                 status=status.HTTP_400_BAD_REQUEST,
+            )
+
+
+        if tipo == "responsavel":
+            dados = request.data.copy()
+            dados.pop("tipo", None)
+
+            # O e-mail é obrigatório para receber o convite.
+            email = dados.get("email", "").strip()
+
+            if not email:
+                return Response(
+                    {"erro": "O e-mail do responsável é obrigatório."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # O responsável definirá a senha pelo convite.
+            dados["password"] = "SenhaTemporaria123!NaoUtilizar"
+
+            serializer = ResponsavelSerializer(data=dados)
+            serializer.is_valid(raise_exception=True)
+
+            responsavel = serializer.save()
+            responsavel.set_unusable_password()
+            responsavel.save(update_fields=["password"])
+
+            # Gera um token seguro para ativação da conta.
+            uid = urlsafe_base64_encode(force_bytes(responsavel.pk))
+            token = default_token_generator.make_token(responsavel)
+
+            link = (
+                f"http://127.0.0.1:8000/api/usuarios/ativar-conta/"
+                f"?uid={uid}&token={token}"
+            )
+
+            # Envia o convite pelo backend de e-mail configurado.
+            send_mail(
+                subject="PKZ Lab - Ativação de conta",
+                message=(
+                    f"Olá, {responsavel.first_name or responsavel.username}!\n\n"
+                    "Seu cadastro no PKZ Lab foi realizado.\n"
+                    "Acesse o link abaixo para definir sua senha:\n\n"
+                    f"{link}\n\n"
+                    "Se você não reconhece este cadastro, ignore esta mensagem."
+                ),
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[responsavel.email],
+                fail_silently=False,
+            )
+
+            return Response(
+                {
+                    "mensagem": "Responsável cadastrado. Convite pendente.",
+                    "usuario": ResponsavelSerializer(responsavel).data,
+                },
+                status=status.HTTP_201_CREATED,
             )
 
         # Profissionais possuem campos e modelos especializados.
