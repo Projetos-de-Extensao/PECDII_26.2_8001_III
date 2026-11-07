@@ -11,6 +11,7 @@ from app.views.responsavelView import ResponsavelView
 from app.views.loginView import LoginView
 from app.views.logoutView import LogoutView
 from app.views.alunoView import AlunoView
+from app.views.profissionalView import ProfissionalView
 
 
 router = DefaultRouter()
@@ -35,6 +36,12 @@ router.register(
     r'alunos',
     AlunoView,
     basename='aluno'
+)
+
+router.register(
+    r'profissionais',
+    ProfissionalView,
+    basename='profissional'
 )
 
 urlpatterns = [
