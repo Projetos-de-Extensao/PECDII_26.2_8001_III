@@ -112,3 +112,20 @@ class TestesCreditosPresencasAPI(APITestCase):
 
         resposta = self.client.get(self.url_lista)
         self.assertEqual(resposta.status_code, 403)
+
+    def test_realizar_sessao(self):
+        """Somente o treinador responsável pode concluir a sessão."""
+        url = reverse("sessao-realizar", kwargs={"pk": self.sessao.pk})
+
+        self.client.force_authenticate(user=self.outro)
+        self.assertEqual(self.client.post(url).status_code, 403)
+
+        self.client.force_authenticate(user=self.treinador)
+        resposta = self.client.post(url)
+
+        self.assertEqual(resposta.status_code, 200)
+        self.sessao.refresh_from_db()
+        self.assertEqual(self.sessao.status, "REALIZADA")
+
+        # Impede concluir novamente.
+        self.assertEqual(self.client.post(url).status_code, 400)

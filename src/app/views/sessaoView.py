@@ -13,7 +13,7 @@ from app.serializers import SessaoSerializer
 from app.models import Administrador, Profissional
 from app.serializers.sessaoSerializer import SolicitacaoSessaoSerializer
 from app.models import Presenca
-from app.Enums import StatusPresenca
+from app.Enums import StatusPresenca, StatusSessao
 
 
 class SessaoView(ModelViewSet):
@@ -282,3 +282,27 @@ class SessaoView(ModelViewSet):
             }
             for p in presencas
         ])
+
+
+    @action(detail=True, methods=["post"])
+    def realizar(self, request, pk=None):
+        """Marca como realizada uma sessão confirmada."""
+        sessao = self.get_object()
+
+        if not (
+            Profissional.objects.filter(pk=request.user.pk).exists()
+            and sessao.profissional_id == request.user.pk
+        ):
+            raise PermissionDenied(
+                "Apenas o profissional responsável pode concluir a sessão."
+            )
+
+        if sessao.status != StatusSessao.CONFIRMADA:
+            raise serializers.ValidationError({
+                "status": "A sessão precisa estar confirmada."
+            })
+
+        sessao.status = StatusSessao.REALIZADA
+        sessao.save(update_fields=["status"])
+
+        return Response(SessaoSerializer(sessao).data)
