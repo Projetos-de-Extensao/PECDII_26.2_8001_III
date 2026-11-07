@@ -12,7 +12,7 @@ class AlunoSerializer(UsuarioSerializer):
             "responsavel",
             "creditos",
         ]
-        read_only_fields = ["id", "creditos"]
+        read_only_fields = ["id", "creditos", "matricula"]
 
     def get_fields(self):
         """Restringe os campos editáveis pelo responsável."""
@@ -37,6 +37,22 @@ class AlunoSerializer(UsuarioSerializer):
 
         return fields
 
+    #def create(self, validated_data):
+       # """Cria um aluno com senha protegida pelo Django."""
+       # return Aluno.objects.create_user(**validated_data)
+
     def create(self, validated_data):
-        """Cria um aluno com senha protegida pelo Django."""
-        return Aluno.objects.create_user(**validated_data)
+        """Cria o aluno e gera uma matrícula única automaticamente."""
+        from django.db import transaction
+
+        validated_data.pop("matricula", None)
+
+        with transaction.atomic():
+            aluno = Aluno.objects.create_user(
+                **validated_data,
+                matricula=f"TEMP-{__import__('uuid').uuid4().hex}",
+            )
+            aluno.matricula = f"MAT-{aluno.pk:06d}"
+            aluno.save(update_fields=["matricula"])
+
+        return aluno
