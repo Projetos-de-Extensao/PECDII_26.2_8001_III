@@ -12,6 +12,7 @@ from app.views.loginView import LoginView
 from app.views.logoutView import LogoutView
 from app.views.alunoView import AlunoView
 from app.views.profissionalView import ProfissionalView
+from app.views.sessaoView import SessaoView
 
 
 router = DefaultRouter()
@@ -42,6 +43,12 @@ router.register(
     r'profissionais',
     ProfissionalView,
     basename='profissional'
+)
+
+router.register(
+    r'sessoes',
+    SessaoView,
+    basename='sessao'
 )
 
 urlpatterns = [

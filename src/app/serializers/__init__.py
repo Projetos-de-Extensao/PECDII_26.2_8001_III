@@ -4,3 +4,4 @@ from .administradorSerializer import AdministradorSerializer
 from .responsavelSerializer import ResponsavelSerializer
 from .alunoSerializer import AlunoSerializer
 from .profissionalSerializer import ProfissionalSerializer
+from .sessaoSerializer import SessaoSerializer
