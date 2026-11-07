@@ -18,6 +18,27 @@ class Laudo(models.Model):
         linkArquivo (str): Link/URL ou caminho referente ao documento do laudo.
     """
 
+    TIPOS_DOCUMENTO = [
+        ("DESEMPENHO", "Relatório de Desempenho"),
+        ("FISIOTERAPIA", "Documento Fisioterapêutico"),
+        ("PSICOLOGIA", "Documento Psicológico"),
+        ("NUTRICAO", "Documento Nutricional"),
+    ]
+
+    tipoDocumento = models.CharField(
+        max_length=20,
+        choices=TIPOS_DOCUMENTO,
+        null=True,
+        blank=True,
+        verbose_name="Tipo de Documento",
+    )
+
+    conteudo = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name="Conteúdo do Documento",
+    )
+
     sessao = models.ForeignKey(
         Sessao,
         on_delete=models.CASCADE,
@@ -42,6 +63,8 @@ class Laudo(models.Model):
     )
     linkArquivo = models.URLField(
         max_length=500,
+        blank=True,
+        default="",
         verbose_name="Link do Arquivo"
     )
 

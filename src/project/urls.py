@@ -19,6 +19,8 @@ from app.views.logoutView import LogoutView
 from app.views.alunoView import AlunoView
 from app.views.profissionalView import ProfissionalView
 from app.views.sessaoView import SessaoView
+from app.views.meView import MeView
+from app.views.laudoView import LaudoView
 
 
 router = DefaultRouter()
@@ -66,6 +68,12 @@ router.register(
     basename='sessao'
 )
 
+router.register(
+    r'laudos',
+    LaudoView,
+    basename='laudo'
+)
+
 urlpatterns = [
     path('admin/', admin.site.urls),
 
@@ -81,4 +89,12 @@ urlpatterns = [
         TemplateView.as_view(template_name="teste_api.html"),
         name="teste-api",
     ),
+
+    path(
+        "portal/",
+        TemplateView.as_view(template_name="portal.html"),
+        name="portal",
+    ),
+    path("api/me/", MeView.as_view(), name="me"),
+
 ]
