@@ -9,6 +9,7 @@ from rest_framework.viewsets import ViewSet
 from app.models import Administrador, Sessao, Usuario, Sala
 from app.serializers import UsuarioSerializer, SalaSerializer
 from app.permissions.administradorPermission import IsAdministrador
+from app.serializers.profissionalSerializer import CadastroProfissionalSerializer
 
 class AdministradorView(ViewSet):
     """
@@ -261,6 +262,42 @@ class AdministradorView(ViewSet):
             Response: Dados públicos do usuário cadastrado
             ou erros de validação.
         """
+
+        # Rejeita especializações não reconhecidas.
+        tipo = request.data.get("tipo")
+
+        tipos_validos = (
+            "treinador",
+            "fisioterapeuta",
+            "psicologo",
+            "nutricionista",
+        )
+
+        if tipo is not None and tipo not in tipos_validos:
+            return Response(
+                {"tipo": "Especialização inválida."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Profissionais possuem campos e modelos especializados.
+        if request.data.get("tipo") in (
+            "treinador",
+            "fisioterapeuta",
+            "psicologo",
+            "nutricionista",
+        ):
+            serializer = CadastroProfissionalSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+
+            profissional = serializer.save()
+
+            return Response(
+                {
+                    "mensagem": "Profissional cadastrado com sucesso.",
+                    "usuario": UsuarioSerializer(profissional).data,
+                },
+                status=status.HTTP_201_CREATED,
+            )
 
         # Valida os dados recebidos pela API.
         serializer = UsuarioSerializer(data=request.data)
