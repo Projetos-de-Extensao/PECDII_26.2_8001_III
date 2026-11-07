@@ -1,5 +1,11 @@
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
+
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework import status
 
 from app.models import Usuario
 from app.serializers import UsuarioSerializer
@@ -38,6 +44,8 @@ class UsuarioView(ModelViewSet):
         Consultas exigem autenticação.
         Operações de escrita exigem autorização administrativa.
         """
+        if self.action == "alterar_senha":
+            return [IsAuthenticated()]
 
         # Consulta individual exige autenticação.
         if self.action == "retrieve":
@@ -45,3 +53,38 @@ class UsuarioView(ModelViewSet):
 
         # Cadastro, atualização e exclusão.
         return [IsAdministrador()]
+
+    @action(detail=False, methods=["post"], url_path="alterar-senha")
+    def alterar_senha(self, request):
+        """Permite ao usuário autenticado alterar a própria senha."""
+        usuario = request.user
+        senha_atual = request.data.get("senha_atual")
+        nova_senha = request.data.get("nova_senha")
+
+        if not senha_atual or not nova_senha:
+            return Response(
+                {"erro": "Informe a senha atual e a nova senha."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not usuario.check_password(senha_atual):
+            return Response(
+                {"erro": "Senha atual incorreta."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            validate_password(nova_senha, user=usuario)
+        except ValidationError as erro:
+            return Response(
+                {"erro": erro.messages},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        usuario.set_password(nova_senha)
+        usuario.save(update_fields=["password"])
+
+        return Response(
+            {"mensagem": "Senha alterada com sucesso."},
+            status=status.HTTP_200_OK,
+        )
