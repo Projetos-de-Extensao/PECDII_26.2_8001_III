@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PKZ Lab | Testador de API</title>
+  <style>
+    :root{font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;color:#e6edf8;background:#0b1020;color-scheme:dark}
+    *{box-sizing:border-box}body{margin:0;padding:36px 18px}main{max-width:1080px;margin:auto}
+    h1{font-size:30px;margin:0 0 8px}h2{font-size:17px;margin:0 0 18px}.sub{color:#9aa8c2;margin:0 0 26px}
+    .grid{display:grid;grid-template-columns:340px 1fr;gap:18px}.panel{background:#151d31;border:1px solid #2b3855;border-radius:14px;padding:23px;margin-bottom:18px}
+    label{display:block;font-size:13px;font-weight:600;color:#b7c5dc;margin:15px 0 7px}input,select,textarea{width:100%;background:#0c1425;color:#eef4ff;border:1px solid #364560;border-radius:8px;padding:12px;font:inherit;outline:none}input:focus,select:focus,textarea:focus{border-color:#79a8ff}textarea{min-height:300px;resize:vertical;font:13px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace}
+    button{border:0;background:#4d82f5;color:#fff;font-weight:650;border-radius:8px;padding:11px 16px;cursor:pointer}button:hover{background:#356cde}button:disabled{opacity:.55;cursor:wait}.secondary{background:#273653}.secondary:hover{background:#334866}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.row{display:flex;gap:10px}.row select{width:130px}.row input{flex:1;min-width:0}
+    .status{margin-top:14px;padding:11px 12px;border-radius:8px;background:#0c1425;color:#aebed7;font-size:13px;overflow-wrap:anywhere}.ok{color:#8fe5bb}.error{color:#ff9f9f}.hint{font-size:12px;color:#96a7c2;line-height:1.6}pre{margin:0;min-height:140px;max-height:380px;overflow:auto;background:#0c1425;border-radius:9px;padding:16px;font:13px/1.6 ui-monospace,Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere}
+    .tag{font-size:12px;background:#253655;padding:5px 9px;border-radius:20px;color:#c7d7f2}.head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.head h2{margin:0}
+    @media(max-width:780px){.grid{grid-template-columns:1fr}body{padding:20px 12px}.panel{padding:17px}.row{flex-direction:column}.row select{width:100%}}
+  </style>
+</head>
+<body>
+<main>
+  <h1>PKZ Lab <span class="tag">Ambiente de desenvolvimento</span></h1>
+  <p class="sub">Painel de testes da API Django REST Framework</p>
+  <div class="grid">
+    <section>
+      <div class="panel">
+        <h2>1. Autenticação</h2>
+        <label for="username">Usuário administrador</label>
+        <input id="username" autocomplete="username" placeholder="Seu username">
+        <label for="password">Senha</label>
+        <input id="password" type="password" autocomplete="current-password" placeholder="Sua senha">
+        <div class="actions"><button id="login">Entrar</button><button id="logout" class="secondary">Sair</button></div>
+        <div id="authStatus" class="status" role="status">Não autenticado</div>
+        <p class="hint">O token fica somente na memória desta página e é descartado ao recarregá-la. Não use este painel em produção.</p>
+      </div>
+      <div class="panel">
+        <h2>Atalhos</h2>
+        <div class="actions"><button class="secondary" id="cadastro">Cadastro de responsável</button><button class="secondary" id="alunos">Listar alunos</button></div>
+        <p class="hint">Os atalhos preenchem os campos; você decide quando enviar a requisição.</p>
+      </div>
+    </section>
+    <section>
+      <div class="panel">
+        <h2>2. Requisição</h2>
+        <label for="endpoint">Método e endpoint</label>
+        <div class="row"><select id="method"><option>POST</option><option>GET</option><option>PATCH</option><option>PUT</option><option>DELETE</option></select><input id="endpoint" value="/api/administradores/usuarios/" spellcheck="false"></div>
+        <label for="payload">JSON da requisição</label>
+        <textarea id="payload" spellcheck="false"></textarea>
+        <div class="actions"><button id="send">Enviar requisição</button><button id="format" class="secondary">Formatar JSON</button></div>
+      </div>
+      <div class="panel">
+        <div class="head"><h2>3. Resposta</h2><span id="httpStatus" class="tag">Aguardando</span></div>
+        <pre id="output" aria-live="polite">Faça login e envie uma requisição para ver a resposta.</pre>
+      </div>
+    </section>
+  </div>
+</main>
+<script>
+  'use strict';
+  let token = null;
+  const $ = id => document.getElementById(id);
+  const authStatus = (message, success = false) => { $('authStatus').textContent = message; $('authStatus').className = 'status ' + (success ? 'ok' : ''); };
+  const show = (status, body, success = false) => {
+    $('httpStatus').textContent = status;
+    $('httpStatus').className = 'tag ' + (success ? 'ok' : 'error');
+    $('output').textContent = typeof body === 'string' ? body : JSON.stringify(body, null, 2);
+  };
+  async function parseResponse(response) {
+    const text = await response.text();
+    try { return JSON.parse(text); } catch { return text || '(Resposta vazia)'; }
+  }
+  async function withBusy(button, action) {
+    button.disabled = true;
+    try { await action(); } finally { button.disabled = false; }
+  }
+  $('login').addEventListener('click', () => withBusy($('login'), async () => {
+    const username = $('username').value.trim();
+    const password = $('password').value;
+    if (!username || !password) { authStatus('Informe usuário e senha.'); return; }
+    try {
+      const response = await fetch('/api/login/', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({username, password})
+      });
+      const data = await parseResponse(response);
+      if (!response.ok || !data.token) { token = null; authStatus('Falha no login (' + response.status + ').'); show('HTTP ' + response.status, data); return; }
+      token = data.token;
+      $('password').value = '';
+      authStatus('Autenticado como ' + (data.username || username), true);
+      show('HTTP ' + response.status, {mensagem:'Login realizado. Token armazenado temporariamente na página.'}, true);
+    } catch (err) { authStatus('Erro de conexão.'); show('Erro', String(err)); }
+  }));
+  $('logout').addEventListener('click', () => withBusy($('logout'), async () => {
+    if (!token) { authStatus('Não autenticado'); return; }
+    try {
+      const response = await fetch('/api/logout/', {method:'POST', headers:{'Authorization':'Token ' + token}});
+      const data = await parseResponse(response);
+      show('HTTP ' + response.status, data, response.ok);
+      if (response.ok) { token = null; authStatus('Sessão encerrada.'); }
+    } catch(err) { show('Erro', String(err)); }
+  }));
+  $('send').addEventListener('click', () => withBusy($('send'), async () => {
+    if (!token) { show('Não enviado', 'Faça login antes de enviar a requisição.'); return; }
+    const method = $('method').value;
+    const endpoint = $('endpoint').value.trim();
+    if (!endpoint.startsWith('/api/') || endpoint.startsWith('//')) { show('Não enviado', 'Use um caminho iniciado por /api/.'); return; }
+    const headers = {'Authorization':'Token ' + token};
+    const options = {method, headers};
+    if (!['GET','DELETE'].includes(method)) {
+      try { options.body = JSON.stringify(JSON.parse($('payload').value || '{}')); }
+      catch(err) { show('JSON inválido', 'Corrija o JSON: ' + err.message); return; }
+      headers['Content-Type'] = 'application/json';
+    }
+    try {
+      const response = await fetch(endpoint, options);
+      show('HTTP ' + response.status, await parseResponse(response), response.ok);
+    } catch(err) { show('Erro de conexão', String(err)); }
+  }));
+  $('format').addEventListener('click', () => {
+    try { $('payload').value = JSON.stringify(JSON.parse($('payload').value), null, 2); }
+    catch(err) { show('JSON inválido', err.message); }
+  });
+  $('cadastro').addEventListener('click', () => {
+    $('method').value = 'POST'; $('endpoint').value = '/api/administradores/usuarios/';
+    $('payload').value = JSON.stringify({
+      tipo:'responsavel', username:'responsavel_teste_01', first_name:'Maria', last_name:'Silva',
+      email:'maria.teste@example.com', telefone:'21999999999', dataNascimento:'1985-05-15', endereco:'Rio de Janeiro',
+      alunos:[
+        {username:'aluno_teste_01',first_name:'Pedro',last_name:'Silva',telefone:'21988888888',dataNascimento:'2015-03-10',endereco:'Rio de Janeiro'},
+        {username:'aluno_teste_02',first_name:'Ana',last_name:'Silva',telefone:'21977777777',dataNascimento:'2017-08-20',endereco:'Rio de Janeiro'}
+      ]
+    }, null, 2);
+  });
+  $('alunos').addEventListener('click', () => { $('method').value='GET'; $('endpoint').value='/api/alunos/'; $('payload').value=''; });
+  $('cadastro').click();
+</script>
+</body>
+</html>

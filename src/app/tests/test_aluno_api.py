@@ -86,7 +86,7 @@ class TestesAlunoAPI(APITestCase):
         aluno = Aluno.objects.get(username="novo_aluno")
         self.assertEqual(aluno.matricula, f"MAT-{aluno.pk:06d}")
         self.assertEqual(resposta.data["matricula"], aluno.matricula)
-        self.assertTrue(aluno.check_password("SenhaForte123!"))
+        self.assertFalse(aluno.has_usable_password())
         self.assertNotIn("password", resposta.data)
 
 

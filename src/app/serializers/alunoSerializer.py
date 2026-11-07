@@ -35,6 +35,8 @@ class AlunoSerializer(UsuarioSerializer):
     def get_fields(self):
         """Restringe os campos editáveis pelo responsável."""
         fields = super().get_fields()
+        # Alunos não possuem senha de acesso.
+        fields.pop("password", None)
         request = self.context.get("request")
 
         if request and request.method == "PATCH":
@@ -55,14 +57,8 @@ class AlunoSerializer(UsuarioSerializer):
 
         return fields
 
-    #def create(self, validated_data):
-       # """Cria um aluno com senha protegida pelo Django."""
-       # return Aluno.objects.create_user(**validated_data)
-
     def validate(self, attrs):
-        """Impede informar dois responsáveis no mesmo cadastro."""
-        attrs = super().validate(attrs)
-
+        """Valida o cadastro sem exigir senha do aluno."""
         if "responsavel_id" in attrs and "novo_responsavel" in attrs:
             raise serializers.ValidationError(
                 "Informe um responsável existente ou um novo, não ambos."
@@ -90,8 +86,9 @@ class AlunoSerializer(UsuarioSerializer):
                 **validated_data,
                 matricula=f"TEMP-{uuid4().hex}",
             )
+            aluno.set_unusable_password()
             aluno.matricula = f"MAT-{aluno.pk:06d}"
-            aluno.save(update_fields=["matricula"])
+            aluno.save(update_fields=["matricula", "password"])
 
             # Vincula o aluno ao responsável.
             if responsavel is not None:

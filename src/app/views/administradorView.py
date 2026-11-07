@@ -6,6 +6,7 @@ from django.core.mail import send_mail
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
+from django.db import transaction
 
 from rest_framework import status
 from rest_framework.decorators import action
@@ -18,6 +19,7 @@ from app.permissions.administradorPermission import IsAdministrador
 from app.serializers.profissionalSerializer import CadastroProfissionalSerializer
 from app.models import Responsavel
 from app.serializers.responsavelSerializer import ResponsavelSerializer
+from app.serializers.alunoSerializer import AlunoSerializer
 
 class AdministradorView(ViewSet):
     """
@@ -250,78 +252,72 @@ class AdministradorView(ViewSet):
         methods=["post"],
         url_path="usuarios"
     )
+    
+    @action(detail=False, methods=["post"], url_path="usuarios")
     def cadastrar_usuario(self, request):
-        """
-        Cadastra um novo usuário no sistema PKZ Lab.
-
-        Somente administradores autenticados e ativos
-        podem executar esta operação.
-
-        Utiliza UsuarioSerializer para validar os dados
-        recebidos e Administrador.cadastrarUsuario()
-        para registrar o usuário no banco de dados.
-
-        A senha é protegida utilizando set_password().
-
-        Args:
-            request: Requisição HTTP com os dados do usuário.
-
-        Returns:
-            Response: Dados públicos do usuário cadastrado
-            ou erros de validação.
-        """
-
-        # Rejeita especializações não reconhecidas.
+        """Cadastra usuários, profissionais e responsáveis com dependentes."""
         tipo = request.data.get("tipo")
-
-        tipos_validos = (
-            "treinador",
-            "fisioterapeuta",
-            "psicologo",
-            "nutricionista",
-            "responsavel",
+        tipos_profissionais = (
+            "treinador", "fisioterapeuta", "psicologo", "nutricionista"
         )
 
-        if tipo is not None and tipo not in tipos_validos:
+        if tipo is not None and tipo not in (*tipos_profissionais, "responsavel"):
             return Response(
                 {"tipo": "Especialização inválida."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-
         if tipo == "responsavel":
             dados = request.data.copy()
             dados.pop("tipo", None)
+            alunos = dados.pop("alunos", [])
+            dados.pop("password", None)
 
-            # O e-mail é obrigatório para receber o convite.
-            email = dados.get("email", "").strip()
-
-            if not email:
+            if not dados.get("email", "").strip():
                 return Response(
-                    {"erro": "O e-mail do responsável é obrigatório."},
+                    {"email": "O e-mail do responsável é obrigatório."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            # O responsável definirá a senha pelo convite.
-            dados["password"] = "SenhaTemporaria123!NaoUtilizar"
+            if not isinstance(alunos, list) or not alunos:
+                return Response(
+                    {"alunos": "Informe pelo menos um aluno."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # Evita que um aluno seja vinculado a dois responsáveis.
+            if any(
+                not isinstance(aluno, dict)
+                or "responsavel_id" in aluno
+                or "novo_responsavel" in aluno
+                for aluno in alunos
+            ):
+                return Response(
+                    {"alunos": "Não informe outro responsável nos dados dos alunos."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
             serializer = ResponsavelSerializer(data=dados)
             serializer.is_valid(raise_exception=True)
 
-            responsavel = serializer.save()
-            responsavel.set_unusable_password()
-            responsavel.save(update_fields=["password"])
+            serializer_alunos = AlunoSerializer(data=alunos, many=True)
+            serializer_alunos.is_valid(raise_exception=True)
 
-            # Gera um token seguro para ativação da conta.
+            # Cria todos os registros ou desfaz a operação em caso de erro.
+            with transaction.atomic():
+                responsavel = serializer.save()
+
+                for aluno in serializer_alunos.save():
+                    responsavel.adicionarDependente(aluno)
+
+            # Gera o convite para definição da senha.
             uid = urlsafe_base64_encode(force_bytes(responsavel.pk))
             token = default_token_generator.make_token(responsavel)
-
             link = (
-                f"http://127.0.0.1:8000/api/usuarios/ativar-conta/"
+                "http://127.0.0.1:8000/api/usuarios/ativar-conta/"
                 f"?uid={uid}&token={token}"
             )
 
-            # Envia o convite pelo backend de e-mail configurado.
             send_mail(
                 subject="PKZ Lab - Ativação de conta",
                 message=(
@@ -338,22 +334,15 @@ class AdministradorView(ViewSet):
 
             return Response(
                 {
-                    "mensagem": "Responsável cadastrado. Convite pendente.",
+                    "mensagem": "Responsável cadastrado. Convite enviado.",
                     "usuario": ResponsavelSerializer(responsavel).data,
                 },
                 status=status.HTTP_201_CREATED,
             )
 
-        # Profissionais possuem campos e modelos especializados.
-        if request.data.get("tipo") in (
-            "treinador",
-            "fisioterapeuta",
-            "psicologo",
-            "nutricionista",
-        ):
+        if tipo in tipos_profissionais:
             serializer = CadastroProfissionalSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
-
             profissional = serializer.save()
 
             return Response(
@@ -364,43 +353,26 @@ class AdministradorView(ViewSet):
                 status=status.HTTP_201_CREATED,
             )
 
-        # Valida os dados recebidos pela API.
         serializer = UsuarioSerializer(data=request.data)
-
         serializer.is_valid(raise_exception=True)
 
-        # Copia os dados validados para evitar modificações
-        # diretas na estrutura interna do serializer.
         dados = serializer.validated_data.copy()
-
-        # Separa a senha dos demais atributos.
         senha = dados.pop("password")
-
-        # Cria uma instância ainda não salva.
         usuario = Usuario(**dados)
-
-        # Protege a senha utilizando o hashing do Django.
         usuario.set_password(senha)
 
-        # Recupera o administrador autenticado.
-        administrador = self.obter_administrador(request)
-
         try:
-            # Executa o método exigido pelo diagrama UML.
-            administrador.cadastrarUsuario(usuario)
-
+            self.obter_administrador(request).cadastrarUsuario(usuario)
         except ValidationError as erro:
-            # Retorna HTTP 400 caso o modelo rejeite o cadastro.
             return Response(
                 {"erro": erro.messages},
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Retorna os dados públicos do usuário cadastrado.
         return Response(
             {
                 "mensagem": "Usuário cadastrado com sucesso.",
-                "usuario": UsuarioSerializer(usuario).data
+                "usuario": UsuarioSerializer(usuario).data,
             },
-            status=status.HTTP_201_CREATED
+            status=status.HTTP_201_CREATED,
         )

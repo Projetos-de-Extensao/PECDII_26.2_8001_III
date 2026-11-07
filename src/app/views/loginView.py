@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
-
+from app.models import Aluno
 
 class LoginView(APIView):
     """Autentica usuários e fornece um token de acesso."""
@@ -31,6 +31,13 @@ class LoginView(APIView):
         )
 
         if usuario is None or not usuario.is_active:
+            return Response(
+                {"detail": "Credenciais inválidas."},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        # Alunos não possuem acesso individual à plataforma.
+        if Aluno.objects.filter(pk=usuario.pk).exists():
             return Response(
                 {"detail": "Credenciais inválidas."},
                 status=status.HTTP_401_UNAUTHORIZED,
