@@ -75,6 +75,59 @@ class TestesSessaoAPI(APITestCase):
         )
         self.assertEqual(Sessao.objects.count(), 0)
 
+    def test_nao_permite_solicitar_sessoes_sobrepostas_na_mesma_sala(self):
+        """Impede sobreposição de sessões solicitadas na mesma sala."""
+        data_hora = timezone.now() + timedelta(days=2)
+        dados = {**self.dados, "dataHora": data_hora.isoformat()}
+
+        primeira = self.client.post(reverse("sessao-list"), dados)
+        segunda = self.client.post(
+            reverse("sessao-list"),
+            {
+                **dados,
+                "dataHora": (data_hora + timedelta(minutes=30)).isoformat(),
+            },
+        )
+
+        self.assertEqual(primeira.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(segunda.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("conflitante", str(segunda.data))
+        self.assertEqual(Sessao.objects.count(), 1)
+
+    def test_permite_sessoes_adjacentes_ou_em_salas_diferentes(self):
+        """Permite sessões adjacentes e horários iguais em salas diferentes."""
+        data_hora = timezone.now() + timedelta(days=2)
+        dados = {**self.dados, "dataHora": data_hora.isoformat()}
+        primeira = self.client.post(reverse("sessao-list"), dados)
+
+        adjacente = self.client.post(
+            reverse("sessao-list"),
+            {
+                **dados,
+                "dataHora": (data_hora + timedelta(hours=1)).isoformat(),
+            },
+        )
+        outra_sala = Sala.objects.create(numero=102, capacidade=20)
+        mesmo_horario = self.client.post(
+            reverse("sessao-list"),
+            {**dados, "sala": outra_sala.pk},
+        )
+
+        self.assertEqual(primeira.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(adjacente.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(mesmo_horario.status_code, status.HTTP_201_CREATED)
+
+    def test_sessao_rejeitada_libera_horario_da_sala(self):
+        """Sessões rejeitadas não reservam mais a sala."""
+        primeira = self.client.post(reverse("sessao-list"), self.dados)
+        Sessao.objects.filter(pk=primeira.data["id"]).update(
+            status=StatusSessao.REJEITADA
+        )
+
+        segunda = self.client.post(reverse("sessao-list"), self.dados)
+
+        self.assertEqual(segunda.status_code, status.HTTP_201_CREATED)
+
     def test_administrador_solicita_sessao(self):
         """Administrador pode solicitar em nome do profissional."""
         self.client.force_authenticate(user=self.admin)
