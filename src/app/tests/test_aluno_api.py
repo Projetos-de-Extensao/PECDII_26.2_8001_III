@@ -1,3 +1,6 @@
+from datetime import timedelta
+
+from django.utils import timezone
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -214,6 +217,14 @@ class TestesAlunoAPI(APITestCase):
     def test_cadastro_aluno_com_responsavel_novo(self):
         """Cadastra aluno e responsável juntos, criando o vínculo."""
         self.client.force_authenticate(user=self.admin)
+        hoje = timezone.localdate()
+        try:
+            nascimento_responsavel = hoje.replace(year=hoje.year - 18)
+        except ValueError:
+            nascimento_responsavel = hoje.replace(
+                year=hoje.year - 18,
+                day=28,
+            )
 
         resposta = self.client.post(
             reverse("aluno-list"),
@@ -223,6 +234,7 @@ class TestesAlunoAPI(APITestCase):
                 "novo_responsavel": {
                     "username": "responsavel_novo",
                     "password": "SenhaTeste123!",
+                    "dataNascimento": nascimento_responsavel.isoformat(),
                 },
             },
             format="json",
@@ -241,6 +253,67 @@ class TestesAlunoAPI(APITestCase):
                 responsavel=responsavel,
             ).exists()
         )
+
+    def test_cadastro_aluno_rejeita_responsavel_menor_de_18_anos(self):
+        """Recusa cadastro quando o responsável ainda não completou 18 anos."""
+        self.client.force_authenticate(user=self.admin)
+        hoje = timezone.localdate()
+        try:
+            nascimento_de_18_anos = hoje.replace(year=hoje.year - 18)
+        except ValueError:
+            nascimento_de_18_anos = hoje.replace(
+                year=hoje.year - 18,
+                day=28,
+            )
+
+        resposta = self.client.post(
+            reverse("aluno-list"),
+            {
+                "username": "aluno_responsavel_menor",
+                "password": "SenhaTeste123!",
+                "novo_responsavel": {
+                    "username": "responsavel_menor",
+                    "password": "SenhaTeste123!",
+                    "dataNascimento": (
+                        nascimento_de_18_anos + timedelta(days=1)
+                    ).isoformat(),
+                },
+            },
+            format="json",
+        )
+
+        self.assertEqual(resposta.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertFalse(Aluno.objects.filter(
+            username="aluno_responsavel_menor"
+        ).exists())
+        self.assertFalse(Responsavel.objects.filter(
+            username="responsavel_menor"
+        ).exists())
+
+    def test_cadastro_aluno_rejeita_responsavel_sem_data_de_nascimento(self):
+        """Recusa responsável sem data para comprovar a maioridade."""
+        self.client.force_authenticate(user=self.admin)
+
+        resposta = self.client.post(
+            reverse("aluno-list"),
+            {
+                "username": "aluno_sem_data_responsavel",
+                "password": "SenhaTeste123!",
+                "novo_responsavel": {
+                    "username": "responsavel_sem_data",
+                    "password": "SenhaTeste123!",
+                },
+            },
+            format="json",
+        )
+
+        self.assertEqual(resposta.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertFalse(Aluno.objects.filter(
+            username="aluno_sem_data_responsavel"
+        ).exists())
+        self.assertFalse(Responsavel.objects.filter(
+            username="responsavel_sem_data"
+        ).exists())
 
     def test_cadastro_rejeita_dois_responsaveis(self):
         """Impede informar responsável existente e novo simultaneamente."""
