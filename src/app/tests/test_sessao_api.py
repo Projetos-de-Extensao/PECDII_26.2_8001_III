@@ -57,6 +57,24 @@ class TestesSessaoAPI(APITestCase):
             resposta.data["status"], StatusSessao.SOLICITADA
         )
 
+    def test_nao_permite_solicitar_sessao_com_data_passada(self):
+        """Impede agendar uma sessão para uma data que já passou."""
+        dados = {
+            **self.dados,
+            "dataHora": (
+                timezone.now() - timedelta(days=1)
+            ).isoformat(),
+        }
+
+        resposta = self.client.post(reverse("sessao-list"), dados)
+
+        self.assertEqual(resposta.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            resposta.data["erro"],
+            ["A data e hora da sessão devem ser futuras."],
+        )
+        self.assertEqual(Sessao.objects.count(), 0)
+
     def test_administrador_solicita_sessao(self):
         """Administrador pode solicitar em nome do profissional."""
         self.client.force_authenticate(user=self.admin)
