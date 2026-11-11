@@ -58,6 +58,45 @@ class Sessao(models.Model):
             ),
         ]
 
+    def clean(self):
+        super().clean()
+        errors = {}
+        data_hora_futura = bool(
+            self.dataHora and self.dataHora > timezone.now()
+        )
+
+        if self.dataHora and not data_hora_futura:
+            errors["dataHora"] = "A data e hora da sessão devem ser futuras."
+
+        status_que_reservam_sala = (
+            StatusSessao.SOLICITADA,
+            StatusSessao.CONFIRMADA,
+        )
+        if (
+            self.status in status_que_reservam_sala
+            and self.sala_id
+            and data_hora_futura
+            and self.duracao
+            and self.duracao > timedelta(0)
+        ):
+            fim = self.dataHora + self.duracao
+            sessoes_conflitantes = Sessao.objects.filter(
+                sala_id=self.sala_id,
+                status__in=status_que_reservam_sala,
+                dataHora__lt=fim,
+            ).exclude(pk=self.pk).only("dataHora", "duracao")
+
+            if any(
+                sessao.dataHora + sessao.duracao > self.dataHora
+                for sessao in sessoes_conflitantes
+            ):
+                errors["dataHora"] = (
+                    "A sala já possui sessão em horário conflitante."
+                )
+
+        if errors:
+            raise ValidationError(errors)
+
 
     #@exigir_sala_valida('A sala precisa estar cadastrada para solicitar uma sessão.')
     @classmethod
@@ -74,10 +113,6 @@ class Sessao(models.Model):
             raise ValidationError(
                 "A sala precisa estar cadastrada para solicitar uma sessão."
             )
-        if dataHora <= timezone.now():
-            raise ValidationError(
-                "A data e hora da sessão devem ser futuras."
-            )
 
         sessao = cls(
             sala=sala,
@@ -88,8 +123,10 @@ class Sessao(models.Model):
             profissional=profissional,
         )
 
-        sessao.full_clean()
-        sessao.save()
+        with transaction.atomic():
+            Sala.objects.select_for_update().get(pk=sala.pk)
+            sessao.full_clean()
+            sessao.save()
 
         return sessao
 
@@ -179,6 +216,26 @@ class Sessao(models.Model):
         presenca = Presenca.objects.filter(sessao=self, aluno=aluno).first()
         if presenca and presenca.status != StatusPresenca.DESISTENTE:
             raise ValidationError("Aluno já inscrito nesta sessão.")
+
+        status_que_reservam_horario = (
+            StatusSessao.SOLICITADA,
+            StatusSessao.CONFIRMADA,
+        )
+        fim = self.dataHora + self.duracao
+        inscricoes_conflitantes = Presenca.objects.filter(
+            aluno=aluno,
+            status=StatusPresenca.PENDENTE,
+            sessao__status__in=status_que_reservam_horario,
+            sessao__dataHora__lt=fim,
+        ).exclude(sessao=self).select_related("sessao")
+
+        if any(
+            inscricao.sessao.dataHora + inscricao.sessao.duracao > self.dataHora
+            for inscricao in inscricoes_conflitantes
+        ):
+            raise ValidationError(
+                "Aluno já possui sessão em horário conflitante."
+            )
 
         if aluno.creditos < self.creditosNecessarios:
             raise ValidationError("Créditos insuficientes.")
