@@ -1,6 +1,7 @@
 
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
+from django.utils import timezone
 
 from .usuarioModel import Usuario
 
@@ -19,6 +20,31 @@ class Responsavel(Usuario):
     class Meta:
         verbose_name = "Responsável"
         verbose_name_plural = "Responsáveis"
+
+    @staticmethod
+    def validarMaioridade(dataNascimento):
+        if dataNascimento is None:
+            raise ValidationError({
+                "dataNascimento": (
+                    "A data de nascimento é obrigatória para responsáveis."
+                )
+            })
+
+        hoje = timezone.localdate()
+        idade = hoje.year - dataNascimento.year
+        if (hoje.month, hoje.day) < (dataNascimento.month, dataNascimento.day):
+            idade -= 1
+
+        if idade < 18:
+            raise ValidationError({
+                "dataNascimento": (
+                    "O responsável deve ter pelo menos 18 anos completos."
+                )
+            })
+
+    def clean(self):
+        super().clean()
+        self.validarMaioridade(self.dataNascimento)
 
     def __str__(self):
         return self.username
