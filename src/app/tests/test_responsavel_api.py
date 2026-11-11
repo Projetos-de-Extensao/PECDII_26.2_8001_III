@@ -7,7 +7,15 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from app.Enums import StatusSessao
-from app.models import Aluno, Presenca, Profissional, Responsavel, Sala, Sessao
+from app.models import (
+    Administrador,
+    Aluno,
+    Presenca,
+    Profissional,
+    Responsavel,
+    Sala,
+    Sessao,
+)
 from app.models.responsavelModel import VinculoResponsavel
 from app.Enums.StatusPresencaEnum import StatusPresenca
 
@@ -88,6 +96,58 @@ class TestesResponsavelAPI(APITestCase):
         self.assertEqual(Presenca.objects.filter(
             aluno=self.aluno, sessao=self.sessao
         ).count(), 1)
+
+    def test_api_rejeita_inscricao_em_sessao_sobreposta(self):
+        """API rejeita inscrição em sessão diferente com horário conflitante."""
+        outra_sala = Sala.objects.create(numero=103, capacidade=10)
+        outra_sessao = Sessao.objects.create(
+            sala=outra_sala,
+            profissional=self.sessao.profissional,
+            dataHora=self.sessao.dataHora + timedelta(minutes=30),
+            duracao=timedelta(hours=1),
+            creditosNecessarios=2,
+            status=StatusSessao.CONFIRMADA,
+        )
+        self.client.force_authenticate(user=self.responsavel)
+        primeira = self.client.post(self.url_inscricao, self.dados)
+        segunda = self.client.post(
+            self.url_inscricao,
+            {**self.dados, "sessao_id": outra_sessao.pk},
+        )
+
+        self.assertEqual(primeira.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(segunda.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("conflitante", str(segunda.data))
+        self.aluno.refresh_from_db()
+        self.assertEqual(self.aluno.creditos, 3)
+
+    def test_api_rejeita_data_de_nascimento_de_responsavel_menor(self):
+        """Impede atualizar o responsável para uma idade inferior a 18."""
+        administrador = Administrador.objects.create_user(
+            username="admin_responsavel_idade",
+            password="Senha123!",
+            tipoContrato="CLT",
+        )
+        hoje = timezone.localdate()
+        try:
+            nascimento_de_18_anos = hoje.replace(year=hoje.year - 18)
+        except ValueError:
+            nascimento_de_18_anos = hoje.replace(
+                year=hoje.year - 18,
+                day=28,
+            )
+        data_menor = nascimento_de_18_anos + timedelta(days=1)
+        self.client.force_authenticate(user=administrador)
+
+        resposta = self.client.patch(
+            reverse("responsavel-detail", args=[self.responsavel.pk]),
+            {"dataNascimento": data_menor.isoformat()},
+            format="json",
+        )
+
+        self.assertEqual(resposta.status_code, status.HTTP_400_BAD_REQUEST)
+        self.responsavel.refresh_from_db()
+        self.assertIsNone(self.responsavel.dataNascimento)
 
     def test_cancelamento_valido(self):
         """Responsável pode cancelar a inscrição do dependente."""
