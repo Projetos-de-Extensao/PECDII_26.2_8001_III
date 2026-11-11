@@ -5,7 +5,9 @@ from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
+from drf_spectacular.utils import extend_schema
 from app.models import Aluno
+from app.serializers.loginSerializer import LoginSerializer
 
 class LoginView(APIView):
     """Autentica usuários e fornece um token de acesso."""
@@ -13,6 +15,10 @@ class LoginView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
 
+    @extend_schema(
+        request=LoginSerializer,
+        description="Autentica o usuário e retorna um token.",
+    )
     def post(self, request):
         """Valida as credenciais e retorna o token."""
         username = request.data.get("username")
