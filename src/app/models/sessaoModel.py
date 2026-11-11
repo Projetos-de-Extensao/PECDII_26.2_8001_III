@@ -74,6 +74,10 @@ class Sessao(models.Model):
             raise ValidationError(
                 "A sala precisa estar cadastrada para solicitar uma sessão."
             )
+        if dataHora <= timezone.now():
+            raise ValidationError(
+                "A data e hora da sessão devem ser futuras."
+            )
 
         sessao = cls(
             sala=sala,
