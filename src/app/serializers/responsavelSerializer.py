@@ -3,6 +3,7 @@ from app.models import Responsavel
 from .usuarioSerializer import UsuarioSerializer
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError as DjangoValidationError
 
 
 class ResponsavelSerializer(UsuarioSerializer):
@@ -41,4 +42,13 @@ class ResponsavelSerializer(UsuarioSerializer):
 
     def validate(self, attrs):
         """Permite cadastro sem senha para ativação por convite."""
+        data_nascimento = attrs.get(
+            "dataNascimento",
+            getattr(self.instance, "dataNascimento", None),
+        )
+        try:
+            Responsavel.validarMaioridade(data_nascimento)
+        except DjangoValidationError as erro:
+            raise serializers.ValidationError(erro.message_dict) from erro
+
         return attrs
