@@ -9,3 +9,7 @@ class Nutricionista(Profissional):
         max_length=50,
         unique=True,
     )
+
+    class Meta:
+        verbose_name = "Nutricionista"
+        verbose_name_plural = "Nutricionistas"

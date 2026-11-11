@@ -6,11 +6,29 @@ from app.models import Sala
 from app.models import Aluno
 from app.models import Sessao
 from app.models import Presenca
+from app.models import Profissional
+from app.models import Treinador
+from app.models import Nutricionista
+from app.models import Psicologo
+from app.models import Fisioterapeuta
+from app.models import Administrador
+from app.models import Responsavel
+from app.models import VinculoResponsavel
+from app.models import Laudo
 
 
 admin.site.register(Usuario)
 admin.site.register(Sala)
 admin.site.register(Aluno)
+admin.site.register(Profissional)
+admin.site.register(Treinador)
+admin.site.register(Nutricionista)
+admin.site.register(Psicologo)
+admin.site.register(Fisioterapeuta)
+admin.site.register(Administrador)
+admin.site.register(Responsavel)
+admin.site.register(VinculoResponsavel)
+admin.site.register(Laudo)
 
 
 @admin.register(Sessao)

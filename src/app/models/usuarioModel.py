@@ -40,6 +40,10 @@ class Usuario(AbstractUser):
     dataNascimento = models.DateField(blank=True, null=True)
     endereco = models.CharField(max_length=255, blank=True)
 
+    class Meta:
+        verbose_name = "Usuario"
+        verbose_name_plural = "Usuarios"
+
     def ativar(self):
         """
         Ativa o usuário, permitindo que ele faça login no sistema.

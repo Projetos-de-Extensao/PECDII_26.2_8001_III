@@ -9,3 +9,7 @@ class Psicologo(Profissional):
         max_length=50,
         unique=True,
     )
+
+    class Meta:
+        verbose_name = "Psicólogo"
+        verbose_name_plural = "Psicólogos"

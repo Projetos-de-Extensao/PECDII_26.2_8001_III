@@ -28,6 +28,10 @@ class Administrador(Usuario):
         max_length=100
     )
 
+    class Meta:
+        verbose_name = "Administrador"
+        verbose_name_plural = "Administradores"
+
     def __str__(self):
         """
         Retorna a representação textual do administrador.

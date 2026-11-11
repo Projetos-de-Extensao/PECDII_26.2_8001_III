@@ -14,6 +14,10 @@ class Aluno(Usuario):
     )
     creditos = models.PositiveIntegerField(default=0)
 
+    class Meta:
+        verbose_name = "Aluno"
+        verbose_name_plural = "Alunos"
+
     def assumirTutoria(self):
         self.responsavel = TipoResponsavel.PROPRIO
         self.save(update_fields=['responsavel'])

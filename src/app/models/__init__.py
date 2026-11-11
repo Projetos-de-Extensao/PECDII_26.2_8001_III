@@ -9,6 +9,6 @@ from .nutricionistaModel import Nutricionista
 from .psicologoModel import Psicologo
 from .fisioterapeutaModel import Fisioterapeuta
 from .administradorModel import Administrador
-from .responsavelModel import Responsavel
+from .responsavelModel import Responsavel, VinculoResponsavel
 from .laudoModel import Laudo
 from app.Enums import TipoResponsavel

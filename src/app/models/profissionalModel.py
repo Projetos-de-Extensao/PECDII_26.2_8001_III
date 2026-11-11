@@ -11,6 +11,10 @@ class Profissional(Usuario):
     tipoContrato = models.CharField(max_length=100)
     formacao = models.CharField(max_length=255)
 
+    class Meta:
+        verbose_name = "Profissional"
+        verbose_name_plural = "Profissionais"
+
     #class Meta:
         #abstract = True
 
