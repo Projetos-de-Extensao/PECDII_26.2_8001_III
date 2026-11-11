@@ -53,6 +53,80 @@ class TestesInscricaoResponsavel(TestCase):
             self.outro_responsavel.inscreverDependenteEmSessao(self.aluno, self.sessao)
         self.assertFalse(Presenca.objects.filter(sessao=self.sessao, aluno=self.aluno).exists())
 
+    def test_impedir_inscricao_em_sessao_sobreposta(self):
+        """Um aluno não pode ter inscrições pendentes em horários sobrepostos."""
+        outra_sala = Sala.objects.create(numero=102, capacidade=10)
+        outra_sessao = Sessao.objects.create(
+            sala=outra_sala,
+            profissional=self.profissional,
+            dataHora=self.sessao.dataHora + timedelta(minutes=30),
+            duracao=timedelta(hours=1),
+            creditosNecessarios=2,
+            status=StatusSessao.CONFIRMADA,
+        )
+        self.responsavel.inscreverDependenteEmSessao(self.aluno, self.sessao)
+
+        with self.assertRaises(ValidationError):
+            self.responsavel.inscreverDependenteEmSessao(
+                self.aluno, outra_sessao
+            )
+
+        self.aluno.refresh_from_db()
+        self.assertEqual(self.aluno.creditos, 3)
+        self.assertEqual(
+            Presenca.objects.filter(aluno=self.aluno).count(),
+            1,
+        )
+
+    def test_permitir_inscricoes_adjacentes(self):
+        """Sessões consecutivas, sem sobreposição, podem ser inscritas."""
+        outra_sala = Sala.objects.create(numero=102, capacidade=10)
+        outra_sessao = Sessao.objects.create(
+            sala=outra_sala,
+            profissional=self.profissional,
+            dataHora=self.sessao.dataHora + self.sessao.duracao,
+            duracao=timedelta(hours=1),
+            creditosNecessarios=2,
+            status=StatusSessao.CONFIRMADA,
+        )
+
+        self.responsavel.inscreverDependenteEmSessao(self.aluno, self.sessao)
+        self.responsavel.inscreverDependenteEmSessao(self.aluno, outra_sessao)
+
+        self.aluno.refresh_from_db()
+        self.assertEqual(self.aluno.creditos, 1)
+        self.assertEqual(
+            Presenca.objects.filter(aluno=self.aluno).count(),
+            2,
+        )
+
+    def test_desistencia_libera_horario_para_outra_inscricao(self):
+        """Inscrição desistente não reserva o horário do aluno."""
+        outra_sala = Sala.objects.create(numero=102, capacidade=10)
+        outra_sessao = Sessao.objects.create(
+            sala=outra_sala,
+            profissional=self.profissional,
+            dataHora=self.sessao.dataHora,
+            duracao=timedelta(hours=1),
+            creditosNecessarios=2,
+            status=StatusSessao.CONFIRMADA,
+        )
+
+        self.responsavel.inscreverDependenteEmSessao(self.aluno, self.sessao)
+        self.responsavel.cancelarInscricaoDependenteEmSessao(
+            self.aluno, self.sessao, "Desistência"
+        )
+        self.responsavel.inscreverDependenteEmSessao(self.aluno, outra_sessao)
+
+        self.assertEqual(
+            Presenca.objects.filter(
+                sessao=outra_sessao,
+                aluno=self.aluno,
+                status=StatusPresenca.PENDENTE,
+            ).count(),
+            1,
+        )
+
     def test_cancelar_inscricao(self):
         """Cancelamento válido remove a presença sem cancelar a sessão."""
         self.responsavel.inscreverDependenteEmSessao(self.aluno, self.sessao)
