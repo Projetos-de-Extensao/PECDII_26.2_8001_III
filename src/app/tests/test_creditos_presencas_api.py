@@ -30,14 +30,14 @@ class TestesCreditosPresencasAPI(APITestCase):
             matricula="MAT-TESTE-001",
         )
         sala = Sala.objects.create(numero=999, capacidade=20)
-        self.sessao = Sessao.solicitar(
+        self.sessao = Sessao.objects.create(
             profissional=self.treinador,
             sala=sala,
-            dataHora=timezone.now() + timedelta(days=2),
+            dataHora=timezone.now() - timedelta(days=2),
             duracao=timedelta(hours=1),
             creditosNecessarios=2,
+            status="CONFIRMADA",
         )
-        self.sessao.confirmar()
         self.presenca = Presenca.novaPresenca(self.sessao, self.aluno)
 
         self.url_creditos = reverse(
@@ -108,17 +108,17 @@ class TestesCreditosPresencasAPI(APITestCase):
         resposta = self.client.patch(
             self.url_presenca, {"status": StatusPresenca.PRESENTE}
         )
-        self.assertEqual(resposta.status_code, 403)
+        self.assertEqual(resposta.status_code, 404)
 
         resposta = self.client.get(self.url_lista)
-        self.assertEqual(resposta.status_code, 403)
+        self.assertEqual(resposta.status_code, 404)
 
     def test_realizar_sessao(self):
         """Somente o treinador responsável pode concluir a sessão."""
         url = reverse("sessao-realizar", kwargs={"pk": self.sessao.pk})
 
         self.client.force_authenticate(user=self.outro)
-        self.assertEqual(self.client.post(url).status_code, 403)
+        self.assertEqual(self.client.post(url).status_code, 404)
 
         self.client.force_authenticate(user=self.treinador)
         resposta = self.client.post(url)
@@ -129,3 +129,63 @@ class TestesCreditosPresencasAPI(APITestCase):
 
         # Impede concluir novamente.
         self.assertEqual(self.client.post(url).status_code, 400)
+
+    def test_nao_realiza_sessao_antes_do_horario_de_termino(self):
+        sessao_futura = Sessao.objects.create(
+            sala=Sala.objects.create(numero=1000, capacidade=20),
+            profissional=self.treinador,
+            dataHora=timezone.now() + timedelta(days=2),
+            duracao=timedelta(hours=1),
+            creditosNecessarios=2,
+            status="CONFIRMADA",
+        )
+        self.client.force_authenticate(user=self.treinador)
+
+        resposta = self.client.post(
+            reverse("sessao-realizar", kwargs={"pk": sessao_futura.pk})
+        )
+
+        self.assertEqual(resposta.status_code, 400)
+        sessao_futura.refresh_from_db()
+        self.assertEqual(sessao_futura.status, "CONFIRMADA")
+
+    def test_presenca_recusa_inscricao_desistente_sem_alterar_o_status(self):
+        self.presenca.status = StatusPresenca.DESISTENTE
+        self.presenca.save(update_fields=["status"])
+        self.client.force_authenticate(user=self.treinador)
+
+        resposta = self.client.patch(
+            self.url_presenca,
+            {"status": StatusPresenca.PRESENTE},
+        )
+
+        self.assertEqual(resposta.status_code, 400)
+        self.presenca.refresh_from_db()
+        self.assertEqual(self.presenca.status, StatusPresenca.DESISTENTE)
+
+    def test_presenca_nao_pode_ser_lancada_antes_do_inicio(self):
+        sessao_futura = Sessao.objects.create(
+            sala=Sala.objects.create(numero=1001, capacidade=20),
+            profissional=self.treinador,
+            dataHora=timezone.now() + timedelta(days=2),
+            duracao=timedelta(hours=1),
+            creditosNecessarios=2,
+            status="CONFIRMADA",
+        )
+        presenca_futura = Presenca.novaPresenca(sessao_futura, self.aluno)
+        self.client.force_authenticate(user=self.treinador)
+
+        resposta = self.client.patch(
+            reverse(
+                "sessao-registrar-presenca",
+                kwargs={
+                    "pk": sessao_futura.pk,
+                    "aluno_id": self.aluno.pk,
+                },
+            ),
+            {"status": StatusPresenca.PRESENTE},
+        )
+
+        self.assertEqual(resposta.status_code, 400)
+        presenca_futura.refresh_from_db()
+        self.assertEqual(presenca_futura.status, StatusPresenca.PENDENTE)

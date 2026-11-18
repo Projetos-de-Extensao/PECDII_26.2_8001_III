@@ -40,9 +40,7 @@ class SessaoSerializer(serializers.ModelSerializer):
             "duracao",
             "status",
             "creditosNecessarios",
-            "status",
             "motivoCancelamento",
-            "creditosNecessarios",
         ]
         read_only_fields = fields
 

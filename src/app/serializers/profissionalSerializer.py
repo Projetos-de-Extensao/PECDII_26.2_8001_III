@@ -20,21 +20,52 @@ class ProfissionalSerializer(UsuarioSerializer):
         ]
         read_only_fields = ["id", "tipo"]
 
-    @extend_schema_field(serializers.CharField(allow_null=True))
-    def get_tipo(self, obj):
-        """Identifica a especialização cadastrada."""
-        especializacoes = (
-            "treinador",
-            "fisioterapeuta",
-            "psicologo",
-            "nutricionista",
+
+    @extend_schema_field(
+        serializers.ChoiceField(
+            choices=[
+                "treinador",
+                "fisioterapeuta",
+                "psicologo",
+                "nutricionista",
+            ],
+            allow_null=True,
         )
+    )
+    def get_tipo(self, obj) -> str | None:
+        """Identifica a especialização cadastrada."""
+        return obter_tipo_profissional(obj)
 
-        for tipo in especializacoes:
-            if hasattr(obj, tipo):
-                return tipo
 
-        return None
+class ProfissionalPublicSerializer(serializers.ModelSerializer):
+    """Expõe somente os dados necessários para identificar a equipe."""
+
+    tipo = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Profissional
+        fields = [
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "formacao",
+            "tipo",
+        ]
+
+    @extend_schema_field(
+        serializers.ChoiceField(
+            choices=[
+                "treinador",
+                "fisioterapeuta",
+                "psicologo",
+                "nutricionista",
+            ],
+            allow_null=True,
+        )
+    )
+    def get_tipo(self, obj) -> str | None:
+        return obter_tipo_profissional(obj)
 
 
 class CadastroProfissionalSerializer(UsuarioSerializer):
@@ -144,3 +175,16 @@ class CadastroNutricionistaSerializer(CadastroProfissionalSerializer):
 
     tipo = serializers.ChoiceField(choices=["nutricionista"])
     CRN = serializers.CharField()
+
+
+def obter_tipo_profissional(obj) -> str | None:
+    especializacoes = (
+        "treinador",
+        "fisioterapeuta",
+        "psicologo",
+        "nutricionista",
+    )
+    for tipo in especializacoes:
+        if hasattr(obj, tipo):
+            return tipo
+    return None

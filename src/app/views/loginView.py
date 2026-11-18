@@ -7,8 +7,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from drf_spectacular.utils import extend_schema
 from app.models import Aluno
-from app.serializers.apiResponseSerializer import DetailResponseSerializer
 from app.serializers.loginSerializer import (
+    LoginErrorResponseSerializer,
     LoginResponseSerializer,
     LoginSerializer,
 )
@@ -23,8 +23,8 @@ class LoginView(APIView):
         request=LoginSerializer,
         responses={
             200: LoginResponseSerializer,
-            400: DetailResponseSerializer,
-            401: DetailResponseSerializer,
+            400: LoginErrorResponseSerializer,
+            401: LoginErrorResponseSerializer,
         },
         description="Autentica o usuário e retorna um token.",
     )

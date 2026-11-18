@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from drf_spectacular.utils import extend_schema
 
-from app.serializers.apiResponseSerializer import DetailResponseSerializer
+from app.serializers.loginSerializer import LogoutResponseSerializer
 
 
 class LogoutView(APIView):
@@ -16,7 +16,7 @@ class LogoutView(APIView):
 
     @extend_schema(
         request=None,
-        responses={200: DetailResponseSerializer},
+        responses={200: LogoutResponseSerializer},
     )
     def post(self, request):
         """Remove o token utilizado na requisição."""

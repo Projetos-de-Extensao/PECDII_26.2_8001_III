@@ -5,8 +5,6 @@ from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 from drf_spectacular.utils import extend_schema_field
-
-
 class AdicionarDependenteSerializer(serializers.Serializer):
     """Define o aluno a vincular ao responsável."""
 
@@ -41,7 +39,7 @@ class ResponsavelSerializer(UsuarioSerializer):
     @extend_schema_field(
         serializers.ListField(child=serializers.IntegerField())
     )
-    def get_dependentes(self, obj):
+    def get_dependentes(self, obj) -> list[int]:
         """Retorna os IDs dos alunos vinculados ao responsável."""
         return list(obj.dependentes.values_list("aluno_id", flat=True))
 

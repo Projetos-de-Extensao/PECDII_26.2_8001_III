@@ -12,7 +12,12 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
-from drf_spectacular.utils import extend_schema, PolymorphicProxySerializer
+from rest_framework import serializers
+from drf_spectacular.utils import (
+    OpenApiParameter,
+    PolymorphicProxySerializer,
+    extend_schema,
+)
 
 from app.models import Administrador, Sessao, Usuario, Sala, Aluno
 from app.serializers import UsuarioSerializer, SalaSerializer
@@ -54,6 +59,7 @@ class AdministradorView(ViewSet):
     """
 
     permission_classes = [IsAdministrador]
+    serializer_class = serializers.Serializer
 
     def obter_administrador(self, request):
         """
@@ -67,6 +73,9 @@ class AdministradorView(ViewSet):
 
     @extend_schema(
         request=None,
+        parameters=[
+            OpenApiParameter("sessao_id", int, OpenApiParameter.PATH),
+        ],
         responses={200: AprovarSessaoResponseSerializer},
     )
     @action(
@@ -113,6 +122,9 @@ class AdministradorView(ViewSet):
 
     @extend_schema(
         request=MotivoSessaoSerializer,
+        parameters=[
+            OpenApiParameter("sessao_id", int, OpenApiParameter.PATH),
+        ],
         responses={200: DesaprovarSessaoResponseSerializer},
     )
     @action(
@@ -164,6 +176,9 @@ class AdministradorView(ViewSet):
 
     @extend_schema(
         request=None,
+        parameters=[
+            OpenApiParameter("usuario_id", int, OpenApiParameter.PATH),
+        ],
         responses={200: DesativarUsuarioResponseSerializer},
     )
     @action(
@@ -437,6 +452,9 @@ class AdministradorView(ViewSet):
 
     @extend_schema(
         request=CreditosAlunoSerializer,
+        parameters=[
+            OpenApiParameter("aluno_id", int, OpenApiParameter.PATH),
+        ],
         responses={200: CreditosAlunoResponseSerializer},
     )
     @action(
@@ -446,8 +464,6 @@ class AdministradorView(ViewSet):
     )
     def gerenciar_creditos(self, request, aluno_id=None):
         """Adiciona ou remove créditos de um aluno."""
-        aluno = get_object_or_404(Aluno, pk=aluno_id)
-
         quantidade = request.data.get("quantidade")
 
         if type(quantidade) is not int or quantidade == 0:
@@ -456,16 +472,21 @@ class AdministradorView(ViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        novo_saldo = aluno.creditos + quantidade
-
-        if novo_saldo < 0:
-            return Response(
-                {"erro": "O aluno não possui créditos suficientes."},
-                status=status.HTTP_400_BAD_REQUEST
+        with transaction.atomic():
+            aluno = get_object_or_404(
+                Aluno.objects.select_for_update(),
+                pk=aluno_id,
             )
+            novo_saldo = aluno.creditos + quantidade
 
-        aluno.creditos = novo_saldo
-        aluno.save(update_fields=["creditos"])
+            if novo_saldo < 0:
+                return Response(
+                    {"erro": "O aluno não possui créditos suficientes."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            aluno.creditos = novo_saldo
+            aluno.save(update_fields=["creditos"])
 
         return Response({
             "mensagem": "Créditos atualizados com sucesso.",

@@ -9,8 +9,23 @@ class LoginSerializer(serializers.Serializer):
 
 
 class LoginResponseSerializer(serializers.Serializer):
-    """Define os dados retornados após autenticação bem-sucedida."""
-
     token = serializers.CharField()
     usuario_id = serializers.IntegerField()
     username = serializers.CharField()
+
+
+class LoginErrorResponseSerializer(serializers.Serializer):
+    detail = serializers.CharField()
+
+
+class LogoutResponseSerializer(serializers.Serializer):
+    detail = serializers.CharField()
+
+
+class MeResponseSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    username = serializers.CharField()
+    nome = serializers.CharField()
+    perfil = serializers.ChoiceField(
+        choices=["administrador", "responsavel", "profissional", "usuario"]
+    )

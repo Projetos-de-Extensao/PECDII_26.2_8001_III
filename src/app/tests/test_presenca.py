@@ -19,10 +19,10 @@ class PresencaTests(TestCase):
         )
         self.sala = Sala.objects.create(numero=301, capacidade=10)
 
-    def criar_sessao(self, status=StatusSessao.CONFIRMADA):
+    def criar_sessao(self, status=StatusSessao.CONFIRMADA, data_hora=None):
         return Sessao.objects.create(
             sala=self.sala,
-            dataHora=timezone.now(),
+            dataHora=data_hora or timezone.now(),
             duracao=timedelta(minutes=45),
             status=status,
             creditosNecessarios=0,
@@ -157,6 +157,39 @@ class PresencaTests(TestCase):
 
         with self.assertRaises(ValidationError):
             presenca.registrarPresenca(StatusPresenca.AUSENTE, '')
+
+    def test_nao_registra_chamada_antes_do_inicio_da_sessao(self):
+        sessao = self.criar_sessao(
+            data_hora=timezone.now() + timedelta(hours=1)
+        )
+        presenca = Presenca.novaPresenca(sessao, self.aluno)
+
+        with self.assertRaises(ValidationError):
+            presenca.registrarPresenca(StatusPresenca.PRESENTE, "")
+
+        presenca.refresh_from_db()
+        self.assertEqual(presenca.status, StatusPresenca.PENDENTE)
+
+    def test_nao_registra_chamada_em_sessao_solicitada(self):
+        sessao = self.criar_sessao(status=StatusSessao.SOLICITADA)
+        presenca = Presenca.novaPresenca(sessao, self.aluno)
+
+        with self.assertRaises(ValidationError):
+            presenca.registrarPresenca(StatusPresenca.PRESENTE, "")
+
+        presenca.refresh_from_db()
+        self.assertEqual(presenca.status, StatusPresenca.PENDENTE)
+
+    def test_nao_registra_chamada_para_inscricao_inativa(self):
+        presenca = Presenca.novaPresenca(self.criar_sessao(), self.aluno)
+        presenca.status = StatusPresenca.DESISTENTE
+        presenca.save(update_fields=["status"])
+
+        with self.assertRaises(ValidationError):
+            presenca.registrarPresenca(StatusPresenca.PRESENTE, "")
+
+        presenca.refresh_from_db()
+        self.assertEqual(presenca.status, StatusPresenca.DESISTENTE)
 
     def test_presenca_impede_exclusao_de_sessao_e_aluno(self):
         presenca = self.criar_presenca()

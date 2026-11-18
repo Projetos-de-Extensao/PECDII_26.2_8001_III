@@ -5,8 +5,18 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from app.models import Administrador, Treinador, Sala, Sessao
+from app.models import (
+    Administrador,
+    Aluno,
+    Presenca,
+    Responsavel,
+    Sala,
+    Sessao,
+    Treinador,
+    Usuario,
+)
 from app.Enums import StatusSessao
+from app.models.responsavelModel import VinculoResponsavel
 
 
 class TestesSessaoAPI(APITestCase):
@@ -108,6 +118,13 @@ class TestesSessaoAPI(APITestCase):
             },
         )
         outra_sala = Sala.objects.create(numero=102, capacidade=20)
+        outro_profissional = Treinador.objects.create(
+            username="treinador_sala_diferente",
+            tipoContrato="CLT",
+            formacao="Educacao Fisica",
+            especialidade="Natacao",
+        )
+        self.client.force_authenticate(user=outro_profissional)
         mesmo_horario = self.client.post(
             reverse("sessao-list"),
             {**dados, "sala": outra_sala.pk},
@@ -247,7 +264,7 @@ class TestesSessaoAPI(APITestCase):
             {"motivo": "Teste"},
         )
 
-        self.assertEqual(resposta.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(resposta.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_filtro_por_profissional(self):
         """Filtra sessões pelo profissional informado."""
@@ -270,3 +287,166 @@ class TestesSessaoAPI(APITestCase):
         )
 
         self.assertEqual(resposta.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_profissional_nao_pode_agendar_conflito_em_outra_sala(self):
+        data_hora = timezone.now() + timedelta(days=4)
+        primeira_sala = Sala.objects.create(numero=103, capacidade=20)
+        outra_sala = Sala.objects.create(numero=104, capacidade=20)
+        primeira = Sessao.solicitar(
+            self.profissional,
+            primeira_sala,
+            data_hora,
+            timedelta(hours=1),
+            2,
+        )
+        resposta = self.client.post(
+            reverse("sessao-list"),
+            {
+                **self.dados,
+                "sala": outra_sala.pk,
+                "dataHora": (data_hora + timedelta(minutes=30)).isoformat(),
+            },
+        )
+
+        self.assertEqual(primeira.status, StatusSessao.SOLICITADA)
+        self.assertEqual(resposta.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("profissional", resposta.data["erro"][0])
+        self.assertEqual(Sessao.objects.count(), 1)
+
+    def test_profissional_lista_apenas_suas_sessoes_e_detalhe_alheio_retorna_404(self):
+        sessao_propria = self.criar_sessao()
+        outro_profissional = Treinador.objects.create(
+            username="treinador_privado",
+            tipoContrato="CLT",
+            formacao="Educacao Fisica",
+            especialidade="Natacao",
+        )
+        outra_sala = Sala.objects.create(numero=105, capacidade=10)
+        sessao_alheia = Sessao.objects.create(
+            sala=outra_sala,
+            profissional=outro_profissional,
+            dataHora=timezone.now() + timedelta(days=4),
+            duracao=timedelta(hours=1),
+            creditosNecessarios=1,
+        )
+
+        resposta_lista = self.client.get(reverse("sessao-list"))
+        resposta_detalhe = self.client.get(
+            reverse("sessao-detail", args=[sessao_alheia.pk])
+        )
+
+        self.assertEqual(resposta_lista.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            [sessao["id"] for sessao in resposta_lista.data],
+            [sessao_propria.pk],
+        )
+        self.assertEqual(
+            resposta_detalhe.status_code,
+            status.HTTP_404_NOT_FOUND,
+        )
+
+    def test_responsavel_lista_somente_sessoes_de_dependentes(self):
+        responsavel = Responsavel.objects.create_user(
+            username="responsavel_sessoes",
+            password="Senha123!",
+        )
+        aluno = Aluno.objects.create_user(
+            username="aluno_sessoes",
+            password="Senha123!",
+            matricula="ALU-SESS-01",
+        )
+        VinculoResponsavel.objects.create(
+            responsavel=responsavel,
+            aluno=aluno,
+        )
+        sessao_vinculada = Sessao.objects.create(
+            sala=self.sala,
+            profissional=self.profissional,
+            dataHora=timezone.now() + timedelta(days=5),
+            duracao=timedelta(hours=1),
+            creditosNecessarios=1,
+            status=StatusSessao.CONFIRMADA,
+        )
+        Presenca.objects.create(
+            sessao=sessao_vinculada,
+            aluno=aluno,
+            status="PENDENTE",
+        )
+        sessao_sem_dependente = Sessao.objects.create(
+            sala=Sala.objects.create(numero=106, capacidade=10),
+            profissional=self.profissional,
+            dataHora=timezone.now() + timedelta(days=6),
+            duracao=timedelta(hours=1),
+            creditosNecessarios=1,
+            status=StatusSessao.CONFIRMADA,
+        )
+        self.client.force_authenticate(user=responsavel)
+
+        resposta = self.client.get(reverse("sessao-list"))
+
+        self.assertEqual(resposta.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            [sessao["id"] for sessao in resposta.data],
+            [sessao_vinculada.pk],
+        )
+        self.assertNotEqual(sessao_vinculada.pk, sessao_sem_dependente.pk)
+
+    def test_usuario_generico_nao_lista_sessoes(self):
+        usuario = Usuario.objects.create_user(
+            username="usuario_sem_perfil",
+            password="Senha123!",
+        )
+        sessao = self.criar_sessao()
+        self.client.force_authenticate(user=usuario)
+
+        resposta_lista = self.client.get(reverse("sessao-list"))
+        resposta_detalhe = self.client.get(
+            reverse("sessao-detail", args=[sessao.pk])
+        )
+
+        self.assertEqual(resposta_lista.status_code, status.HTTP_200_OK)
+        self.assertEqual(resposta_lista.data, [])
+        self.assertEqual(
+            resposta_detalhe.status_code,
+            status.HTTP_404_NOT_FOUND,
+        )
+
+    def test_patch_generico_nao_altera_sessao(self):
+        sessao = self.criar_sessao()
+
+        resposta = self.client.patch(
+            reverse("sessao-detail", args=[sessao.pk]),
+            {"status": StatusSessao.CANCELADA},
+        )
+
+        self.assertEqual(
+            resposta.status_code,
+            status.HTTP_405_METHOD_NOT_ALLOWED,
+        )
+        sessao.refresh_from_db()
+        self.assertEqual(sessao.status, StatusSessao.SOLICITADA)
+
+    def test_administrador_lista_sessoes_de_todos_os_profissionais(self):
+        sessao_propria = self.criar_sessao()
+        outro_profissional = Treinador.objects.create(
+            username="treinador_admin_sessoes",
+            tipoContrato="CLT",
+            formacao="Educacao Fisica",
+            especialidade="Natacao",
+        )
+        sessao_alheia = Sessao.objects.create(
+            sala=Sala.objects.create(numero=107, capacidade=10),
+            profissional=outro_profissional,
+            dataHora=timezone.now() + timedelta(days=7),
+            duracao=timedelta(hours=1),
+            creditosNecessarios=1,
+        )
+        self.client.force_authenticate(user=self.admin)
+
+        resposta = self.client.get(reverse("sessao-list"))
+
+        self.assertEqual(resposta.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            {sessao["id"] for sessao in resposta.data},
+            {sessao_propria.pk, sessao_alheia.pk},
+        )

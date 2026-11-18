@@ -80,7 +80,9 @@ class ResponsavelView(ModelViewSet):
                 OpenApiTypes.INT,
                 OpenApiParameter.PATH,
             )
-        ]
+        ],
+        request=None,
+        responses={204: None},
     )
     @action(
         detail=True,

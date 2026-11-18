@@ -189,6 +189,35 @@ class TestesResponsavelAPI(APITestCase):
         self.assertEqual(resposta.status_code, 201)
         self.assertEqual(self.aluno.creditos, 3)
 
+    def test_inscricao_nao_ultrapassa_capacidade_da_sala(self):
+        self.sessao.sala.capacidade = 1
+        self.sessao.sala.save(update_fields=["capacidade"])
+        segundo_aluno = Aluno.objects.create_user(
+            username="aluno_capacidade_api",
+            password="Senha123!",
+            matricula="MAT-CAP-002",
+            creditos=5,
+        )
+        VinculoResponsavel.objects.create(
+            responsavel=self.responsavel,
+            aluno=segundo_aluno,
+        )
+        self.client.force_authenticate(user=self.responsavel)
+        primeira = self.client.post(self.url_inscricao, self.dados)
+        segunda = self.client.post(
+            self.url_inscricao,
+            {
+                "aluno_id": segundo_aluno.pk,
+                "sessao_id": self.sessao.pk,
+            },
+        )
+
+        self.assertEqual(primeira.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(segunda.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(Presenca.objects.filter(sessao=self.sessao).count(), 1)
+        segundo_aluno.refresh_from_db()
+        self.assertEqual(segundo_aluno.creditos, 5)
+
     def test_cancelamento_antecipado_devolve_creditos(self):
         """Devolve créditos quando faltam pelo menos 12 horas."""
         self.client.force_authenticate(user=self.responsavel)

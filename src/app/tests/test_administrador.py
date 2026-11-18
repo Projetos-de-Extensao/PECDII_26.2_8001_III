@@ -57,7 +57,7 @@ class AdministradorTests(TestCase):
         # Cria uma sessão com os campos obrigatórios.
         sessao = Sessao.objects.create(
             sala=sala,
-            dataHora=timezone.now(),
+            dataHora=timezone.now() + timedelta(days=1),
             duracao=timedelta(minutes=60),
             creditosNecessarios=1
         )

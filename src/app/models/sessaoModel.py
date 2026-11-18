@@ -6,6 +6,7 @@ from django.db import models, transaction
 from django.utils import timezone
 
 from app.Enums import StatusPresenca, StatusSessao
+from app.Enums.StatusPresencaEnum import STATUS_INSCRICAO_ATIVA
 from app.decorators import *
 
 from .salaModel import Sala
@@ -94,6 +95,20 @@ class Sessao(models.Model):
                     "A sala já possui sessão em horário conflitante."
                 )
 
+            if self.profissional_id:
+                sessoes_profissional = Sessao.objects.filter(
+                    profissional_id=self.profissional_id,
+                    status__in=status_que_reservam_sala,
+                    dataHora__lt=fim,
+                ).exclude(pk=self.pk).only("dataHora", "duracao")
+                if any(
+                    sessao.dataHora + sessao.duracao > self.dataHora
+                    for sessao in sessoes_profissional
+                ):
+                    errors["profissional"] = (
+                        "O profissional já possui sessão em horário conflitante."
+                    )
+
         if errors:
             raise ValidationError(errors)
 
@@ -125,6 +140,7 @@ class Sessao(models.Model):
 
         with transaction.atomic():
             Sala.objects.select_for_update().get(pk=sala.pk)
+            Profissional.objects.select_for_update().get(pk=profissional.pk)
             sessao.full_clean()
             sessao.save()
 
@@ -132,20 +148,36 @@ class Sessao(models.Model):
 
 
     @exigir_sessao_valida('A sessão precisa estar cadastrada para ser confirmada.')
-    @exigir_status_solicitada('Apenas sessões solicitadas podem ser confirmadas.')
+    @transaction.atomic
     def confirmar(self):
-        self.status = StatusSessao.CONFIRMADA
-        self.save(update_fields=['status'])
+        sessao = Sessao.objects.select_for_update().get(pk=self.pk)
+        if sessao.status != StatusSessao.SOLICITADA:
+            raise ValidationError(
+                "Apenas sessões solicitadas podem ser confirmadas."
+            )
+
+        sessao.full_clean()
+        sessao.status = StatusSessao.CONFIRMADA
+        sessao.save(update_fields=['status'])
+        self.status = sessao.status
 
 
     @exigir_sessao_valida('A sessão precisa estar cadastrada para ser rejeitada.')
-    @exigir_status_solicitada('A sessão não pode ser rejeitada no estado atual.')
     @exigir_motivo()
+    @transaction.atomic
     def rejeitar(self, motivo):
         motivo = motivo.strip()
-        self.status = StatusSessao.REJEITADA
-        self.motivoCancelamento = motivo
-        self.save(update_fields=['status', 'motivoCancelamento'])
+        sessao = Sessao.objects.select_for_update().get(pk=self.pk)
+        if sessao.status != StatusSessao.SOLICITADA:
+            raise ValidationError(
+                "A sessão não pode ser rejeitada no estado atual."
+            )
+
+        sessao.status = StatusSessao.REJEITADA
+        sessao.motivoCancelamento = motivo
+        sessao.save(update_fields=['status', 'motivoCancelamento'])
+        self.status = sessao.status
+        self.motivoCancelamento = sessao.motivoCancelamento
 
 
     @exigir_sessao_valida('A sessão precisa estar cadastrada para ser cancelada.')
@@ -168,14 +200,17 @@ class Sessao(models.Model):
 
         alunos_ids = Presenca.objects.filter(
             sessao=sessao,
-            status=StatusPresenca.PENDENTE,
+            status__in=STATUS_INSCRICAO_ATIVA,
         ).values_list("aluno_id", flat=True)
 
         Aluno.objects.filter(pk__in=alunos_ids).update(
             creditos=F("creditos") + sessao.creditosNecessarios
         )
 
-        Presenca.objects.filter(sessao=sessao, status=StatusPresenca.PENDENTE).update(
+        Presenca.objects.filter(
+            sessao=sessao,
+            status__in=STATUS_INSCRICAO_ATIVA,
+        ).update(
             status=StatusPresenca.CANCELADA
         )
 
@@ -201,51 +236,65 @@ class Sessao(models.Model):
 
 
     @exigir_sessao_valida('A sessão precisa estar cadastrada para ser realizada.')
-    @exigir_status_confirmada('Um aluno não pode ser inscrito em uma sessão que não está confirmada.')
     @exigir_aluno_valido('O aluno precisa estar cadastrado para ser inscrito em uma sessão.')
     @transaction.atomic
     def inscreverAluno(self, aluno):
         """Inscreve o aluno e desconta os créditos da sessão."""
         from .presencaModel import Presenca
 
-        if self.dataHora <= timezone.now():
+        sessao = Sessao.objects.select_for_update().select_related(
+            "sala"
+        ).get(pk=self.pk)
+        if sessao.status != StatusSessao.CONFIRMADA:
+            raise ValidationError(
+                "Um aluno não pode ser inscrito em uma sessão que não está confirmada."
+            )
+
+        if sessao.dataHora <= timezone.now():
             raise ValidationError("A sessão já começou.")
 
         aluno = Aluno.objects.select_for_update().get(pk=aluno.pk)
 
-        presenca = Presenca.objects.filter(sessao=self, aluno=aluno).first()
+        presenca = Presenca.objects.filter(sessao=sessao, aluno=aluno).first()
         if presenca and presenca.status != StatusPresenca.DESISTENTE:
             raise ValidationError("Aluno já inscrito nesta sessão.")
+
+        inscricoes_ativas = Presenca.objects.filter(
+            sessao=sessao,
+            status__in=STATUS_INSCRICAO_ATIVA,
+        ).count()
+        if inscricoes_ativas >= sessao.sala.capacidade:
+            raise ValidationError("A sessão atingiu a capacidade máxima da sala.")
 
         status_que_reservam_horario = (
             StatusSessao.SOLICITADA,
             StatusSessao.CONFIRMADA,
         )
-        fim = self.dataHora + self.duracao
+        fim = sessao.dataHora + sessao.duracao
         inscricoes_conflitantes = Presenca.objects.filter(
             aluno=aluno,
-            status=StatusPresenca.PENDENTE,
+            status__in=STATUS_INSCRICAO_ATIVA,
             sessao__status__in=status_que_reservam_horario,
             sessao__dataHora__lt=fim,
-        ).exclude(sessao=self).select_related("sessao")
+        ).exclude(sessao=sessao).select_related("sessao")
 
         if any(
-            inscricao.sessao.dataHora + inscricao.sessao.duracao > self.dataHora
+            inscricao.sessao.dataHora + inscricao.sessao.duracao > sessao.dataHora
             for inscricao in inscricoes_conflitantes
         ):
             raise ValidationError(
                 "Aluno já possui sessão em horário conflitante."
             )
 
-        if aluno.creditos < self.creditosNecessarios:
+        if aluno.creditos < sessao.creditosNecessarios:
             raise ValidationError("Créditos insuficientes.")
 
         if presenca:
             presenca.status = StatusPresenca.PENDENTE
             presenca.save(update_fields=["status"])
         else:
-            presenca = Presenca.novaPresenca(self, aluno)
-        aluno.creditos -= self.creditosNecessarios
+            presenca = Presenca.novaPresenca(sessao, aluno)
+        aluno.creditos -= sessao.creditosNecessarios
         aluno.save(update_fields=["creditos"])
 
         return presenca
@@ -258,21 +307,45 @@ class Sessao(models.Model):
         from .presencaModel import Presenca
 
         agora = timezone.now()
+        sessao = Sessao.objects.select_for_update().get(pk=self.pk)
 
-        if self.dataHora <= agora:
+        if sessao.status != StatusSessao.CONFIRMADA:
+            raise ValidationError(
+                "A inscrição só pode ser cancelada em uma sessão confirmada."
+            )
+
+        if sessao.dataHora <= agora:
             raise ValidationError("A sessão já começou.")
 
         aluno = Aluno.objects.select_for_update().get(pk=aluno.pk)
         presenca = Presenca.objects.filter(
-            sessao=self, aluno=aluno
+            sessao=sessao, aluno=aluno
         ).first()
 
         if presenca is None or presenca.status != StatusPresenca.PENDENTE:
             raise ValidationError("O aluno não está inscrito nesta sessão.")
 
-        if self.dataHora - agora >= timedelta(hours=12):
-            aluno.creditos += self.creditosNecessarios
+        if sessao.dataHora - agora >= timedelta(hours=12):
+            aluno.creditos += sessao.creditosNecessarios
             aluno.save(update_fields=["creditos"])
 
         presenca.status = StatusPresenca.DESISTENTE
         presenca.save(update_fields=["status"])
+
+    @exigir_sessao_valida(
+        'A sessão precisa estar cadastrada para ser realizada.'
+    )
+    @transaction.atomic
+    def realizar(self):
+        sessao = Sessao.objects.select_for_update().get(pk=self.pk)
+        if sessao.status != StatusSessao.CONFIRMADA:
+            raise ValidationError("A sessão precisa estar confirmada.")
+
+        if timezone.now() < sessao.dataHora + sessao.duracao:
+            raise ValidationError(
+                "A sessão só pode ser concluída após o horário de término."
+            )
+
+        sessao.status = StatusSessao.REALIZADA
+        sessao.save(update_fields=["status"])
+        self.status = sessao.status
