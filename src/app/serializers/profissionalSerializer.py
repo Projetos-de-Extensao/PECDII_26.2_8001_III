@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from drf_spectacular.utils import extend_schema_field
 
 from app.models import Profissional
 from .usuarioSerializer import UsuarioSerializer
@@ -19,20 +20,51 @@ class ProfissionalSerializer(UsuarioSerializer):
         ]
         read_only_fields = ["id", "tipo"]
 
-    def get_tipo(self, obj):
-        """Identifica a especialização cadastrada."""
-        especializacoes = (
-            "treinador",
-            "fisioterapeuta",
-            "psicologo",
-            "nutricionista",
+    @extend_schema_field(
+        serializers.ChoiceField(
+            choices=[
+                "treinador",
+                "fisioterapeuta",
+                "psicologo",
+                "nutricionista",
+            ],
+            allow_null=True,
         )
+    )
+    def get_tipo(self, obj) -> str | None:
+        """Identifica a especialização cadastrada."""
+        return obter_tipo_profissional(obj)
 
-        for tipo in especializacoes:
-            if hasattr(obj, tipo):
-                return tipo
 
-        return None
+class ProfissionalPublicSerializer(serializers.ModelSerializer):
+    """Expõe somente os dados necessários para identificar a equipe."""
+
+    tipo = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Profissional
+        fields = [
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "formacao",
+            "tipo",
+        ]
+
+    @extend_schema_field(
+        serializers.ChoiceField(
+            choices=[
+                "treinador",
+                "fisioterapeuta",
+                "psicologo",
+                "nutricionista",
+            ],
+            allow_null=True,
+        )
+    )
+    def get_tipo(self, obj) -> str | None:
+        return obter_tipo_profissional(obj)
 
 
 class CadastroProfissionalSerializer(UsuarioSerializer):
@@ -114,3 +146,16 @@ class CadastroProfissionalSerializer(UsuarioSerializer):
         profissional.save()
 
         return profissional
+
+
+def obter_tipo_profissional(obj) -> str | None:
+    especializacoes = (
+        "treinador",
+        "fisioterapeuta",
+        "psicologo",
+        "nutricionista",
+    )
+    for tipo in especializacoes:
+        if hasattr(obj, tipo):
+            return tipo
+    return None
