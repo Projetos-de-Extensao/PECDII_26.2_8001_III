@@ -1,22 +1,46 @@
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.viewsets import ModelViewSet
+from rest_framework import mixins
 from rest_framework.exceptions import ValidationError
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
 from rest_framework import serializers
 from rest_framework.decorators import action
+from rest_framework.viewsets import GenericViewSet
+from drf_spectacular.utils import (
+    OpenApiParameter,
+    extend_schema,
+    extend_schema_view,
+    inline_serializer,
+)
 
 from app.models import Sessao
 from app.serializers import SessaoSerializer
-from app.models import Administrador, Profissional
+from app.models import Administrador, Profissional, Responsavel
 from app.serializers.sessaoSerializer import SolicitacaoSessaoSerializer
 from app.models import Presenca
 from app.Enums import StatusPresenca, StatusSessao
+from app.Enums.StatusPresencaEnum import STATUS_CHAMADA
+from app.models.responsavelModel import VinculoResponsavel
 
 
-class SessaoView(ModelViewSet):
+@extend_schema_view(
+    list=extend_schema(
+        parameters=[
+            OpenApiParameter("data", str),
+            OpenApiParameter("profissional", int),
+            OpenApiParameter("sala", int),
+            OpenApiParameter("status", str),
+        ]
+    )
+)
+class SessaoView(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    GenericViewSet,
+):
     """Permite consultar as sessões cadastradas."""
 
     def get_queryset(self):
@@ -24,6 +48,20 @@ class SessaoView(ModelViewSet):
         queryset = Sessao.objects.select_related(
             "sala", "profissional"
         ).all().order_by("dataHora")
+        usuario = self.request.user
+
+        if not Administrador.objects.filter(pk=usuario.pk).exists():
+            if Profissional.objects.filter(pk=usuario.pk).exists():
+                queryset = queryset.filter(profissional_id=usuario.pk)
+            elif Responsavel.objects.filter(pk=usuario.pk).exists():
+                alunos_ids = VinculoResponsavel.objects.filter(
+                    responsavel_id=usuario.pk
+                ).values_list("aluno_id", flat=True)
+                queryset = queryset.filter(
+                    presencas__aluno_id__in=alunos_ids
+                ).distinct()
+            else:
+                return queryset.none()
 
         params = self.request.query_params
 
@@ -44,7 +82,10 @@ class SessaoView(ModelViewSet):
                 })
 
         if params.get("status"):
-            status_validos = [valor for valor, _ in Sessao._meta.get_field("status").choices]
+            status_validos = [
+                valor
+                for valor, _ in Sessao._meta.get_field("status").choices
+            ]
 
             if params["status"] not in status_validos:
                 raise ValidationError({
@@ -69,6 +110,10 @@ class SessaoView(ModelViewSet):
     permission_classes = [IsAuthenticated]
     http_method_names = ["get", "post", "patch", "head", "options"]
 
+    @extend_schema(
+        request=SolicitacaoSessaoSerializer,
+        responses={201: SessaoSerializer},
+    )
     def create(self, request, *args, **kwargs):
         """Solicita uma sessão conforme o perfil autenticado."""
         dados = SolicitacaoSessaoSerializer(data=request.data)
@@ -119,6 +164,7 @@ class SessaoView(ModelViewSet):
             status=status.HTTP_201_CREATED,
         )
 
+    @extend_schema(request=None, responses={200: SessaoSerializer})
     @action(detail=True, methods=["post"])
     def confirmar(self, request, pk=None):
         """Permite ao administrador confirmar uma sessão solicitada."""
@@ -136,6 +182,13 @@ class SessaoView(ModelViewSet):
 
         return Response(SessaoSerializer(sessao).data)
 
+    @extend_schema(
+        request=inline_serializer(
+            name="RejeitarSessaoRequest",
+            fields={"motivo": serializers.CharField()},
+        ),
+        responses={200: SessaoSerializer},
+    )
     @action(detail=True, methods=["post"])
     def rejeitar(self, request, pk=None):
         """Permite ao administrador rejeitar uma sessão."""
@@ -159,6 +212,13 @@ class SessaoView(ModelViewSet):
 
         return Response(SessaoSerializer(sessao).data)
 
+    @extend_schema(
+        request=inline_serializer(
+            name="CancelarSessaoRequest",
+            fields={"motivo": serializers.CharField()},
+        ),
+        responses={200: SessaoSerializer},
+    )
     @action(detail=True, methods=["post"])
     def cancelar(self, request, pk=None):
         """Permite cancelar uma sessão conforme o perfil autorizado."""
@@ -189,6 +249,32 @@ class SessaoView(ModelViewSet):
 
         return Response(SessaoSerializer(sessao).data)
 
+    @extend_schema(
+        request=inline_serializer(
+            name="RegistrarPresencaRequest",
+            fields={
+                "status": serializers.ChoiceField(
+                    choices=STATUS_CHAMADA
+                ),
+                "justificativa": serializers.CharField(required=False),
+            },
+        ),
+        parameters=[
+            OpenApiParameter("aluno_id", int, OpenApiParameter.PATH),
+        ],
+        responses={
+            200: inline_serializer(
+                name="RegistrarPresencaResponse",
+                fields={
+                    "mensagem": serializers.CharField(),
+                    "sessao": serializers.IntegerField(),
+                    "aluno": serializers.IntegerField(),
+                    "status": serializers.CharField(),
+                    "justificativa": serializers.CharField(),
+                },
+            )
+        },
+    )
     @action(detail=True, methods=["patch"], url_path=r"presencas/(?P<aluno_id>[0-9]+)")
     def registrar_presenca(self, request, pk=None, aluno_id=None):
         """Registra presença, ausência ou justificativa de um aluno."""
@@ -251,6 +337,21 @@ class SessaoView(ModelViewSet):
             "justificativa": presenca.justificativa,
         })
 
+    @extend_schema(
+        request=None,
+        responses={
+            200: inline_serializer(
+                name="ItemListaPresenca",
+                fields={
+                    "aluno_id": serializers.IntegerField(),
+                    "nome": serializers.CharField(),
+                    "status": serializers.CharField(),
+                    "justificativa": serializers.CharField(),
+                },
+                many=True,
+            )
+        },
+    )
     @action(detail=True, methods=["get"], url_path="presencas")
     def listar_presencas(self, request, pk=None):
         """Lista os alunos inscritos e suas presenças na sessão."""
@@ -284,6 +385,7 @@ class SessaoView(ModelViewSet):
         ])
 
 
+    @extend_schema(request=None, responses={200: SessaoSerializer})
     @action(detail=True, methods=["post"])
     def realizar(self, request, pk=None):
         """Marca como realizada uma sessão confirmada."""
@@ -302,7 +404,11 @@ class SessaoView(ModelViewSet):
                 "status": "A sessão precisa estar confirmada."
             })
 
-        sessao.status = StatusSessao.REALIZADA
-        sessao.save(update_fields=["status"])
+        try:
+            sessao.realizar()
+        except DjangoValidationError as erro:
+            raise serializers.ValidationError({
+                "status": erro.messages
+            })
 
         return Response(SessaoSerializer(sessao).data)
