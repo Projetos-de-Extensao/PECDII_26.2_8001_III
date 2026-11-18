@@ -280,3 +280,78 @@ class SessaoTests(TestCase):
 
         self.assertEqual(aluno.creditos, 5)
         self.assertEqual(presenca.status, "DESISTENTE")
+
+    def test_inscricao_respeita_capacidade_da_sala(self):
+        sala = Sala.objects.create(numero=202, capacidade=1)
+        sessao = Sessao.objects.create(
+            sala=sala,
+            dataHora=timezone.now() + timedelta(days=1),
+            duracao=timedelta(hours=1),
+            creditosNecessarios=2,
+            status=StatusSessao.CONFIRMADA,
+        )
+        primeiro = Aluno.objects.create_user(
+            username="aluno_capacidade_1",
+            password="Senha123!",
+            matricula="CAP-001",
+            creditos=4,
+        )
+        segundo = Aluno.objects.create_user(
+            username="aluno_capacidade_2",
+            password="Senha123!",
+            matricula="CAP-002",
+            creditos=4,
+        )
+
+        sessao.inscreverAluno(primeiro)
+        with self.assertRaises(ValidationError):
+            sessao.inscreverAluno(segundo)
+
+        primeiro.refresh_from_db()
+        segundo.refresh_from_db()
+        self.assertEqual(primeiro.creditos, 2)
+        self.assertEqual(segundo.creditos, 4)
+        self.assertEqual(Presenca.objects.filter(sessao=sessao).count(), 1)
+
+    def test_desistencia_libera_vaga_para_outra_inscricao(self):
+        sala = Sala.objects.create(numero=203, capacidade=1)
+        sessao = Sessao.objects.create(
+            sala=sala,
+            dataHora=timezone.now() + timedelta(days=1),
+            duracao=timedelta(hours=1),
+            creditosNecessarios=2,
+            status=StatusSessao.CONFIRMADA,
+        )
+        primeiro = Aluno.objects.create_user(
+            username="aluno_vaga_1",
+            password="Senha123!",
+            matricula="VAGA-001",
+            creditos=4,
+        )
+        segundo = Aluno.objects.create_user(
+            username="aluno_vaga_2",
+            password="Senha123!",
+            matricula="VAGA-002",
+            creditos=4,
+        )
+        sessao.inscreverAluno(primeiro)
+        sessao.removerAluno(primeiro)
+
+        inscricao = sessao.inscreverAluno(segundo)
+
+        self.assertEqual(inscricao.status, "PENDENTE")
+        self.assertEqual(Presenca.objects.filter(sessao=sessao).count(), 2)
+        segundo.refresh_from_db()
+        self.assertEqual(segundo.creditos, 2)
+
+    def test_nao_conclui_sessao_antes_do_horario_de_termino(self):
+        sessao = self.criar_sessao(
+            status=StatusSessao.CONFIRMADA,
+            dataHora=timezone.now() + timedelta(hours=2),
+        )
+
+        with self.assertRaises(ValidationError):
+            sessao.realizar()
+
+        sessao.refresh_from_db()
+        self.assertEqual(sessao.status, StatusSessao.CONFIRMADA)
