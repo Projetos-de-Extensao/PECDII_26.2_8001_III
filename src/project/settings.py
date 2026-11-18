@@ -28,7 +28,6 @@ DEBUG = True
 ALLOWED_HOSTS = [
     "pecdii-26-2-8001-iii.onrender.com"
 ]
-]
 
 
 # Application definition
