@@ -9,3 +9,17 @@ class StatusPresenca(TextChoices):
     JUSTIFICADO = 'JUSTIFICADO', 'Justificado'
     DESISTENTE = 'DESISTENTE', 'Desistente'
     CANCELADA = "CANCELADA", "Cancelada"
+
+
+STATUS_INSCRICAO_ATIVA = (
+    StatusPresenca.PENDENTE,
+    StatusPresenca.PRESENTE,
+    StatusPresenca.AUSENTE,
+    StatusPresenca.JUSTIFICADO,
+)
+
+STATUS_CHAMADA = (
+    StatusPresenca.PRESENTE,
+    StatusPresenca.AUSENTE,
+    StatusPresenca.JUSTIFICADO,
+)
