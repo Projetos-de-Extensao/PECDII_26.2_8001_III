@@ -6,3 +6,11 @@ class LoginSerializer(serializers.Serializer):
 
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
+
+
+class LoginResponseSerializer(serializers.Serializer):
+    """Define os dados retornados após autenticação bem-sucedida."""
+
+    token = serializers.CharField()
+    usuario_id = serializers.IntegerField()
+    username = serializers.CharField()

@@ -9,6 +9,7 @@ from xml.sax.saxutils import escape
 
 from django.http import FileResponse
 from rest_framework.decorators import action
+from drf_spectacular.utils import extend_schema
 
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
@@ -19,12 +20,13 @@ from reportlab.platypus import (
 
 from app.models import Laudo, Profissional, Administrador, Responsavel
 from app.models.responsavelModel import VinculoResponsavel
-from app.serializers.laudoSerializer import LaudoSerializer
+from app.serializers.laudoSerializer import EmitirLaudoSerializer, LaudoSerializer
 
 
 class LaudoView(ModelViewSet):
     """Permite emitir e consultar documentos profissionais."""
 
+    queryset = Laudo.objects.all()
     serializer_class = LaudoSerializer
     permission_classes = [IsAuthenticated]
     http_method_names = ["get", "post", "head", "options"]
@@ -52,6 +54,7 @@ class LaudoView(ModelViewSet):
 
         return queryset.none()
 
+    @extend_schema(request=EmitirLaudoSerializer)
     def create(self, request, *args, **kwargs):
         """Emite um documento para uma sessão do profissional."""
         if not Profissional.objects.filter(pk=request.user.pk).exists():

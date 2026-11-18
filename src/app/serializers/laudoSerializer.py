@@ -8,6 +8,18 @@ from app.models import (
 from app.Enums import StatusPresenca
 
 
+class EmitirLaudoSerializer(serializers.Serializer):
+    """Define os dados obrigatórios para emissão de um laudo."""
+
+    sessao = serializers.PrimaryKeyRelatedField(queryset=Sessao.objects.all())
+    aluno = serializers.PrimaryKeyRelatedField(queryset=Aluno.objects.all())
+    tipoDocumento = serializers.ChoiceField(choices=Laudo.TIPOS_DOCUMENTO)
+    conteudo = serializers.DictField(
+        child=serializers.JSONField(),
+        help_text="Campos de texto variam conforme o tipo de documento.",
+    )
+
+
 class LaudoSerializer(serializers.ModelSerializer):
     """Valida os documentos emitidos pelos profissionais."""
 

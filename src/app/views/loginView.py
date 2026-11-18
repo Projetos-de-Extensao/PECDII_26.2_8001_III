@@ -7,7 +7,11 @@ from rest_framework.response import Response
 from rest_framework import status
 from drf_spectacular.utils import extend_schema
 from app.models import Aluno
-from app.serializers.loginSerializer import LoginSerializer
+from app.serializers.apiResponseSerializer import DetailResponseSerializer
+from app.serializers.loginSerializer import (
+    LoginResponseSerializer,
+    LoginSerializer,
+)
 
 class LoginView(APIView):
     """Autentica usuários e fornece um token de acesso."""
@@ -17,6 +21,11 @@ class LoginView(APIView):
 
     @extend_schema(
         request=LoginSerializer,
+        responses={
+            200: LoginResponseSerializer,
+            400: DetailResponseSerializer,
+            401: DetailResponseSerializer,
+        },
         description="Autentica o usuário e retorna um token.",
     )
     def post(self, request):

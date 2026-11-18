@@ -1,8 +1,10 @@
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from drf_spectacular.utils import extend_schema
 
 from app.models import Administrador, Responsavel, Profissional
+from app.serializers.usuarioSerializer import MeResponseSerializer
 
 
 class MeView(APIView):
@@ -10,6 +12,7 @@ class MeView(APIView):
 
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(responses={200: MeResponseSerializer})
     def get(self, request):
         usuario = request.user
 

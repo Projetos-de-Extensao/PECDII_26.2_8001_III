@@ -9,9 +9,14 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
+from drf_spectacular.utils import extend_schema
 
 from app.models import Usuario
 from app.serializers import UsuarioSerializer
+from app.serializers.usuarioSerializer import (
+    AlterarSenhaSerializer,
+    AtivarContaSerializer,
+)
 from app.permissions.administradorPermission import IsAdministrador
 
 
@@ -61,6 +66,7 @@ class UsuarioView(ModelViewSet):
         # Cadastro, atualização e exclusão.
         return [IsAdministrador()]
 
+    @extend_schema(request=AlterarSenhaSerializer)
     @action(detail=False, methods=["post"], url_path="alterar-senha")
     def alterar_senha(self, request):
         """Permite ao usuário autenticado alterar a própria senha."""
@@ -96,6 +102,7 @@ class UsuarioView(ModelViewSet):
             status=status.HTTP_200_OK,
         )
 
+    @extend_schema(request=AtivarContaSerializer)
     @action(
         detail=False,
         methods=["post"],

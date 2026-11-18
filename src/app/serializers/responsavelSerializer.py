@@ -4,6 +4,33 @@ from .usuarioSerializer import UsuarioSerializer
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
+from drf_spectacular.utils import extend_schema_field
+
+
+class AdicionarDependenteSerializer(serializers.Serializer):
+    """Define o aluno a vincular ao responsável."""
+
+    aluno_id = serializers.IntegerField(min_value=1)
+
+
+class TransferirResponsabilidadeSerializer(serializers.Serializer):
+    """Define o aluno e o responsável de destino de uma transferência."""
+
+    aluno_id = serializers.IntegerField(min_value=1)
+    novo_responsavel_id = serializers.IntegerField(min_value=1)
+
+
+class InscreverDependenteSerializer(serializers.Serializer):
+    """Define o dependente e a sessão para uma inscrição."""
+
+    aluno_id = serializers.IntegerField(min_value=1)
+    sessao_id = serializers.IntegerField(min_value=1)
+
+
+class CancelarInscricaoSerializer(InscreverDependenteSerializer):
+    """Define os dados necessários para cancelar uma inscrição."""
+
+    motivo = serializers.CharField(allow_blank=False, trim_whitespace=True)
 
 
 class ResponsavelSerializer(UsuarioSerializer):
@@ -11,6 +38,9 @@ class ResponsavelSerializer(UsuarioSerializer):
 
     dependentes = serializers.SerializerMethodField()
 
+    @extend_schema_field(
+        serializers.ListField(child=serializers.IntegerField())
+    )
     def get_dependentes(self, obj):
         """Retorna os IDs dos alunos vinculados ao responsável."""
         return list(obj.dependentes.values_list("aluno_id", flat=True))
@@ -26,6 +56,12 @@ class ResponsavelSerializer(UsuarioSerializer):
         model = Responsavel
         fields = UsuarioSerializer.Meta.fields + ["dependentes"]
         read_only_fields = ["id", "dependentes"]
+
+    def get_fields(self):
+        fields = super().get_fields()
+        if "password" in fields:
+            fields["password"].required = False
+        return fields
 
     def create(self, validated_data):
         """Cria responsável com senha ou aguardando ativação."""

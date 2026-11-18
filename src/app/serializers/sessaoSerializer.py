@@ -2,6 +2,30 @@ from rest_framework import serializers
 
 from app.models import Sessao
 from app.models import Sala, Profissional
+from app.Enums import StatusPresenca
+
+
+class MotivoSessaoSerializer(serializers.Serializer):
+    """Define a justificativa para rejeitar ou cancelar uma sessão."""
+
+    motivo = serializers.CharField(allow_blank=False, trim_whitespace=True)
+
+
+class RegistrarPresencaSerializer(serializers.Serializer):
+    """Define o status e a justificativa de uma presença."""
+
+    status = serializers.ChoiceField(
+        choices=[
+            StatusPresenca.PRESENTE,
+            StatusPresenca.AUSENTE,
+            StatusPresenca.JUSTIFICADO,
+        ]
+    )
+    justificativa = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        default="",
+    )
 
 class SessaoSerializer(serializers.ModelSerializer):
     """Disponibiliza os dados da sessão para a API."""

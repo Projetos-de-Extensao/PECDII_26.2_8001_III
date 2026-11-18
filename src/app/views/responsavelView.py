@@ -8,9 +8,20 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
+from drf_spectacular.utils import (
+    OpenApiParameter,
+    OpenApiTypes,
+    extend_schema,
+)
 
 from app.models import Aluno, Responsavel, Sessao, Presenca
 from app.serializers import ResponsavelSerializer
+from app.serializers.responsavelSerializer import (
+    AdicionarDependenteSerializer,
+    CancelarInscricaoSerializer,
+    InscreverDependenteSerializer,
+    TransferirResponsabilidadeSerializer,
+)
 from app.permissions.administradorPermission import IsAdministrador
 from app.permissions.responsavelPermission import IsResponsavel
 
@@ -45,6 +56,7 @@ class ResponsavelView(ModelViewSet):
 
 
     
+    @extend_schema(request=AdicionarDependenteSerializer)
     @action(detail=True, methods=["post"], url_path="dependentes")
     def adicionar_dependente(self, request, pk=None):
         """Vincula um aluno ao responsável."""
@@ -61,6 +73,15 @@ class ResponsavelView(ModelViewSet):
             status=status.HTTP_201_CREATED,
         )
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "aluno_id",
+                OpenApiTypes.INT,
+                OpenApiParameter.PATH,
+            )
+        ]
+    )
     @action(
         detail=True,
         methods=["delete"],
@@ -78,6 +99,7 @@ class ResponsavelView(ModelViewSet):
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @extend_schema(request=TransferirResponsabilidadeSerializer)
     @action(detail=True, methods=["post"], url_path="transferir")
     def transferir_responsabilidade(self, request, pk=None):
         """Transfere um aluno para outro responsável."""
@@ -95,6 +117,7 @@ class ResponsavelView(ModelViewSet):
 
         return Response({"detail": "Responsabilidade transferida."})
 
+    @extend_schema(request=InscreverDependenteSerializer)
     @action(detail=True, methods=["post"], url_path="inscricoes")
     def inscrever_dependente(self, request, pk=None):
         """Inscreve um dependente em uma sessão."""
@@ -113,6 +136,7 @@ class ResponsavelView(ModelViewSet):
         )
 
 
+    @extend_schema(request=CancelarInscricaoSerializer)
     @action(detail=True, methods=["delete"], url_path="inscricoes/cancelar")
     def cancelar_inscricao(self, request, pk=None):
         """Cancela a inscrição de um dependente em uma sessão."""

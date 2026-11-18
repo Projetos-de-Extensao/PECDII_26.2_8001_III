@@ -7,11 +7,16 @@ from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
 from rest_framework import serializers
 from rest_framework.decorators import action
+from drf_spectacular.utils import extend_schema
 
 from app.models import Sessao
 from app.serializers import SessaoSerializer
 from app.models import Administrador, Profissional
-from app.serializers.sessaoSerializer import SolicitacaoSessaoSerializer
+from app.serializers.sessaoSerializer import (
+    MotivoSessaoSerializer,
+    RegistrarPresencaSerializer,
+    SolicitacaoSessaoSerializer,
+)
 from app.models import Presenca
 from app.Enums import StatusPresenca, StatusSessao
 
@@ -69,6 +74,7 @@ class SessaoView(ModelViewSet):
     permission_classes = [IsAuthenticated]
     http_method_names = ["get", "post", "patch", "head", "options"]
 
+    @extend_schema(request=SolicitacaoSessaoSerializer)
     def create(self, request, *args, **kwargs):
         """Solicita uma sessão conforme o perfil autenticado."""
         dados = SolicitacaoSessaoSerializer(data=request.data)
@@ -119,6 +125,7 @@ class SessaoView(ModelViewSet):
             status=status.HTTP_201_CREATED,
         )
 
+    @extend_schema(request=None)
     @action(detail=True, methods=["post"])
     def confirmar(self, request, pk=None):
         """Permite ao administrador confirmar uma sessão solicitada."""
@@ -136,6 +143,7 @@ class SessaoView(ModelViewSet):
 
         return Response(SessaoSerializer(sessao).data)
 
+    @extend_schema(request=MotivoSessaoSerializer)
     @action(detail=True, methods=["post"])
     def rejeitar(self, request, pk=None):
         """Permite ao administrador rejeitar uma sessão."""
@@ -159,6 +167,7 @@ class SessaoView(ModelViewSet):
 
         return Response(SessaoSerializer(sessao).data)
 
+    @extend_schema(request=MotivoSessaoSerializer)
     @action(detail=True, methods=["post"])
     def cancelar(self, request, pk=None):
         """Permite cancelar uma sessão conforme o perfil autorizado."""
@@ -189,6 +198,7 @@ class SessaoView(ModelViewSet):
 
         return Response(SessaoSerializer(sessao).data)
 
+    @extend_schema(request=RegistrarPresencaSerializer)
     @action(detail=True, methods=["patch"], url_path=r"presencas/(?P<aluno_id>[0-9]+)")
     def registrar_presenca(self, request, pk=None, aluno_id=None):
         """Registra presença, ausência ou justificativa de um aluno."""
@@ -284,6 +294,7 @@ class SessaoView(ModelViewSet):
         ])
 
 
+    @extend_schema(request=None)
     @action(detail=True, methods=["post"])
     def realizar(self, request, pk=None):
         """Marca como realizada uma sessão confirmada."""

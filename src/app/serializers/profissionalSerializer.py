@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from drf_spectacular.utils import extend_schema_field
 
 from app.models import Profissional
 from .usuarioSerializer import UsuarioSerializer
@@ -19,6 +20,7 @@ class ProfissionalSerializer(UsuarioSerializer):
         ]
         read_only_fields = ["id", "tipo"]
 
+    @extend_schema_field(serializers.CharField(allow_null=True))
     def get_tipo(self, obj):
         """Identifica a especialização cadastrada."""
         especializacoes = (
@@ -114,3 +116,31 @@ class CadastroProfissionalSerializer(UsuarioSerializer):
         profissional.save()
 
         return profissional
+
+
+class CadastroTreinadorSerializer(CadastroProfissionalSerializer):
+    """Define os campos exclusivos do cadastro de treinador."""
+
+    tipo = serializers.ChoiceField(choices=["treinador"])
+    especialidade = serializers.CharField()
+
+
+class CadastroFisioterapeutaSerializer(CadastroProfissionalSerializer):
+    """Define os campos exclusivos do cadastro de fisioterapeuta."""
+
+    tipo = serializers.ChoiceField(choices=["fisioterapeuta"])
+    CREFITO = serializers.CharField()
+
+
+class CadastroPsicologoSerializer(CadastroProfissionalSerializer):
+    """Define os campos exclusivos do cadastro de psicólogo."""
+
+    tipo = serializers.ChoiceField(choices=["psicologo"])
+    CRP = serializers.CharField()
+
+
+class CadastroNutricionistaSerializer(CadastroProfissionalSerializer):
+    """Define os campos exclusivos do cadastro de nutricionista."""
+
+    tipo = serializers.ChoiceField(choices=["nutricionista"])
+    CRN = serializers.CharField()

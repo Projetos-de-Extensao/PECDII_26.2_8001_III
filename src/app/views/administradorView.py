@@ -12,14 +12,34 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
+from drf_spectacular.utils import extend_schema, PolymorphicProxySerializer
 
 from app.models import Administrador, Sessao, Usuario, Sala, Aluno
 from app.serializers import UsuarioSerializer, SalaSerializer
 from app.permissions.administradorPermission import IsAdministrador
 from app.serializers.profissionalSerializer import CadastroProfissionalSerializer
+from app.serializers.profissionalSerializer import (
+    CadastroFisioterapeutaSerializer,
+    CadastroNutricionistaSerializer,
+    CadastroPsicologoSerializer,
+    CadastroTreinadorSerializer,
+)
 from app.models import Responsavel
 from app.serializers.responsavelSerializer import ResponsavelSerializer
 from app.serializers.alunoSerializer import AlunoSerializer
+from app.serializers.administradorSerializer import (
+    AprovarSessaoResponseSerializer,
+    CadastrarSalaResponseSerializer,
+    CadastroResponsavelAdminSerializer,
+    CreditosAlunoSerializer,
+    CreditosAlunoResponseSerializer,
+    DesativarUsuarioResponseSerializer,
+    DesaprovarSessaoResponseSerializer,
+    ProfissionalCadastradoResponseSerializer,
+    ResponsavelCadastradoResponseSerializer,
+    UsuarioCadastradoResponseSerializer,
+)
+from app.serializers.sessaoSerializer import MotivoSessaoSerializer
 
 class AdministradorView(ViewSet):
     """
@@ -45,6 +65,10 @@ class AdministradorView(ViewSet):
 
         return Administrador.objects.get(pk=request.user.pk)
 
+    @extend_schema(
+        request=None,
+        responses={200: AprovarSessaoResponseSerializer},
+    )
     @action(
         detail=False,
         methods=["post"],
@@ -87,6 +111,10 @@ class AdministradorView(ViewSet):
             status=status.HTTP_200_OK
         )
 
+    @extend_schema(
+        request=MotivoSessaoSerializer,
+        responses={200: DesaprovarSessaoResponseSerializer},
+    )
     @action(
         detail=False,
         methods=["post"],
@@ -134,6 +162,10 @@ class AdministradorView(ViewSet):
         )
 
 
+    @extend_schema(
+        request=None,
+        responses={200: DesativarUsuarioResponseSerializer},
+    )
     @action(
         detail=False,
         methods=["post"],
@@ -190,6 +222,10 @@ class AdministradorView(ViewSet):
         )
 
 
+    @extend_schema(
+        request=SalaSerializer,
+        responses={201: CadastrarSalaResponseSerializer},
+    )
     @action(
         detail=False,
         methods=["post"],
@@ -247,12 +283,31 @@ class AdministradorView(ViewSet):
         )
 
 
-    @action(
-        detail=False,
-        methods=["post"],
-        url_path="usuarios"
+    @extend_schema(
+        request=PolymorphicProxySerializer(
+            component_name="CadastroUsuarioAdministrativo",
+            serializers=[
+                UsuarioSerializer,
+                CadastroTreinadorSerializer,
+                CadastroFisioterapeutaSerializer,
+                CadastroPsicologoSerializer,
+                CadastroNutricionistaSerializer,
+                CadastroResponsavelAdminSerializer,
+            ],
+            resource_type_field_name=None,
+        ),
+        responses={
+            201: PolymorphicProxySerializer(
+                component_name="UsuarioCadastradoAdministrativamente",
+                serializers=[
+                    UsuarioCadastradoResponseSerializer,
+                    ProfissionalCadastradoResponseSerializer,
+                    ResponsavelCadastradoResponseSerializer,
+                ],
+                resource_type_field_name=None,
+            )
+        },
     )
-    
     @action(detail=False, methods=["post"], url_path="usuarios")
     def cadastrar_usuario(self, request):
         """Cadastra usuários, profissionais e responsáveis com dependentes."""
@@ -380,6 +435,10 @@ class AdministradorView(ViewSet):
         )
 
 
+    @extend_schema(
+        request=CreditosAlunoSerializer,
+        responses={200: CreditosAlunoResponseSerializer},
+    )
     @action(
         detail=False,
         methods=["patch"],

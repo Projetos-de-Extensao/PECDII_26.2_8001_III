@@ -4,6 +4,42 @@ from rest_framework import serializers
 from app.models import Usuario
 
 
+class AlterarSenhaSerializer(serializers.Serializer):
+    """Define os dados para alterar a senha do usuário autenticado."""
+
+    senha_atual = serializers.CharField(
+        write_only=True,
+        trim_whitespace=False,
+        style={"input_type": "password"},
+    )
+    nova_senha = serializers.CharField(
+        write_only=True,
+        trim_whitespace=False,
+        style={"input_type": "password"},
+    )
+
+
+class AtivarContaSerializer(serializers.Serializer):
+    """Define os dados do convite e da senha para ativar uma conta."""
+
+    uid = serializers.CharField()
+    token = serializers.CharField()
+    nova_senha = serializers.CharField(
+        write_only=True,
+        trim_whitespace=False,
+        style={"input_type": "password"},
+    )
+
+
+class MeResponseSerializer(serializers.Serializer):
+    """Define o perfil público do usuário autenticado."""
+
+    id = serializers.IntegerField()
+    username = serializers.CharField()
+    nome = serializers.CharField()
+    perfil = serializers.CharField()
+
+
 class UsuarioSerializer(serializers.ModelSerializer):
     """
     Serializa e valida os dados dos usuários do PKZ Lab.
@@ -44,6 +80,12 @@ class UsuarioSerializer(serializers.ModelSerializer):
         ]
 
         read_only_fields = ["id"]
+
+    def get_fields(self):
+        fields = super().get_fields()
+        if self.instance is None and "password" in fields:
+            fields["password"].required = True
+        return fields
 
     def validate(self, attrs):
         """
