@@ -57,7 +57,7 @@ class AdministradorAPITests(TestCase):
 
         return Sessao.objects.create(
             sala=self.sala,
-            dataHora=timezone.now(),
+            dataHora=timezone.now() + timedelta(days=1),
             duracao=timedelta(hours=1),
             creditosNecessarios=1
         )
