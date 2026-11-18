@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
 
 # Import your models here.
 from app.models import Usuario
@@ -17,7 +18,19 @@ from app.models import VinculoResponsavel
 from app.models import Laudo
 
 
-admin.site.register(Usuario)
+@admin.register(Usuario)
+class UsuarioAdmin(UserAdmin):
+    fieldsets = UserAdmin.fieldsets + (
+        ("Informações pessoais", {"fields": ("telefone", "dataNascimento", "endereco")}),
+    )
+    add_fieldsets = UserAdmin.add_fieldsets + (
+        (
+            "Informações pessoais",
+            {"fields": ("email", "first_name", "last_name", "telefone", "dataNascimento", "endereco")},
+        ),
+    )
+
+
 admin.site.register(Sala)
 admin.site.register(Aluno)
 admin.site.register(Profissional)
