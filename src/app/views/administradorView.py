@@ -12,6 +12,8 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
+from rest_framework import serializers
+from drf_spectacular.utils import OpenApiParameter, extend_schema, inline_serializer
 
 from app.models import Administrador, Sessao, Usuario, Sala, Aluno
 from app.serializers import UsuarioSerializer, SalaSerializer
@@ -34,6 +36,7 @@ class AdministradorView(ViewSet):
     """
 
     permission_classes = [IsAdministrador]
+    serializer_class = serializers.Serializer
 
     def obter_administrador(self, request):
         """
@@ -45,6 +48,22 @@ class AdministradorView(ViewSet):
 
         return Administrador.objects.get(pk=request.user.pk)
 
+    @extend_schema(
+        request=None,
+        parameters=[
+            OpenApiParameter("sessao_id", int, OpenApiParameter.PATH),
+        ],
+        responses={
+            200: inline_serializer(
+                name="SessaoAprovadaResponse",
+                fields={
+                    "mensagem": serializers.CharField(),
+                    "sessao_id": serializers.IntegerField(),
+                    "status": serializers.CharField(),
+                },
+            )
+        },
+    )
     @action(
         detail=False,
         methods=["post"],
@@ -87,6 +106,26 @@ class AdministradorView(ViewSet):
             status=status.HTTP_200_OK
         )
 
+    @extend_schema(
+        request=inline_serializer(
+            name="DesaprovarSessaoRequest",
+            fields={"motivo": serializers.CharField()},
+        ),
+        parameters=[
+            OpenApiParameter("sessao_id", int, OpenApiParameter.PATH),
+        ],
+        responses={
+            200: inline_serializer(
+                name="SessaoDesaprovadaResponse",
+                fields={
+                    "mensagem": serializers.CharField(),
+                    "sessao_id": serializers.IntegerField(),
+                    "status": serializers.CharField(),
+                    "motivo": serializers.CharField(),
+                },
+            )
+        },
+    )
     @action(
         detail=False,
         methods=["post"],
@@ -134,6 +173,22 @@ class AdministradorView(ViewSet):
         )
 
 
+    @extend_schema(
+        request=None,
+        parameters=[
+            OpenApiParameter("usuario_id", int, OpenApiParameter.PATH),
+        ],
+        responses={
+            200: inline_serializer(
+                name="UsuarioDesativadoResponse",
+                fields={
+                    "mensagem": serializers.CharField(),
+                    "usuario_id": serializers.IntegerField(),
+                    "is_active": serializers.BooleanField(),
+                },
+            )
+        },
+    )
     @action(
         detail=False,
         methods=["post"],
@@ -190,6 +245,18 @@ class AdministradorView(ViewSet):
         )
 
 
+    @extend_schema(
+        request=SalaSerializer,
+        responses={
+            201: inline_serializer(
+                name="SalaCriadaResponse",
+                fields={
+                    "mensagem": serializers.CharField(),
+                    "sala": SalaSerializer(),
+                },
+            )
+        },
+    )
     @action(
         detail=False,
         methods=["post"],
@@ -247,12 +314,44 @@ class AdministradorView(ViewSet):
         )
 
 
-    @action(
-        detail=False,
-        methods=["post"],
-        url_path="usuarios"
+    @extend_schema(
+        request=inline_serializer(
+            name="CadastroUsuarioRequest",
+            fields={
+                "tipo": serializers.CharField(required=False),
+                "username": serializers.CharField(),
+                "password": serializers.CharField(
+                    required=False,
+                    write_only=True,
+                ),
+                "first_name": serializers.CharField(required=False),
+                "last_name": serializers.CharField(required=False),
+                "email": serializers.EmailField(required=False),
+                "telefone": serializers.CharField(required=False),
+                "dataNascimento": serializers.DateField(required=False),
+                "endereco": serializers.CharField(required=False),
+                "tipoContrato": serializers.CharField(required=False),
+                "formacao": serializers.CharField(required=False),
+                "especialidade": serializers.CharField(required=False),
+                "CREFITO": serializers.CharField(required=False),
+                "CRP": serializers.CharField(required=False),
+                "CRN": serializers.CharField(required=False),
+                "alunos": serializers.ListField(
+                    child=serializers.DictField(),
+                    required=False,
+                ),
+            },
+        ),
+        responses={
+            201: inline_serializer(
+                name="UsuarioCadastradoResponse",
+                fields={
+                    "mensagem": serializers.CharField(),
+                    "usuario": serializers.DictField(),
+                },
+            )
+        },
     )
-    
     @action(detail=False, methods=["post"], url_path="usuarios")
     def cadastrar_usuario(self, request):
         """Cadastra usuários, profissionais e responsáveis com dependentes."""
@@ -380,6 +479,25 @@ class AdministradorView(ViewSet):
         )
 
 
+    @extend_schema(
+        request=inline_serializer(
+            name="GerenciarCreditosRequest",
+            fields={"quantidade": serializers.IntegerField()},
+        ),
+        parameters=[
+            OpenApiParameter("aluno_id", int, OpenApiParameter.PATH),
+        ],
+        responses={
+            200: inline_serializer(
+                name="GerenciarCreditosResponse",
+                fields={
+                    "mensagem": serializers.CharField(),
+                    "aluno_id": serializers.IntegerField(),
+                    "creditos": serializers.IntegerField(),
+                },
+            )
+        },
+    )
     @action(
         detail=False,
         methods=["patch"],
@@ -387,8 +505,6 @@ class AdministradorView(ViewSet):
     )
     def gerenciar_creditos(self, request, aluno_id=None):
         """Adiciona ou remove créditos de um aluno."""
-        aluno = get_object_or_404(Aluno, pk=aluno_id)
-
         quantidade = request.data.get("quantidade")
 
         if type(quantidade) is not int or quantidade == 0:
@@ -397,16 +513,21 @@ class AdministradorView(ViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        novo_saldo = aluno.creditos + quantidade
-
-        if novo_saldo < 0:
-            return Response(
-                {"erro": "O aluno não possui créditos suficientes."},
-                status=status.HTTP_400_BAD_REQUEST
+        with transaction.atomic():
+            aluno = get_object_or_404(
+                Aluno.objects.select_for_update(),
+                pk=aluno_id,
             )
+            novo_saldo = aluno.creditos + quantidade
 
-        aluno.creditos = novo_saldo
-        aluno.save(update_fields=["creditos"])
+            if novo_saldo < 0:
+                return Response(
+                    {"erro": "O aluno não possui créditos suficientes."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            aluno.creditos = novo_saldo
+            aluno.save(update_fields=["creditos"])
 
         return Response({
             "mensagem": "Créditos atualizados com sucesso.",
