@@ -8,6 +8,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 
 from app.models import Aluno, Responsavel, Sessao, Presenca
 from app.serializers import ResponsavelSerializer
@@ -61,6 +62,13 @@ class ResponsavelView(ModelViewSet):
             status=status.HTTP_201_CREATED,
         )
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter("aluno_id", int, OpenApiParameter.PATH),
+        ],
+        request=None,
+        responses={204: None},
+    )
     @action(
         detail=True,
         methods=["delete"],
