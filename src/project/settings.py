@@ -26,7 +26,8 @@ SECRET_KEY = 'django-insecure-^)hm&zjdn9vv+810d!q^hi2g+a&x0k37x2t%@5akw_cnz)dz4t
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    "pecdii-26-2-8001-iii.onrender.com"
+    "pecdii-26-2-8001-iii.onrender.com",
+    "whitenoise.middleware.WhiteNoiseMiddleware"
 ]
 
 
@@ -152,7 +153,7 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.IsAuthenticated",
     ],
     # Configuração do schema para documentação da API.
-    "DEFAULT_SCHEMA_CLASS": "app.schema.DeleteBodyAutoSchema",
+    "DEFAULT_SCHEMA_CLASS": "app.schema.ActionRequestBodyAutoSchema",
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.TokenAuthentication",
     ],
@@ -164,6 +165,7 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "API de gerenciamento de usuários, salas e sessões.",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
+    "COMPONENT_SPLIT_REQUEST": True,
     "AUTHENTICATION_WHITELIST": [
         "rest_framework.authentication.TokenAuthentication",
     ],

@@ -1,7 +1,7 @@
 from drf_spectacular.openapi import AutoSchema
 
 
-class DeleteBodyAutoSchema(AutoSchema):
+class ActionRequestBodyAutoSchema(AutoSchema):
     """Keep custom action request schemas accurate for the API's input methods."""
 
     def _get_request_body(self, direction="request"):
