@@ -26,6 +26,8 @@ SECRET_KEY = 'django-insecure-^)hm&zjdn9vv+810d!q^hi2g+a&x0k37x2t%@5akw_cnz)dz4t
 DEBUG = True
 
 ALLOWED_HOSTS = []
+    "pecdii-26-2-8001-iii.onrender.com"
+]
 
 
 # Application definition
@@ -150,7 +152,7 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.IsAuthenticated",
     ],
     # Configuração do schema para documentação da API.
-    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_SCHEMA_CLASS": "app.schema.DeleteBodyAutoSchema",
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.TokenAuthentication",
     ],
