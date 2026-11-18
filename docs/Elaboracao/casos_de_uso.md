@@ -1,403 +1,215 @@
 ---
-id: diagrama_de_casos de uso
-title: Diagrama de Casos de Uso
+id: diagrama_de_casos_de_uso
+title: Casos de Uso — PKZ Lab
 ---
 
-## Casos de Uso
+# Casos de Uso — PKZ Lab
 
-Os casos de uso descrevem as principais interações entre os usuários e o sistema de gestão do PKZ Lab, representando as funcionalidades disponíveis de acordo com os diferentes perfis de acesso. A documentação apresenta os atores envolvidos, as pré-condições, o fluxo básico, os fluxos alternativos e as pós-condições de cada caso de uso.
+## Visão geral
 
-## Diagrama
+O sistema administra usuários e perfis, responsáveis e dependentes, profissionais, salas, sessões, inscrições, créditos, presenças e laudos. Os perfis implementados incluem **Administrador**, **Responsável** e **Profissional** (com especializações); há também o cadastro de **Aluno**. O acesso às operações depende de autenticação e permissões.
 
-![Diagrama de Casos de Uso da PKZ Lab](./Imagem/pkz_lab_casos_de_uso.png)
+## Casos de uso
 
-> Código-fonte: [diagrama_caso_de_uso.puml](diagrama_caso_de_uso.puml)
+### UC01 — Autenticar usuário e gerenciar acesso
 
-### Descrição:
+**Atores:** Usuário cadastrado; Administrador (para criação e desativação de contas).
 
+**Pré-condições:** Conta existente e ativa para autenticação.
 
-- Acesso e Segurança
-    
-    - Realizar Login
-    - Autenticar Usuário
-    - Controle de acesso por perfil
-        
-- Alunos
-    
-    - Gerenciar Alunos
-    - Consultar informações do aluno
-    - Consultar histórico de presença
-        
-- Profissionais
-    
-    - Gerenciar Profissionais
-    - Consultar horários e atividades associadas
-        
-- Turmas e Atividades
-    
-    - Gerenciar Turmas
-    - Associar alunos e profissionais
-    - Definir horários e espaços
-        
-- Agenda
-    
-    - Gerenciar Agendamentos
-    - Consultar horários
-    - Verificar disponibilidade e conflitos
-    - Cancelar agendamentos
-        
-- Presença e Acompanhamento
-    
-    - Registrar Presença
-    - Registrar Progresso do Aluno
-    - Consultar Desempenho
-        
-- Administração
-    
-    - Gerenciar Alunos
-    - Gerenciar Profissionais
-    - Gerenciar Turmas
-    - Gerenciar Agendamentos
-    - Consultar Relatórios
+**Fluxo básico:**
+1. O usuário informa suas credenciais no endpoint de login.
+2. O sistema valida as credenciais e retorna um token de autenticação.
+3. O usuário utiliza o token para acessar operações permitidas ao seu perfil.
+4. O usuário pode consultar seus próprios dados (`me`), alterar a senha e encerrar a sessão (logout).
 
-### Realizar Login
+**Fluxos alternativos:**
+- Credenciais inválidas ou conta sem acesso: o sistema recusa a autenticação.
+- Na alteração de senha, a senha atual deve estar correta e a nova deve passar pela validação.
+- Um responsável cadastrado com convite pode definir a senha por meio de UID e token válidos.
+- O administrador pode desativar usuários; contas desativadas não devem autenticar.
 
-**Atores:** Usuário, Sistema
+**Pós-condições:** Usuário autenticado, senha atualizada, conta ativada ou token encerrado, conforme a operação.
 
-**Pré-Condições:**
-
-* Usuário deve estar previamente cadastrado no sistema.
-* Usuário deve possuir credenciais de acesso válidas.
-
-**Fluxo Básico:**
-
-1. Usuário informa e-mail e senha.
-2. Sistema autentica o usuário.
-3. Sistema identifica o perfil de acesso.
-4. Sistema disponibiliza as funcionalidades permitidas para o perfil identificado.
-
-**Fluxos Alternativos:**
-
-* **2a.** As credenciais informadas são inválidas.
-
-  * **2a1.** Sistema informa que os dados de acesso são inválidos.
-  * **2a2.** Usuário pode tentar realizar o login novamente.
-* **3a.** Usuário não possui um perfil de acesso válido.
-
-  * **3a1.** Sistema bloqueia o acesso às funcionalidades.
-
-**Pós-Condições:**
-
-* Usuário é autenticado e tem acesso às funcionalidades permitidas para seu perfil.
-
-**Regras de Negócio:**
-
-* **RN01.** Apenas usuários cadastrados podem acessar o sistema.
-* **RN02.** O acesso às funcionalidades deve respeitar o perfil de cada usuário.
-* **RN03.** Credenciais inválidas não devem permitir acesso ao sistema.
+**Regras de negócio:** As permissões são verificadas por operação; o convite de ativação exige token válido; a desativação preserva o registro do usuário.
 
 ---
 
-### Gerenciar Alunos
+### UC02 — Gerenciar alunos e vínculos com responsáveis
 
-**Atores:** Administrador, Responsável, Sistema
+**Atores:** Administrador; Responsável (consulta do próprio cadastro e operações específicas sobre dependentes).
 
-**Pré-Condições:**
+**Pré-condições:** Usuário autenticado e autorizado.
 
-* Usuário deve estar autenticado.
-* Usuário deve possuir permissão para consultar ou alterar informações de alunos.
+**Fluxo básico:**
+1. O administrador cadastra um responsável informando seus dados e os de pelo menos um aluno.
+2. O sistema valida os dados e cria o responsável e os alunos em uma transação.
+3. O sistema vincula cada aluno ao responsável e envia convite de ativação por e-mail.
+4. O administrador consulta alunos e pode atualizar informações conforme as permissões implementadas.
+5. O administrador pode adicionar, remover ou transferir vínculos entre responsáveis e alunos.
 
-**Fluxo Básico:**
+**Fluxos alternativos:**
+- Dados obrigatórios ausentes ou inválidos: cadastro recusado.
+- Tentativa de vincular aluno que já possui responsável: operação recusada.
+- Transferência ou remoção de vínculo inválido: operação recusada.
+- Usuário sem permissão: acesso negado.
 
-1. Usuário acessa o gerenciamento de alunos.
-2. Sistema apresenta os alunos disponíveis de acordo com o perfil de acesso.
-3. Usuário seleciona um aluno existente ou inicia um novo cadastro.
-4. Usuário informa ou altera os dados do aluno.
-5. Sistema valida as informações fornecidas.
-6. Sistema registra as informações.
-7. Sistema confirma a operação.
+**Pós-condições:** Cadastro e vínculos persistidos ou modificados conforme a operação autorizada.
 
-**Fluxos Alternativos:**
-
-* **5a.** Existem dados obrigatórios ausentes.
-
-  * **5a1.** Sistema informa os dados que precisam ser preenchidos.
-* **5b.** Os dados informados são inválidos.
-
-  * **5b1.** Sistema solicita a correção das informações.
-* **3a.** Usuário não possui permissão para realizar a operação.
-
-  * **3a1.** Sistema bloqueia a operação.
-
-**Pós-Condições:**
-
-* Os dados do aluno são cadastrados ou atualizados conforme a operação realizada.
-
-**Regras de Negócio:**
-
-* **RN04.** Todo aluno deve possuir um cadastro antes de ser associado a uma turma ou agendamento.
-* **RN05.** Os dados do aluno devem ser armazenados de acordo com as permissões de acesso definidas.
-* **RN06.** Informações obrigatórias devem ser preenchidas antes da conclusão do cadastro.
-* **RN07.** O acesso às informações do aluno deve respeitar o perfil do usuário.
+**Regras de negócio:** Cada aluno pode ter, no máximo, um responsável vinculado; o cadastro conjunto de responsável e alunos é atômico; o responsável não tem acesso administrativo geral aos alunos.
 
 ---
 
-### Gerenciar Profissionais
+### UC03 — Gerenciar profissionais e usuários
 
-**Atores:** Administrador, Sistema
+**Atores:** Administrador; Profissional (consulta permitida).
 
-**Pré-Condições:**
+**Pré-condições:** Administrador autenticado para cadastro; usuário autenticado para consultas autorizadas.
 
-* Administrador deve estar autenticado.
-* Administrador deve possuir permissão para gerenciar profissionais.
+**Fluxo básico:**
+1. O administrador inicia o cadastro de usuário.
+2. Seleciona, quando aplicável, o tipo profissional: treinador, fisioterapeuta, psicólogo ou nutricionista.
+3. O sistema valida os dados e cria o usuário e seu perfil especializado.
+4. Usuários autenticados consultam os profissionais conforme o filtro de acesso da API.
 
-**Fluxo Básico:**
+**Fluxos alternativos:** Tipo de especialização inválido, dados incorretos ou cadastro duplicado: a operação é recusada.
 
-1. Administrador acessa o gerenciamento de profissionais.
-2. Sistema apresenta os profissionais cadastrados.
-3. Administrador seleciona um profissional existente ou inicia um novo cadastro.
-4. Administrador informa ou altera os dados do profissional.
-5. Sistema valida as informações.
-6. Sistema registra as informações.
-7. Sistema confirma a operação.
+**Pós-condições:** Usuário/profissional cadastrado ou informações consultadas.
 
-**Fluxos Alternativos:**
-
-* **5a.** Existem dados obrigatórios ausentes.
-
-  * **5a1.** Sistema solicita o preenchimento dos dados.
-* **5b.** Profissional já está cadastrado.
-
-  * **5b1.** Sistema informa a existência do cadastro e impede a duplicação.
-
-**Pós-Condições:**
-
-* Os dados do profissional são cadastrados ou atualizados.
-
-**Regras de Negócio:**
-
-* **RN08.** Um profissional deve possuir cadastro antes de ser associado a uma turma ou agendamento.
-* **RN09.** Cada profissional deve possuir um perfil ou área de atuação definida.
-* **RN10.** Um profissional não pode possuir cadastros duplicados.
-* **RN11.** Apenas usuários autorizados podem cadastrar ou alterar profissionais.
+**Regras de negócio:** O cadastro administrativo exige permissão de administrador; o perfil profissional identifica sua especialização. Não há caso de uso independente de cadastro de turmas no código analisado.
 
 ---
 
-### Gerenciar Turmas
+### UC04 — Gerenciar salas e sessões
 
-**Atores:** Administrador, Profissional, Sistema
+**Atores:** Administrador; Profissional.
 
-**Pré-Condições:**
+**Pré-condições:** Usuário autenticado; profissional e sala cadastrados para solicitar sessão.
 
-* Usuário deve estar autenticado.
-* A modalidade ou atividade deve estar previamente cadastrada.
-* Deve existir profissional disponível para associação à turma.
+**Fluxo básico:**
+1. O administrador cadastra ou gerencia salas.
+2. O administrador solicita uma sessão indicando o profissional; o profissional pode solicitar sessão para si mesmo.
+3. O sistema valida sala, data/hora, duração, créditos necessários e regras de disponibilidade.
+4. A sessão é criada com status **SOLICITADA**.
+5. O administrador confirma ou rejeita a solicitação.
+6. Os usuários autenticados consultam sessões, com filtros por data, profissional, sala e status.
+7. O profissional responsável pode concluir uma sessão confirmada, marcando-a **REALIZADA**.
 
-**Fluxo Básico:**
+**Fluxos alternativos:**
+- Dados inválidos ou conflito de disponibilidade: solicitação recusada.
+- Rejeição: administrador informa motivo.
+- Cancelamento: administrador ou profissional responsável informa motivo; o sistema aplica as regras de cancelamento.
+- Sessão em status inadequado: confirmação, rejeição, cancelamento ou conclusão recusada.
 
-1. Usuário acessa o gerenciamento de turmas.
-2. Sistema apresenta as turmas cadastradas.
-3. Usuário seleciona uma turma existente ou inicia um novo cadastro.
-4. Usuário informa modalidade, profissional responsável, horário e espaço.
-5. Sistema verifica a disponibilidade do profissional e do espaço.
-6. Sistema registra ou atualiza a turma.
-7. Sistema confirma a operação.
+**Pós-condições:** Sala cadastrada ou sessão criada, confirmada, rejeitada, cancelada ou realizada.
 
-**Fluxos Alternativos:**
-
-* **5a.** O profissional já possui outra atividade no horário informado.
-
-  * **5a1.** Sistema informa o conflito.
-* **5b.** O espaço não está disponível no horário informado.
-
-  * **5b1.** Sistema informa a indisponibilidade.
-* **4a.** Existem informações obrigatórias ausentes.
-
-  * **4a1.** Sistema solicita o preenchimento dos dados.
-
-**Pós-Condições:**
-
-* A turma é cadastrada ou atualizada com suas informações de modalidade, profissional, horário e espaço.
-
-**Regras de Negócio:**
-
-* **RN12.** Uma turma deve possuir um profissional responsável.
-* **RN13.** Uma turma deve estar associada a uma modalidade ou atividade.
-* **RN14.** Um profissional não pode ser associado a duas atividades conflitantes no mesmo horário.
-* **RN15.** Um espaço não pode ser utilizado simultaneamente por turmas incompatíveis.
-* **RN16.** A capacidade do espaço deve ser respeitada pela quantidade de alunos da turma.
+**Regras de negócio:** Apenas administrador confirma/rejeita solicitações; profissional só solicita sessão para si; apenas o profissional responsável conclui a sessão; cancelamento de sessão pode gerar reembolso integral aos inscritos elegíveis.
 
 ---
 
-### Gerenciar Agendamentos
+### UC05 — Inscrever e cancelar inscrição de dependente
 
-**Atores:** Responsável, Profissional, Administrador, Sistema
+**Atores:** Responsável.
 
-**Pré-Condições:**
+**Pré-condições:** Responsável autenticado; aluno vinculado ao responsável; sessão existente e confirmada; créditos suficientes.
 
-* Usuário deve estar autenticado.
-* O aluno deve estar cadastrado.
-* Deve existir um horário disponível para o agendamento.
+**Fluxo básico:**
+1. O responsável consulta as sessões disponíveis.
+2. Seleciona um dependente vinculado e uma sessão.
+3. O sistema valida o vínculo, o estado da sessão, a disponibilidade e os créditos.
+4. O sistema registra a inscrição e desconta os créditos necessários.
+5. O responsável consulta as inscrições dos dependentes no endpoint de agendamentos.
 
-**Fluxo Básico:**
+**Fluxos alternativos:**
+- Aluno sem vínculo, inscrição duplicada, conflito de horário, sessão iniciada ou créditos insuficientes: inscrição recusada.
+- O responsável solicita cancelamento e informa motivo.
+- O sistema altera o status da inscrição sem excluir o registro e aplica a política de reembolso.
 
-1. Usuário acessa a agenda.
-2. Sistema apresenta os horários e agendamentos disponíveis de acordo com o perfil.
-3. Usuário seleciona a operação desejada.
-4. Usuário informa os dados do agendamento ou seleciona um agendamento existente.
-5. Sistema verifica a disponibilidade do profissional e do espaço.
-6. Sistema registra, altera ou cancela o agendamento conforme a operação.
-7. Sistema confirma a operação.
+**Pós-condições:** Inscrição registrada ou cancelada; saldo de créditos atualizado quando cabível.
 
-**Fluxos Alternativos:**
-
-* **5a.** Existe conflito de horário.
-
-  * **5a1.** Sistema informa o conflito.
-  * **5a2.** Usuário deve selecionar outro horário disponível.
-* **5b.** Profissional ou espaço não está disponível.
-
-  * **5b1.** Sistema informa a indisponibilidade.
-* **6a.** Usuário seleciona um agendamento existente para cancelamento.
-
-  * **6a1.** Sistema apresenta os dados do agendamento.
-  * **6a2.** Usuário confirma o cancelamento.
-  * **6a3.** Sistema cancela o agendamento e atualiza a disponibilidade.
-
-**Pós-Condições:**
-
-* O agendamento é criado, alterado, consultado ou cancelado.
-* A disponibilidade do horário é atualizada quando necessário.
-
-**Regras de Negócio:**
-
-* **RN17.** Um aluno não pode possuir agendamentos conflitantes no mesmo horário.
-* **RN18.** Um profissional não pode possuir dois agendamentos no mesmo horário.
-* **RN19.** Um espaço não pode possuir agendamentos conflitantes no mesmo horário.
-* **RN20.** Um agendamento só pode ser realizado para aluno previamente cadastrado.
-* **RN21.** O cancelamento de um agendamento deve liberar o horário correspondente.
+**Regras de negócio:** Créditos são descontados na inscrição. Cancelamento pelo responsável com pelo menos 12 horas de antecedência dá reembolso integral; com menos de 12 horas não há reembolso. Cancelamento da sessão por administrador ou profissional responsável prevê reembolso integral das inscrições elegíveis.
 
 ---
 
-### Registrar Presença
+### UC06 — Registrar presença e concluir sessão
 
-**Atores:** Profissional, Sistema
+**Atores:** Profissional responsável; Administrador (registro de presença).
 
-**Pré-Condições:**
+**Pré-condições:** Sessão e aluno existentes; registro de inscrição correspondente; ator autorizado.
 
-* Profissional deve estar autenticado.
-* A turma ou atividade deve estar cadastrada.
-* Os alunos devem estar associados à turma ou atividade.
+**Fluxo básico:**
+1. O profissional responsável ou administrador acessa os registros da sessão.
+2. Consulta os alunos inscritos e seus estados de presença.
+3. Registra presença, ausência ou justificativa de um aluno.
+4. O sistema atualiza o registro de presença.
+5. O profissional responsável conclui a sessão confirmada.
 
-**Fluxo Básico:**
+**Fluxos alternativos:** Registro inexistente, status inválido ou usuário não autorizado: operação recusada.
 
-1. Profissional seleciona a turma ou atividade.
-2. Sistema apresenta os alunos associados.
-3. Profissional registra a presença ou ausência de cada aluno.
-4. Sistema registra as informações.
-5. Sistema atualiza o histórico de presença e a frequência.
+**Pós-condições:** Presenças atualizadas; sessão marcada como realizada quando concluída.
 
-**Fluxos Alternativos:**
-
-* **2a.** Não existem alunos associados à turma.
-
-  * **2a1.** Sistema informa que não há alunos para registrar.
-* **3a.** O registro de presença está incompleto.
-
-  * **3a1.** Sistema solicita a conclusão do registro.
-
-**Pós-Condições:**
-
-* A presença ou ausência dos alunos é registrada no histórico.
-* A frequência do aluno é atualizada.
-
-**Regras de Negócio:**
-
-* **RN22.** Apenas alunos associados à turma podem ter presença registrada nela.
-* **RN23.** Cada aluno deve possuir apenas um registro de presença por atividade realizada.
-* **RN24.** O registro de presença deve estar associado à turma ou atividade correspondente.
-* **RN25.** A frequência deve ser atualizada a partir dos registros de presença e ausência.
+**Regras de negócio:** O registro está associado a um par aluno–sessão; não se cria uma segunda inscrição para registrar presença; a conclusão da sessão é exclusiva do profissional responsável.
 
 ---
 
-### Registrar Progresso do Aluno
+### UC07 — Registrar acompanhamento por laudo
 
-**Atores:** Profissional, Sistema
+**Atores:** Profissional.
 
-**Pré-Condições:**
+**Pré-condições:** Profissional autenticado; aluno e sessão existentes; sessão atribuída ao profissional.
 
-* Profissional deve estar autenticado.
-* O aluno deve estar cadastrado.
-* O profissional deve possuir permissão para registrar informações de acompanhamento.
+**Fluxo básico:**
+1. O profissional seleciona a sessão e o aluno.
+2. Informa os dados do documento de acompanhamento.
+3. O sistema valida o laudo e a relação com a sessão.
+4. O sistema grava o documento vinculado ao profissional, ao aluno e à sessão.
+5. O documento pode ser consultado ou baixado em PDF conforme as permissões.
 
-**Fluxo Básico:**
+**Fluxos alternativos:** Sessão pertencente a outro profissional, dados inválidos ou acesso sem permissão: operação recusada.
 
-1. Profissional acessa o acompanhamento dos alunos.
-2. Sistema apresenta os alunos disponíveis para acompanhamento.
-3. Profissional seleciona um aluno.
-4. Sistema apresenta os registros de acompanhamento existentes.
-5. Profissional registra as informações referentes ao progresso do aluno.
-6. Sistema valida e armazena as informações.
-7. Sistema confirma o registro.
+**Pós-condições:** Laudo armazenado e disponível aos perfis autorizados.
 
-**Fluxos Alternativos:**
-
-* **3a.** O profissional não possui permissão para acessar o aluno.
-
-  * **3a1.** Sistema bloqueia o acesso às informações.
-* **5a.** Existem informações obrigatórias ausentes.
-
-  * **5a1.** Sistema solicita a complementação do registro.
-
-**Pós-Condições:**
-
-* O registro de acompanhamento do aluno é armazenado e fica disponível para consulta conforme as permissões do usuário.
-
-**Regras de Negócio:**
-
-* **RN26.** Apenas profissionais autorizados podem registrar informações de acompanhamento.
-* **RN27.** O registro deve estar associado ao aluno e ao profissional responsável pelo acompanhamento.
-* **RN28.** Informações de acompanhamento devem respeitar as permissões de acesso definidas pelo sistema.
-* **RN29.** Registros já realizados não devem ser alterados por usuários sem permissão.
+**Regras de negócio:** Somente profissionais emitem laudos; a API implementa consulta e criação, sem edição/exclusão por seus métodos HTTP expostos.
 
 ---
 
-### Consultar Desempenho
+### UC08 — Consultar informações do aluno e histórico
 
-**Atores:** Responsável, Profissional, Sistema
+**Atores:** Administrador; Responsável; Aluno; Profissional (para consultas autorizadas de documentos).
 
-**Pré-Condições:**
+**Pré-condições:** Usuário autenticado e permissão para o recurso solicitado.
 
-* Usuário deve estar autenticado.
-* O aluno deve estar cadastrado.
-* Devem existir informações disponíveis para consulta.
+**Fluxo básico:**
+1. O usuário acessa os recursos de consulta.
+2. O sistema restringe os registros segundo o perfil.
+3. O administrador consulta os alunos; o responsável consulta seus dependentes e inscrições; o aluno consulta seu próprio cadastro.
+4. Profissionais e responsáveis consultam laudos nos limites de acesso definidos na API.
+5. O usuário visualiza os dados disponíveis.
 
-**Fluxo Básico:**
+**Fluxos alternativos:** Registro inexistente ou fora do escopo do usuário: consulta negada ou lista vazia.
 
-1. Usuário acessa o acompanhamento do aluno.
-2. Sistema apresenta os alunos disponíveis de acordo com o perfil.
-3. Usuário seleciona um aluno.
-4. Sistema apresenta as informações de acompanhamento disponíveis.
-5. Usuário consulta os dados de presença, frequência e progresso do aluno.
+**Pós-condições:** Informações consultadas sem alteração de dados.
 
-**Fluxos Alternativos:**
+**Regras de negócio:** O responsável só consulta dados de dependentes vinculados; a consulta de laudos é filtrada pelo perfil. Não foi identificado um painel agregado de desempenho com métricas calculadas; o acompanhamento disponível é baseado em inscrições/presenças e laudos.
 
-* **3a.** Usuário não possui permissão para consultar o aluno.
+---
 
-  * **3a1.** Sistema bloqueia o acesso às informações.
-* **4a.** Não existem registros disponíveis.
+### UC09 — Gerenciar créditos de alunos
 
-  * **4a1.** Sistema informa que não há informações para consulta.
+**Atores:** Administrador.
 
-**Pós-Condições:**
+**Pré-condições:** Administrador autenticado; aluno cadastrado.
 
-* Usuário consulta as informações de desempenho e acompanhamento permitidas pelo seu perfil de acesso.
+**Fluxo básico:**
+1. O administrador seleciona um aluno.
+2. Informa uma quantidade inteira positiva ou negativa de créditos.
+3. O sistema valida a quantidade e o saldo resultante.
+4. Atualiza o saldo do aluno e confirma a operação.
 
-**Regras de Negócio:**
+**Fluxos alternativos:** Quantidade zero, não inteira ou débito superior ao saldo: operação recusada.
 
-* **RN30.** O Responsável só pode consultar informações dos alunos vinculados a ele.
-* **RN31.** O acesso às informações deve respeitar o perfil e as permissões do usuário.
-* **RN32.** Informações de acompanhamento não podem ser disponibilizadas a usuários sem autorização.
-* **RN33.** O sistema deve apresentar apenas informações registradas e disponíveis para consulta.
+**Pós-condições:** Saldo atualizado.
 
-## Imagem do diagrama de uso
+**Regras de negócio:** O saldo não pode ficar negativo; a inscrição e o cancelamento também podem alterar créditos automaticamente.
+
+---
